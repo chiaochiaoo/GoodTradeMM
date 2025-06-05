@@ -1,6 +1,8 @@
 #Spirits of the machine, accept my pleas, And walk amidst the gun, and fire it true.
 
-
+from dataclasses import make_dataclass, asdict, field
+import os
+import json
 #SYMBOL PARAMETERS
 BID = "bid"
 ASK = "ask"
@@ -268,21 +270,169 @@ STRONGRED = "#FC433D"
 DEEPGREEN = "#059a12"
 
 
-#print("12:42:53"[6:8])
-	# def deploy_orders(self,orders):
+STATUS = "status"
+SETTINGS = "Default Mode"
+PRICE_ZONES = "Default Mode"
+MANAGEMENT = "Management"
+COMMANDS = "COMMANDS"
+INACTIVE = "Inactive"
+DEFAULT_MODE = "Default Mode"
+RESTRICTIVE_MODE = "Restrictive Mode"
+OPENING_MODE = "Opening Mode"
+AGGRESIVE_MODE = 'Aggresive Mode'
 
-	# 	coefficient = 1
-	# 	action = ""
-	# 	if self.tradingplan.data[POSITION] == LONG:
-	# 		action = LIMITSELL
+VENUES = "Venues"
+# === Step 1: Central Config Schema ===
+CONFIG_SCHEMA = [
+    {"name": "Ticker",      "label": "Ticker",            "section": STATUS, "type": "string", "row": 0},
+    {"name": "Status",      "label": "Status",            "section": STATUS, "type": "string", "row": 0, "default": INACTIVE, "readonly": True},
+    {"name": "cur_inv",     "label": "Current Inventory", "section": STATUS, "type": "int",    "row": 0, "readonly": True},
+    {"name": "unrealized",  "label": "Unreal",            "section": STATUS, "type": "float",  "row": 0, "readonly": True},
+    {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 0,"readonly":True},
+    {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 0,"readonly":True},
+    {"name": "RealizedPnLShutdown",  "label": "RealizedPnLShutdown",            "section": STATUS, "type": "float",  "row": 1, "readonly": True},
+    {"name": "FavourableBuyingConditions",  "label": "FavourableBuyingConditions",   "section": STATUS, "type": "float",  "row": 1, "readonly": True},
 
-	# 	elif self.tradingplan.data[POSITION] == SHORT:
-	# 		action = LIMITBUY
-	# 		coefficient = -1
+    {"name": "bid",  "label": "Bid",            "section": STATUS, "type": "float",  "row": 2, "readonly": True},
+    {"name": "ask",   "label": "Ask",            "section": STATUS, "type": "float",  "row": 2,"readonly":True},
 
-	# 	for key in sorted(orders.keys()):
-	# 		if orders[key]>0:
-	# 			price = round(self.price+coefficient*self.gap*key,2)
-	# 			share = orders[key]
-	# 			self.ppro_out.send([action,self.symbol_name,price,share,"Exit price "])
 
+
+    {"name": "d_Venue","label": "Default Venue",     "section": VENUES, "type": "string", "row": 0, "options": ["T1", "T2", "T3"]},
+    {"name": "a_Venue",    "label": "Aggressive Venue",  "section": VENUES, "type": "string", "row": 1, "options": ["T1", "T2", "T3"]},
+    # {"name": "d_enabled",     "label": "Default Mode",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
+    # {"name": "r_enabled",     "label": "Restrictive Mode", "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
+    # {"name": "a_enabled",     "label": "Aggresive Mode",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
+    # {"name": "o_enabled",    "label": "Opening Enabled",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
+
+
+    {"name": "start_pending",   "label": "Pause Algo",    "section": COMMANDS, "type": "button", "row": 0, "command": "start_pending"},
+    {"name": "cancel_orders",   "label": "Cancel Orders",    "section": COMMANDS, "type": "button", "row": 0, "command": "cancel_orders"},
+    {"name": "fetch_data",   "label": "Fetch Database",    "section": COMMANDS, "type": "button", "row": 0, "command": "fetch_data"},
+
+
+
+
+    {"name": "boardlot",    "label": "Board Lot",         "section": SETTINGS, "type": "int",    "row": 1,"default": 100,},
+    {"name": "ticksize",    "label": "Tick Size",         "section": SETTINGS, "type": "float",  "row": 1,"default": 0.01,},
+    {"name": "MaxInventorySize",     "label": "Max Inventory",   "section": SETTINGS, "type": "int",    "row": 1,"default": 1000,},
+    {"name": "MaxAllowedUPnL",     "label": "Max Loss",          "section": SETTINGS, "type": "int",    "row": 1,"default": 1000,},
+    # {"name": "email_alert", "label": "Email Alert",       "section": SETTINGS, "type": "bool",   "row": 0},
+
+    {"name": "bidmult",     "label": "Glb Bid Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
+
+
+    {"name": "AdjustedSpread",  "label": "Adj Spread",        "section": SETTINGS, "type": "float",  "row": 2, "default": 0.01},
+    {"name": "reserve_bidmult", "label": "Rsv Bid Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 0},
+    {"name": "reserve_askmult", "label": "Rsv Ask Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 0},
+    {"name": "BuyZone1",    "label": "Buy Zone1",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
+    {"name": "BuyZone2",    "label": "Buy Zone2",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
+    {"name": "BuyZone3",    "label": "Buy Zone3",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
+    {"name": "SellZone1",   "label": "Sell Zone1",        "section": SETTINGS, "type": "float", "row": 5, "default": 0},
+    {"name": "SellZone2",   "label": "Sell Zone2",        "section": SETTINGS, "type": "float", "row": 5, "default": 0},
+    {"name": "SellZone3",   "label": "Sell Zone3",        "section": SETTINGS, "type": "float", "row": 5, "default": 0},
+
+    # {"name": "d_enabled",   "label": "Default Mode Enabled", "section": SETTINGS, "type": "bool",   "row": 0,"readonly":True},
+
+    {"name": "start_default",   "label": "Start Default",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_default"},
+
+    {"name": "start_test",   "label": "Start Test",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_test"},
+    # {"name": "loadData",    "label": "Load Data",         "section": SETTINGS, "type": "button", "row": 3},
+
+
+    # {"name": "r_enabled",         "label": "Restrictive Enabled", "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0,"readonly":True},
+
+    {"name": "r_nbbo",      "label": "Post on L1 ask",    "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0},
+    {"name": "r_bidmult",   "label": "Bid Mult",           "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
+    {"name": "r_askmult",   "label": "Ask Mult",          "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
+
+
+    {"name": "start_restrictive",   "label": "Start Restrictive",    "section": RESTRICTIVE_MODE, "type": "button", "row": 1, "command": "start_restrictive"},
+    # {"name": "PssVenue",    "label": "Passive Venue",     "section": RESTRICTIVE_MODE, "type": "string", "row": 2, "options": ["T1", "T2", "T3"]},
+    # {"name": "AggVenue",    "label": "Aggressive Venue",  "section": RESTRICTIVE_MODE, "type": "string", "row": 2, "options": ["T1", "T2", "T3"]},
+    # {"name": "OpnVenue",    "label": "Open Venue",        "section": RESTRICTIVE_MODE, "type": "string", "row": 2, "options": ["T1", "T2", "T3"]},
+
+
+
+    # {"name": "o_enabled",    "label": "Opening Enabled",      "section": OPENING_MODE, "type": "bool",   "row": 0,"readonly":True},
+    {"name": "o_bidmult",   "label": "Bid Mult",           "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
+    {"name": "o_askmult",   "label": "Ask Mult",          "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
+    {"name": "start_opening",   "label": "Start Opening",    "section": OPENING_MODE, "type": "button", "row": 1, "command": "start_opening"},
+
+    # {"name": "a_enabled",     "label": "Aggresive Enabled",      "section": AGGRESIVE_MODE, "type": "bool",   "row": 0},
+
+    {"name": "a_action",    "label": "Aggresive Action",  "section": AGGRESIVE_MODE, "type": "string", "row": 0, "options": ["Buy", "Sell"],'default':'Buy'},
+    {"name": "a_type",    "label": "Target Volume By",  "section": AGGRESIVE_MODE, "type": "string", "row": 0, "options": ["Size", "Percentage"],'default':'Size'},
+
+    {"name": "a_bidmult",   "label": "Bid Mult",           "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 1},
+    {"name": "a_askmult",   "label": "Ask Mult",          "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 1},
+
+
+    {"name": "a_size",       "label": "Total Size",          "section": AGGRESIVE_MODE, "type": "int",  "row": 2, "default": 100},
+    {"name": "a_percentage",   "label": "% Volume Target",          "section": AGGRESIVE_MODE, "type": "float",  "row": 2, "default": 0.05},
+    {"name": "a_duration",   "label": "Total Duration(Min)",          "section": AGGRESIVE_MODE, "type": "int",  "row": 2, "default": 60},
+
+    {"name": "v_hitalert",   "label": "Hit Notification",          "section": AGGRESIVE_MODE, "type": "bool",  "row": 2, "default": 1},
+
+    {"name": "start_aggresive",   "label": "Start Aggresive",    "section": AGGRESIVE_MODE, "type": "button", "row": 3, "command": "start_aggresive"},
+
+]
+
+
+MODE_CHECKBOXES = [
+    'd_enabled',
+    "r_enabled",         # Restrictive Mode
+    "o_enabled",          # Opening Mode
+    "a_enabled",         # Aggressive Mode
+]
+
+
+# === Step 2: Dynamic TickerConfig Class ===
+TYPE_MAP = {
+    "string": str,
+    "int": int,
+    "float": float,
+    "bool": int,
+    "button": None 
+}
+
+# Deduplicate names when creating dataclass fields
+used_names = set()
+fields_spec = []
+
+for entry in CONFIG_SCHEMA:
+    name = entry["name"]
+    typ = entry["type"]
+
+    if typ not in TYPE_MAP or TYPE_MAP[typ] is None:
+        continue  # skip unsupported types like button
+
+    if name in used_names:
+        continue  # skip duplicates
+
+    used_names.add(name)
+    py_type = TYPE_MAP[typ]
+    default_val = entry.get("default", py_type())
+    if typ=='bool':default_val = False
+    fields_spec.append((name, py_type, field(default=default_val)))
+
+TickerConfig = make_dataclass("TickerConfig", fields_spec)
+
+def config_save(self, folder="configs"):
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, f"{self.Ticker}.json")
+    with open(path, "w") as f:
+        json.dump(asdict(self), f, indent=4)
+    print(f"[Saved] {path}")
+
+@staticmethod
+def config_load(ticker, folder="configs"):
+    path = os.path.join(folder, f"{ticker}.json")
+    with open(path, "r") as f:
+        data = json.load(f)
+    return TickerConfig(**data)
+# Attach methods
+TickerConfig.save = config_save
+TickerConfig.load = config_load
+FIELDS_PER_ROW= 6
+# === Step 3: TickerMM Class with tkinter Variables ===
