@@ -572,7 +572,7 @@ class SymbolMM:
             self.get_nbbo_depth()
 
         except Exception as e:
-            print(e)
+            #print(e)
 
             postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
             r= requests.get(postbody)
@@ -781,3 +781,39 @@ class SymbolMM:
             self.vars[name] = (var, typ)
 
 
+import tkinter as tk
+
+class MyUI:
+    def __init__(self, root):
+        self.root = root
+        self.notification_pannel = tk.Frame(root)
+        self.notification_pannel.pack()
+
+        # Text widget inside the notification panel
+        self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
+        self.notification_text.pack()
+
+    def show_notification(self, message: str, max_lines=500):
+        self.notification_text.config(state='normal')
+        self.notification_text.insert(tk.END, message + '\n')
+        self.notification_text.see(tk.END)
+
+        # Trim to keep only the last 500 lines
+        lines = self.notification_text.get("1.0", tk.END).splitlines()
+        if len(lines) > max_lines:
+            self.notification_text.delete("1.0", f"{len(lines) - max_lines + 1}.0")
+
+        self.notification_text.config(state='disabled')
+
+# Example usage
+if __name__ == "__main__":
+    root = tk.Tk()
+    ui = MyUI(root)
+
+    # Simulate external function call
+    ui.show_notification("App started.")
+
+    for i in range(600):
+        ui.show_notification(f'Waiting for user input...{i}')
+
+    root.mainloop()

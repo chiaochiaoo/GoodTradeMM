@@ -288,8 +288,8 @@ CONFIG_SCHEMA = [
     {"name": "Status",      "label": "Status",            "section": STATUS, "type": "string", "row": 0, "default": INACTIVE, "readonly": True},
     {"name": "cur_inv",     "label": "Current Inventory", "section": STATUS, "type": "int",    "row": 0, "readonly": True},
     {"name": "unrealized",  "label": "Unreal",            "section": STATUS, "type": "float",  "row": 0, "readonly": True},
-    {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 0,"readonly":True},
-    {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 0,"readonly":True},
+    {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 1,"readonly":True},
+    {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 1,"readonly":True},
     {"name": "RealizedPnLShutdown",  "label": "RealizedPnLShutdown",            "section": STATUS, "type": "float",  "row": 1, "readonly": True},
     {"name": "FavourableBuyingConditions",  "label": "FavourableBuyingConditions",   "section": STATUS, "type": "float",  "row": 1, "readonly": True},
 

@@ -18,11 +18,11 @@ TICKER_CONFIG_FILE = "configs/tickers.json"
 
 
 def save_tickers(self):
-    os.makedirs("configs", exist_ok=True)
-    ticker_list = list(self.ticker_table_rows.keys())
-    with open(TICKER_CONFIG_FILE, "w") as f:
-        json.dump(ticker_list, f, indent=4)
-    print(f"[Saved] {len(ticker_list)} tickers to {TICKER_CONFIG_FILE}")
+	os.makedirs("configs", exist_ok=True)
+	ticker_list = list(self.ticker_table_rows.keys())
+	with open(TICKER_CONFIG_FILE, "w") as f:
+		json.dump(ticker_list, f, indent=4)
+	print(f"[Saved] {len(ticker_list)} tickers to {TICKER_CONFIG_FILE}")
 def validate_float(new_value):
 	if new_value == "":
 		return True
@@ -96,13 +96,17 @@ class UI(pannel):
 		self.ticker_management_frame .place(x=360,y=10,height=250,width=700)
 
 		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
-		self.notification_pannel.place(x=1070,y=10,height=250,width=290)
+		self.notification_pannel.place(x=1070,y=10,height=250,width=400)
+
+		self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
+		self.notification_text.pack(anchor="nw", padx=0, pady=0, fill="both",expand=True)#
+
 
 		# self.filter_pannel = ttk.LabelFrame(self.root,text="Algorithms Management") 
 		# self.filter_pannel.place(x=360,y=200,height=60,width=1300)
 
 		self.mm_pannel = ttk.LabelFrame(self.root,text="MarketMaking") 
-		self.mm_pannel.place(x=10,y=270,height=950,width=1350)
+		self.mm_pannel.place(x=10,y=270,height=950,width=1060)
 
 		self.marketmaking_notebook = ttk.Notebook(self.mm_pannel)
 		self.marketmaking_notebook.place(x=0,rely=0,relheight=1,relwidth=1)
@@ -111,6 +115,18 @@ class UI(pannel):
 		self.init_ticker_management_table()
 		self.init_system_pannel()
 		self.load_saved_tickers()
+
+	def show_notification(self, message: str, max_lines=500):
+		self.notification_text.config(state='normal')
+		self.notification_text.insert(tk.END, message + '\n')
+		self.notification_text.see(tk.END)
+
+		# Trim to keep only the last 500 lines
+		lines = self.notification_text.get("1.0", tk.END).splitlines()
+		if len(lines) > max_lines:
+			self.notification_text.delete("1.0", f"{len(lines) - max_lines + 1}.0")
+
+		self.notification_text.config(state='disabled')
 
 
 	def init_system_pannel(self):
@@ -200,33 +216,37 @@ class UI(pannel):
 		row +=1
 		ttk.Button(self.system_pannel, text="Save Tickers", command=self.save_tickers).grid(row=row, column=1)
 
+		try:
+			ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
 
-		ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
+			ttk.Button(self.system_pannel, text="Cancel All Orders", command=self.manager.cancel_all_orders).grid(row=row, column=3)
+		except:
+			pass
 
-		ttk.Button(self.system_pannel, text="Cancel All Orders", command=self.manager.cancel_all_orders).grid(row=row, column=3)
 
 		self.ticker_var.set('XIU.TO')
 		self.load_ticker_tab()
 
+
 	def load_saved_tickers(self):
-	    if os.path.exists(TICKER_CONFIG_FILE):
-	        with open(TICKER_CONFIG_FILE, "r") as f:
-	            saved = json.load(f)
-	            for symbol in saved:
-	                self.ticker_var.set(symbol)
-	                self.load_ticker_tab()  # This should call your full load logic
-	        #print(f"[Loaded] {len(saved)} saved tickers from {TICKER_CONFIG_FILE}")
-	    else:
-	        print("[Info] No saved ticker file found.")
+		if os.path.exists(TICKER_CONFIG_FILE):
+			with open(TICKER_CONFIG_FILE, "r") as f:
+				saved = json.load(f)
+				for symbol in saved:
+					self.ticker_var.set(symbol)
+					self.load_ticker_tab()  # This should call your full load logic
+			#print(f"[Loaded] {len(saved)} saved tickers from {TICKER_CONFIG_FILE}")
+		else:
+			print("[Info] No saved ticker file found.")
 
 
 
 	def save_tickers(self):
-	    os.makedirs("configs", exist_ok=True)
-	    ticker_list = list(self.ticker_table_rows.keys())
-	    with open(TICKER_CONFIG_FILE, "w") as f:
-	        json.dump(ticker_list, f, indent=4)
-	    print(f"[Saved] {len(ticker_list)} tickers to {TICKER_CONFIG_FILE}")
+		os.makedirs("configs", exist_ok=True)
+		ticker_list = list(self.ticker_table_rows.keys())
+		with open(TICKER_CONFIG_FILE, "w") as f:
+			json.dump(ticker_list, f, indent=4)
+		print(f"[Saved] {len(ticker_list)} tickers to {TICKER_CONFIG_FILE}")
 
 
 
@@ -247,81 +267,81 @@ class UI(pannel):
 					var.set(0)
 
 	def get_sort_value(self, symbol, key):
-	    info = self.ticker_table_rows[symbol]
+		info = self.ticker_table_rows[symbol]
 
-	    #print(symbol,key)
-	    if key == "ticker":
-	        return symbol
-	    elif key in info:
-	        var = info[key]
-	        if hasattr(var, "get"):
-	            val = var.get()
-	            try:
-	                # Try convert to float if it's numeric
-	                return float(val)
-	            except (ValueError, TypeError):
-	                return val  # fallback to raw string
-	        return var
-	    else:
-	        return ""  # fallback if key not found
+		#print(symbol,key)
+		if key == "ticker":
+			return symbol
+		elif key in info:
+			var = info[key]
+			if hasattr(var, "get"):
+				val = var.get()
+				try:
+					# Try convert to float if it's numeric
+					return float(val)
+				except (ValueError, TypeError):
+					return val  # fallback to raw string
+			return var
+		else:
+			return ""  # fallback if key not found
 	def sort_ticker_table(self, key):
-	    ascending = self.sort_order.get(key, True)
+		ascending = self.sort_order.get(key, True)
 
-	    sortable = []
-	    for symbol in self.ticker_table_rows:
-	        val = self.get_sort_value(symbol, key)
-	        sortable.append((symbol, val))
+		sortable = []
+		for symbol in self.ticker_table_rows:
+			val = self.get_sort_value(symbol, key)
+			sortable.append((symbol, val))
 
-	    sortable.sort(key=lambda x: x[1], reverse=not ascending)
-	    self.sort_order[key] = not ascending
+		sortable.sort(key=lambda x: x[1], reverse=not ascending)
+		self.sort_order[key] = not ascending
 
-	    for new_row, (symbol, _) in enumerate(sortable, start=1):
-	        row_info = self.ticker_table_rows[symbol]
-	        for col, widget in enumerate(row_info["widgets"]):
-	            widget.grid(row=new_row, column=col, padx=5, sticky="w")
-	        row_info["row"] = new_row
+		for new_row, (symbol, _) in enumerate(sortable, start=1):
+			row_info = self.ticker_table_rows[symbol]
+			for col, widget in enumerate(row_info["widgets"]):
+				widget.grid(row=new_row, column=col, padx=5, sticky="w")
+			row_info["row"] = new_row
 
 
 
 
 	def create_ticker_management_ui(self, symbol, mm):
-	    if symbol in self.ticker_table_rows:
-	        return  # Already exists
+		if symbol in self.ticker_table_rows:
+			return  # Already exists
 
-	    row_idx = len(self.ticker_table_rows) + 1
+		row_idx = len(self.ticker_table_rows) + 1
 
-	    # Variables from mm instance
-	    status = mm.vars['Status'][0]
-	    inventory = mm.vars['cur_inv'][0]
-	    open_orders = mm.vars['openOrderCount'][0]
-	    notional = mm.vars['notionalAmount'][0]
-	    # === Create and place widgets ===
-	    label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2")
-	    label.grid(row=row_idx, column=0, padx=5, sticky="w")
-	    label.bind("<Button-1>", lambda e, sym=symbol: self.open_ticker_tab(sym))
+		# Variables from mm instance
+		status = mm.vars['Status'][0]
+		inventory = mm.vars['cur_inv'][0]
+		open_orders = mm.vars['openOrderCount'][0]
+		notional = mm.vars['notionalAmount'][0]
+		# === Create and place widgets ===
+		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2")
+		label.grid(row=row_idx, column=0, padx=5, sticky="w")
+		label.bind("<Button-1>", lambda e, sym=symbol: self.open_ticker_tab(sym))
 
-	    status_label = ttk.Label(self.ticker_table_frame, textvariable=status)
-	    status_label.grid(row=row_idx, column=1, padx=5, sticky="w")
+		status_label = ttk.Label(self.ticker_table_frame, textvariable=status)
+		status_label.grid(row=row_idx, column=1, padx=5, sticky="w")
 
-	    inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory)
-	    inv_label.grid(row=row_idx, column=2, padx=5, sticky="w")
+		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory)
+		inv_label.grid(row=row_idx, column=2, padx=5, sticky="w")
 
 
-	    not_label = ttk.Label(self.ticker_table_frame, textvariable=notional)
-	    not_label.grid(row=row_idx, column=3, padx=5, sticky="w")
+		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional)
+		not_label.grid(row=row_idx, column=3, padx=5, sticky="w")
 
-	    orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders)
-	    orders_label.grid(row=row_idx, column=4, padx=5, sticky="w")
+		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders)
+		orders_label.grid(row=row_idx, column=4, padx=5, sticky="w")
 
-	    # Store all info + widgets for future sorting
-	    self.ticker_table_rows[symbol] = {
-	        "status": status,
-	        "inventory": inventory,
-	        'notional amount':notional,
-	        "orders": open_orders,
-	        "row": row_idx,
-	        "widgets": [label, status_label, inv_label, not_label,orders_label]
-	    }
+		# Store all info + widgets for future sorting
+		self.ticker_table_rows[symbol] = {
+			"status": status,
+			"inventory": inventory,
+			'notional amount':notional,
+			"orders": open_orders,
+			"row": row_idx,
+			"widgets": [label, status_label, inv_label, not_label,orders_label]
+		}
 
 	def init_ticker_management_table(self):
 		# === Scrollable canvas inside ticker_management_frame ===
@@ -371,25 +391,25 @@ class UI(pannel):
 
 
 	def delete_ticker(self, symbol):
-	    # 1. Remove widgets from Ticker Management table
-	    if symbol in self.ticker_table_rows:
-	        for widget in self.ticker_table_rows[symbol]["widgets"]:
-	            widget.destroy()
-	        del self.ticker_table_rows[symbol]
+		# 1. Remove widgets from Ticker Management table
+		if symbol in self.ticker_table_rows:
+			for widget in self.ticker_table_rows[symbol]["widgets"]:
+				widget.destroy()
+			del self.ticker_table_rows[symbol]
 
-	    # 2. Remove notebook tab
-	    if hasattr(self, 'marketmaking_tabs') and symbol in self.marketmaking_tabs:
-	        self.marketmaking_notebook.forget(self.marketmaking_tabs[symbol])
-	        del self.marketmaking_tabs[symbol]
+		# 2. Remove notebook tab
+		if hasattr(self, 'marketmaking_tabs') and symbol in self.marketmaking_tabs:
+			self.marketmaking_notebook.forget(self.marketmaking_tabs[symbol])
+			del self.marketmaking_tabs[symbol]
 
-	    # 3. Remove mm instance from manager if tracked
-	    if hasattr(self.manager, "symbols") and symbol in self.manager.symbols:
-	        del self.manager.symbols[symbol]
+		# 3. Remove mm instance from manager if tracked
+		if hasattr(self.manager, "symbols") and symbol in self.manager.symbols:
+			del self.manager.symbols[symbol]
 
-	    # 4. Save updated tickers
-	    self.save_tickers()
+		# 4. Save updated tickers
+		self.save_tickers()
 
-	    print(f"[Deleted] {symbol} fully removed.")
+		print(f"[Deleted] {symbol} fully removed.")
 
 	def load_ticker_tab(self, force=True):
 
@@ -457,7 +477,7 @@ class UI(pannel):
 					)
 					# Widget
 					if readonly:
-						widget = ttk.Entry(section_frame, textvariable=var, state="readonly")
+						widget = ttk.Entry(section_frame, textvariable=var, state="readonly", width=15)
 					elif entry_type == "bool":
 						if name in MODE_CHECKBOXES:
 							widget = ttk.Checkbutton(section_frame, variable=var, command=lambda n=name: self.on_mode_toggle(mm,n))
@@ -473,7 +493,7 @@ class UI(pannel):
 									var.set(options[0])
 							widget = ttk.Combobox(section_frame, textvariable=var, values=options, state="readonly", width=45)
 						else:
-							widget = ttk.Combobox(section_frame, textvariable=var, values=options, state="readonly", width=14)
+							widget = ttk.Combobox(section_frame, textvariable=var, values=options, state="readonly", width=10)
 						#mm.venues_options[name] = widget
 					else:
 
@@ -492,38 +512,38 @@ class UI(pannel):
 		)
 
 		ttk.Button(
-		    tab,
-		    text="Delete Ticker",
-		    command=lambda sym=ticker: self.delete_ticker(sym)
+			tab,
+			text="Delete Ticker",
+			command=lambda sym=ticker: self.delete_ticker(sym)
 		).grid(
-		    row=row_counter + 10, column=1,
-		    columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
+			row=row_counter + 10, column=1,
+			columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
 		)
 
 class CollapsibleSection(ttk.Frame):
-    def __init__(self, parent, title="", *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+	def __init__(self, parent, title="", *args, **kwargs):
+		super().__init__(parent, *args, **kwargs)
 
-        self.showing = tk.BooleanVar(value=True)
+		self.showing = tk.BooleanVar(value=True)
 
-        # Title row with toggle button
-        self.toggle_button = ttk.Checkbutton(
-            self, text=f"▼ {title}", variable=self.showing,
-            command=self.toggle, style="Toolbutton"
-        )
-        self.toggle_button.grid(row=0, column=0, sticky="w", pady=(10, 0))
+		# Title row with toggle button
+		self.toggle_button = ttk.Checkbutton(
+			self, text=f"▼ {title}", variable=self.showing,
+			command=self.toggle, style="Toolbutton"
+		)
+		self.toggle_button.grid(row=0, column=0, sticky="w", pady=(10, 0))
 
-        # Container for child widgets
-        self.content = ttk.Frame(self)
-        self.content.grid(row=1, column=0, sticky="w")
+		# Container for child widgets
+		self.content = ttk.Frame(self)
+		self.content.grid(row=1, column=0, sticky="w")
 
-    def toggle(self):
-        if self.showing.get():
-            self.toggle_button.configure(text=self.toggle_button.cget("text").replace("▶", "▼"))
-            self.content.grid()
-        else:
-            self.toggle_button.configure(text=self.toggle_button.cget("text").replace("▼", "▶"))
-            self.content.grid_remove()
+	def toggle(self):
+		if self.showing.get():
+			self.toggle_button.configure(text=self.toggle_button.cget("text").replace("▶", "▼"))
+			self.content.grid()
+		else:
+			self.toggle_button.configure(text=self.toggle_button.cget("text").replace("▼", "▶"))
+			self.content.grid_remove()
 
 
 MARKET={}

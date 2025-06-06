@@ -89,6 +89,17 @@ TWILIO_TO = "+16472170498"         # Your phone number
 
 LOG_FOLDER = "logs/"
 
+
+
+# global ui
+ui = None
+
+def set_ui(uix):
+    global ui
+    ui = uix
+
+
+
 class message:
     def __init__(self, content, mtype="info"):
 
@@ -147,6 +158,10 @@ class message:
 
     def _handle_ui(self):
         print(f"[UI] → {self.content}")
+
+        #global ui 
+        if ui!=None:
+            ui.show_notification(f"{self.timestamp.strftime('%H:%M:%S')}: {self.content}")
 
     def _handle_email(self):
         try:

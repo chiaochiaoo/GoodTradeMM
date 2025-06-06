@@ -18,8 +18,7 @@ import xml.etree.ElementTree as ET
 from psutil import process_iter
 import psutil
 
-
-
+from logging_module import *
 
 
 
@@ -145,7 +144,13 @@ class Manager:
 		self.cmd_text = tk.StringVar(value="Status:")
 
 		self.symbols ={}
+		
 		self.ui = UI(root,self,self.cmd_text)
+
+
+		#ui = self.ui
+
+		set_ui( self.ui)
 
 		self.user = "QIAOSUN"
 
@@ -257,7 +262,7 @@ class Manager:
 		#sock.settimeout()
 		work = False
 
-		print('ppro in actived')
+		#print('ppro in actived')
 
 		req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
 		requests.post(req)
@@ -266,7 +271,7 @@ class Manager:
 			try:
 				rec= False
 				try:
-					data, addr = sock.recvfrom(1024)
+					data, addr = sock.recvfrom(2048)
 					rec = True
 				except Exception as e:
 
@@ -341,6 +346,7 @@ if __name__ == '__main__':
 	manager=Manager(root)
 
 
+	message("System Running",WARNING)
 	# root.minsize(1600, 1000)
 	# root.maxsize(1800, 1200)
 	root.mainloop() 

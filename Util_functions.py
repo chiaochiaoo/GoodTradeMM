@@ -223,4 +223,4 @@ def send_email(subject,body):
 	except Exception as e:
 		print(e)
 
-send_email("TEST,","TEST \n TEST")
+# send_email("TEST,","TEST \n TEST")
