@@ -313,18 +313,19 @@ CONFIG_SCHEMA = [
 
 
 
-    {"name": "boardlot",    "label": "Board Lot",         "section": SETTINGS, "type": "int",    "row": 1,"default": 100,},
-    {"name": "ticksize",    "label": "Tick Size",         "section": SETTINGS, "type": "float",  "row": 1,"default": 0.01,},
+    {"name": "boardlot",    "label": "Board Lot",         "section": SETTINGS, "type": "int",    "row": 1,"default": 100,"readonly": True},
+    {"name": "ticksize",    "label": "Tick Size",         "section": SETTINGS, "type": "float",  "row": 1,"default": 0.01,"readonly": True},
     {"name": "MaxInventorySize",     "label": "Max Inventory",   "section": SETTINGS, "type": "int",    "row": 1,"default": 1000,},
     {"name": "MaxAllowedUPnL",     "label": "Max Loss",          "section": SETTINGS, "type": "int",    "row": 1,"default": 1000,},
     # {"name": "email_alert", "label": "Email Alert",       "section": SETTINGS, "type": "bool",   "row": 0},
 
     {"name": "bidmult",     "label": "Glb Bid Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
+    {"name": "askmult",     "label": "Glb Ask Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
 
 
     {"name": "AdjustedSpread",  "label": "Adj Spread",        "section": SETTINGS, "type": "float",  "row": 2, "default": 0.01},
-    {"name": "reserve_bidmult", "label": "Rsv Bid Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 0},
-    {"name": "reserve_askmult", "label": "Rsv Ask Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 0},
+    {"name": "reserve_bidmult", "label": "Rsv Bid Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 2},
+    {"name": "reserve_askmult", "label": "Rsv Ask Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 2},
     {"name": "BuyZone1",    "label": "Buy Zone1",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
     {"name": "BuyZone2",    "label": "Buy Zone2",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
     {"name": "BuyZone3",    "label": "Buy Zone3",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},

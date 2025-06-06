@@ -17,6 +17,12 @@ import xml.etree.ElementTree as ET
 
 from psutil import process_iter
 import psutil
+
+
+
+
+
+
 def find_between(data, first, last):
 	try:
 		start = data.index(first) + len(first)
@@ -145,8 +151,6 @@ class Manager:
 
 		self.positions ={}
 		self.open_orders = {}
-
-
 
 		if not TEST_MODE:
 			self.user = get_env()

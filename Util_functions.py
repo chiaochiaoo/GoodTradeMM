@@ -13,6 +13,27 @@ import traceback
 import socket
 import time
 import json
+
+
+try:
+	import smtplib
+except ImportError:
+	import pip
+	pip.main(['install', 'smtplib'])
+	import smtplib
+	
+try:
+	from email.mime.text import MIMEText
+	from email.mime.multipart import MIMEMultipart
+	from email.mime.application import MIMEApplication
+except ImportError:
+	import pip
+	pip.main(['install', 'email'])
+	
+	from email.mime.text import MIMEText
+	from email.mime.multipart import MIMEMultipart
+	from email.mime.application import MIMEApplication
+
 def find_between(data, first, last):
 	try:
 		start = data.index(first) + len(first)
@@ -102,13 +123,8 @@ def graphweekly():
 	plt.show()
 	
 def PrintException(info,additional="ERROR"):
-	# exc_type, exc_obj, tb = sys.exc_info()
-	# f = tb.tb_frame
-	# lineno = tb.tb_lineno
-	# filename = f.f_code.co_filename
-	# linecache.checkcache(filename)
-	# line = linecache.getline(filename, lineno, f.f_globals)
-	# log_print (info+'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj))
+
+
 	exc_type, exc_obj, exc_tb = sys.exc_info()
 	fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 	log_print(additional,info,exc_type, fname, exc_tb.tb_lineno,traceback.format_exc())
@@ -132,8 +148,6 @@ def log_print(*args):
 			print(time_,*args)
 	except Exception as e:
 		print(*args,e,"failed to write")
-
-
 
 def hexcolor_green_to_red(level):
 
@@ -178,265 +192,6 @@ def hexcolor_red(level):
 	else:
 		return "#FF"+"FF"+hex_to_string(255-code)
 
-		
-def algo_manager_voxcom(pipe):
-
-	#tries to establish commuc
-
-
-	while True:
-
-		HOST = 'localhost'  # The server's hostname or IP address
-		#PORT = 65491       # The port used by the server
-
-		try:
-			log_print("Trying to connect to the main application")
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			connected = False
-
-			while not connected:
-				try:
-					with open('../commlink.json') as json_file:
-						port_file = json.load(json_file)
-
-					if datetime.now().strftime("%m%d") not in port_file:
-						time.sleep(1)
-					else:
-						PORT = port_file[datetime.now().strftime("%m%d")]
-						s.connect((HOST, PORT))
-						connected = True
-
-					s.setblocking(0)
-				except Exception as e:
-					pipe.send(["msg","Disconnected"])
-					log_print("Cannot connected. Try again in 2 seconds.",e)
-					time.sleep(2)
-
-			connection = True
-			pipe.send(["msg","Connected"])
-			k = None
-
-			count = 0
-			while connection:
-
-				#from the socket
-				ready = select.select([s], [], [], 0)
-				
-				if ready[0]:
-					data = []
-					while True:
-						try:
-							part = s.recv(2048)
-						except:
-							connection = False
-							break
-						#if not part: break
-						data.append(part)
-						if len(part) < 2048:
-							#try to assemble it, if successful.jump. else, get more. 
-							try:
-								k = pickle.loads(b"".join(data))
-								break
-							except:
-								pass
-					#k is the confirmation from client. send it back to pipe.
-					if k!=None:
-						placed = []
-
-						pipe.send(["pkg",k[1:]])
-						for i in k[1:]:
-							log_print("placed:",i[1])
-							placed.append(i[1])
-						#log_print("placed:",k[1][1])
-						
-						s.send(pickle.dumps(["Algo placed",placed]))
-
-				# if pipe.poll(0):
-				# 	data = pipe.recv()
-				# 	if data == "Termination":
-				# 		s.send(pickle.dumps(["Termination"]))
-				# 		print("Terminate!")
-
-				# 	part = s.recv(2048)
-				# except:
-				# 	connection = False
-				# 	break
-				# #if not part: break
-				# data.append(part)
-				# if len(part) < 2048:
-				# 	#try to assemble it, if successful.jump. else, get more. 
-				# 	try:
-				# 		k = pickle.loads(b"".join(data))
-				# 		break
-				# 	except:
-				# 		pass
-
-				count+=1
-				print(count)
-			log_print("Main disconnected")
-			pipe.send(["msg","Main disconnected"])
-		except Exception as e:
-			pipe.send(["msg",e])
-			log_print(e)
-
-
-def algo_manager_voxcom2(pipe):
-
-	#tries to establish commuc
-	while True:
-
-		HOST = 'localhost'  # The server's hostname or IP address
-		PORT = 65491       # The port used by the server
-
-		try:
-			log_print("Trying to connect to the main application")
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			connected = False
-
-			while not connected:
-				try:
-					s.connect((HOST, PORT))
-					s.send(pickle.dumps(["Connection","Connected"]))
-					connected = True
-				except:
-					pipe.send(["msg","Disconnected"])
-					log_print("Cannot connected. Try again in 3 seconds.")
-					time.sleep(3)
-
-			connection = True
-
-			pipe.send(["msg","Connected"])
-
-			while connection:
-
-				data = []
-				k = None
-				while True:
-					try:
-						part = s.recv(2048)
-					except:
-						connection = False
-						break
-					#if not part: break
-					data.append(part)
-					if len(part) < 2048:
-						#try to assemble it, if successful.jump. else, get more. 
-						try:
-							k = pickle.loads(b"".join(data))
-							break
-						except Exception as e:
-							log_print(e)
-				#s.sendall(pickle.dumps(["ids"]))
-				if k!=None:
-					pipe.send(["pkg",k])
-					#log_print("placed:",k[1][1])
-					s.send(pickle.dumps(["Algo placed",k[1][1]]))
-			log_print("Main disconnected")
-			pipe.send(["msg","Disconnected"])
-		except Exception as e:
-			pipe.send(["msg",e])
-			log_print(e)
-
-
-def algo_manager_voxcom3(pipe):
-
-	#tries to establish commuc
-
-
-	while True:
-
-		HOST = 'localhost'  # The server's hostname or IP address
-		#PORT = 65491       # The port used by the server
-
-		try:
-			log_print("Trying to connect to the main application")
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			connected = False
-
-			while not connected:
-				try:
-					with open('../commlink.json') as json_file:
-						port_file = json.load(json_file)
-
-					if datetime.now().strftime("%m%d") not in port_file:
-						time.sleep(1)
-					else:
-						PORT = port_file[datetime.now().strftime("%m%d")]
-						s.connect((HOST, PORT))
-						connected = True
-
-					s.setblocking(1)
-				except Exception as e:
-					pipe.send(["msg","Disconnected"])
-					#log_print("Cannot connected. Try again in 2 seconds.",e)
-					time.sleep(120)
-
-			connection = True
-			pipe.send(["msg","Connected"])
-			k = None
-
-			count = 0
-			while connection:
-
-				#from the socket
-				data = []
-				while True:
-					try:
-						part = s.recv(2048)
-					except:
-						connection = False
-						break
-					#if not part: break
-					data.append(part)
-					if len(part) < 2048:
-						#try to assemble it, if successful.jump. else, get more. 
-						try:
-							k = pickle.loads(b"".join(data))
-							break
-						except:
-							pass
-				#k is the confirmation from client. send it back to pipe.
-				if k!=None:
-					if k!=['checking']:
-						placed = []
-
-						pipe.send(["pkg",k[1:]])
-						for i in k[1:]:
-							log_print("placed:",i[1])
-							placed.append(i[1])
-						#log_print("placed:",k[1][1])
-						
-						s.send(pickle.dumps(["Algo placed",placed]))
-
-				# if pipe.poll(0):
-				# 	data = pipe.recv()
-				# 	if data == "Termination":
-				# 		s.send(pickle.dumps(["Termination"]))
-				# 		print("Terminate!")
-
-				# 	part = s.recv(2048)
-				# except:
-				# 	connection = False
-				# 	break
-				# #if not part: break
-				# data.append(part)
-				# if len(part) < 2048:
-				# 	#try to assemble it, if successful.jump. else, get more. 
-				# 	try:
-				# 		k = pickle.loads(b"".join(data))
-				# 		break
-				# 	except:
-				# 		pass
-
-				count+=1
-				#print("algo place counts",count)
-			log_print("Main disconnected")
-			pipe.send(["msg","Main disconnected"])
-		except Exception as e:
-			pipe.send(["msg",e])
-			log_print(e)
-
-
 def logging(pipe):
 
 	f = open(datetime.now().strftime("%d/%m")+".txt", "w")
@@ -447,16 +202,25 @@ def logging(pipe):
 		f.write(time_+" :"+string)
 	f.close()
 
-#COLOR CODING TEST
-# if __name__ == '__main__':
 
-# 	import tkinter as tk
-# 	root = tk.Tk() 
-
-# 	for i in range(0,13):
-
-# 		tk.Label(text="",background=hexcolor_red(i/10),width=10).grid(column=i,row=1)
-
-# 	root.mainloop()
+def send_email(subject,body):
 
 
+	sender = 'algomanagertnv2@gmail.com'
+	password = 'tnylycahyopwgedq'
+	recipients = ['algomanagertnv2@gmail.com']
+
+	msg = MIMEText(body)
+	msg['Subject'] = subject
+	msg['From'] = sender
+	msg['To'] = ', '.join(recipients)
+
+
+	try:
+		with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+		   smtp_server.login(sender, password)
+		   smtp_server.sendmail(sender, recipients, msg.as_string())
+	except Exception as e:
+		print(e)
+
+send_email("TEST,","TEST \n TEST")

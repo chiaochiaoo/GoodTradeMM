@@ -12,6 +12,12 @@ from constant import *
 from datetime import datetime
 
 import mysql.connector
+
+from logging_module import *
+
+
+
+ALGO ="Algo Manger"
 def find_between(data, first, last):
     try:
         start = data.index(first) + len(first)
@@ -87,6 +93,9 @@ def fetch_data(symbol):
 
 
 
+# AEQN Buy AequitasLIT Limit Broker DAY Reserve
+# AEQN Sell->Short AequitasLIT Limit Broker DAY Reserve
+
 
 BUY = "Buy"
 SELL ="Sell->Short"
@@ -137,6 +146,9 @@ class SymbolMM:
 
         self.unreal =0
 
+        self.spread =0
+        self.adj_spread =0
+
         self.board_setting = False 
 
 
@@ -154,6 +166,8 @@ class SymbolMM:
             self.rasks[i]=0
 
         self.venues_options ={}
+
+        self.opening = []
         self.set_up_venue()
 
     def fetch_db_data(self):
@@ -192,7 +206,10 @@ class SymbolMM:
 
         self.rejection+=1 
 
-        print(self.symbol,self.rejection)
+        #print(self.symbol,self.rejection)
+        message(f'{ALGO} {self.symbol} received rejection. current count: {self.rejection}',CRITICAL)
+
+        #message(f'')
         if self.rejection>2:
             self.start_pending()
     def set_up_venue(self):
@@ -223,15 +240,9 @@ class SymbolMM:
 
 
     def start_restrictive(self):
+
         self.mode = RESTRICTIVE_MODE 
         self.vars['Status'][0].set(self.mode)
-
-        # 1 level behind nbbo.
-        ### STEP 1 , CHECK WHATS THERE ###
-
-        ### STEP 2 , CHECK WHO SHOULD BE CANCELD ###
-
-        ### STEP 3. CHECK WHO SHOULD BE THERE ###
 
 
     def start_opening(self):
@@ -244,7 +255,60 @@ class SymbolMM:
         self.vars['Status'][0].set(self.mode)
 
 
+    def inventory_check(self,vals):
+        ###
+        inv =self.get_variable('cur_inv')
+
+        result = {}
+        total = 0
+
+        #vals = dict(sorted(vals.items()))
+        vals = dict(sorted(vals.items(), reverse=True))
+        for key, value in vals.items():
+            if key < 0:
+                if total + value <= inv:
+                    result[key] = value
+                    total += value
+            else:
+                result[key] = value
+
+        #print("inv check:",vals,result)
+        return result 
+
+    def check_restrictive_condition(self):
+
+        inv =self.get_variable('cur_inv')
+        max_inv = self.get_variable('MaxInventorySize')
+
+        u = self.get_variable('unrealized')
+        upnl = abs(self.get_variable('MaxAllowedUPnL'))*-1
+
+        shutdown = self.get_variable('RealizedPnLShutdown')
+
+
+        if inv==0 and max_inv ==0 and self.mode != INACTIVE:
+            message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',WARNING)
+            self.start_pending()
+
+        if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+
+            message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',WARNING)
+            self.start_restrictive()
+
+        if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+            message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',WARNING)
+
+            self.set_variable('r_nbbo',1)
+            self.start_restrictive()
+
+        if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+            message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',WARNING)
+            self.set_variable('r_nbbo',1)
+            self.start_restrictive()
+
     def sysmbol_inspection(self):
+
+        self.check_restrictive_condition()
 
         if self.mode == RESTRICTIVE_MODE:
             
@@ -255,28 +319,29 @@ class SymbolMM:
 
             self.insepection_inactive()
 
+        elif self.mode == DEFAULT_MODE:
+
+            self.inspection_default()
+
+        elif self.mode == OPENING_MODE:
+
+            self.inspection_opening()
+
     def insepection_inactive(self):
         self.cancel_orders()
 
-        
-    def inspection_restrictive(self):
+    def update_order_book(self,vals):
 
-        ## get should.
-        vals = [self.nbids[1],self.nbids[2],self.nasks[1]*-1,self.nasks[2]*-1]
-        a1enable = self.get_variable('r_nbbo')
-
-        if a1enable:
-            vals.append(self.nasks[0]*-1)
-
+        #print(vals)
         cancel_list = []
 
         for price in self.order_book.keys():
-            if price not in vals:
+            if price not in vals.keys():
                 cancel_list.append(price)
         ## cancel that.
 
         send_list = []
-        for price in vals:
+        for price in vals.keys():
             if price not in self.order_book.keys():
                 send_list.append(price)
 
@@ -292,10 +357,8 @@ class SymbolMM:
         for i in cancel_list:
             self.cancel_order(self.order_book[i])
 
-
         order = self.vars['d_Venue'][0].get()
-        board_lot =self.vars['boardlot'][0].get()
-
+        
         for price in send_list:
 
             if price>0:
@@ -303,9 +366,99 @@ class SymbolMM:
             else:
                 action =SELL
 
-            price = abs(price)
-            self.post_cmd(order,price,board_lot,action)
+            self.post_cmd(order, abs(price),vals[price],action)
 
+
+    def inspection_default(self):
+        vals = [self.nbids[0],self.nbids[1],self.nbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
+        sellzone1 = self.get_variable('SellZone1')
+
+        print("Default Check:",self.spread>=self.adj_spread,self.bid <= sellzone1)
+        if self.spread>=self.adj_spread and self.bid <= sellzone1:
+            vals = [self.rbids[0],self.rbids[1],self.rbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
+
+        global_bid_mult = self.get_variable('bidmult')
+        global_ask_mult =  self.get_variable('askmult')
+
+        board_lot =self.vars['boardlot'][0].get()
+
+        orders = {}
+
+        for val in vals:
+            if val>0:
+                orders[val] = board_lot*global_bid_mult
+            else:
+                orders[val] = board_lot*global_ask_mult
+        orders = self.inventory_check(orders)
+        self.update_order_book(orders)
+
+
+    def inspection_opening(self):
+
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        if today not in self.opening:
+            self.opening.append(today)
+            if self.pc==0:
+                message(f'{ALGO} {self.symbol} have no previous closing price. skip opening phase')
+            else:
+
+                order = self.vars['d_Venue'][0].get()
+                board_lot =  self.vars['boardlot'][0].get()
+                tick_size =  self.vars['ticksize'][0].get()
+
+
+
+                send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+
+                send_list2= []
+                for i in send_list:
+
+                    if abs(i)>=0.50:
+                        send_list2.append(round(i,2))
+                    else:
+                        send_list2.append(round(i,3))
+
+                for price in send_list2:
+
+                    if price>0:
+                        action = BUY 
+                    else:
+                        action =SELL
+
+                    self.post_cmd(order, abs(price),board_lot,action)
+
+
+    def inspection_restrictive(self):
+
+        ## get should.
+        vals = [self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1]
+        a1enable = self.get_variable('r_nbbo')
+
+        if a1enable:
+            vals.append(self.nasks[0]*-1)
+
+
+        global_bid_mult = self.get_variable('bidmult')
+        global_ask_mult =  self.get_variable('askmult')
+
+
+        res_bid_mult = self.get_variable('r_bidmult')
+        res_ask_mult =  self.get_variable('r_askmult')
+
+        board_lot =self.vars['boardlot'][0].get()
+
+        orders = {}
+
+        for val in vals:
+            if val>0:
+                orders[val] = board_lot*res_bid_mult*global_bid_mult
+            else:
+                orders[val] = board_lot*res_ask_mult*global_ask_mult
+
+        orders = self.inventory_check(orders)
+        self.update_order_book(orders)
 
     def cancel_orders(self):
         cancel_list = []
@@ -323,8 +476,8 @@ class SymbolMM:
         
         r = requests.post(req)
 
-        print(ordername)
-
+        # print(ordername)
+        # Message("REPROT: EMAIL CHECK",REPORT)
 
     def post_cmd(self,order,price,share,action):
 
@@ -334,7 +487,7 @@ class SymbolMM:
             order = order.replace("Broker ","")
         req = f'http://127.0.0.1:8080/ExecuteOrder?symbol={str(self.symbol)}&limitprice={str(price)}&ordername={order}&shares={str(share)}'
         
-        print(order,req)
+        #print(order,req)
         r = requests.post(req)
 
 
@@ -374,24 +527,29 @@ class SymbolMM:
             self.bid = bid
             self.ask = ask
 
+            self.spread = self.ask-self.bid
+
             self.nbids[0]=bid
             self.nasks[0]=ask
 
 
-            increment =  self.vars['AdjustedSpread'][0].get()
+            self.adj_spread =  self.vars['AdjustedSpread'][0].get()
 
-            if increment>self.ask-self.bid:
-                increment = self.ask-self.bid
+            if self.adj_spread>=self.ask-self.bid:
+                self.adj_spread = self.ask-self.bid
+
+            if self.adj_spread<0.005:
+                self.adj_spread=0.005
 
             if ask>=0.51:
-                self.rbids[0]=round(ask-increment,2)
+                self.rbids[0]=round(ask-self.adj_spread,2)
             else:
-                self.rbids[0]=round(ask-increment,3)
+                self.rbids[0]=round(ask-self.adj_spread,3)
 
             if bid>=0.51:
-                self.rasks[0]=round(bid+increment,2)
+                self.rasks[0]=round(bid+self.adj_spread,2)
             else:
-                self.rasks[0]=round(bid+increment,3)
+                self.rasks[0]=round(bid+self.adj_spread,3)
 
 
             self.pc = pc
@@ -415,6 +573,10 @@ class SymbolMM:
 
         except Exception as e:
             print(e)
+
+            postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
+            r= requests.get(postbody)
+
             pass
 
     def check_boardlot(self):
@@ -554,7 +716,7 @@ class SymbolMM:
         return TickerConfig(**values)
 
     def save(self, folder="configs"):
-        print("saving:::")
+        #print("saving:::")
         config = self.to_config()
         config.save(folder=folder)
 
@@ -572,11 +734,11 @@ class SymbolMM:
         try:
             if not override:
                 self.data = TickerConfig.load(symbol, folder).__dict__
-                print(f"[Loaded] {symbol} config from JSON")
+                #print(f"[Loaded] {symbol} config from JSON")
             else:
                 self.data = {}
         except Exception as e:
-            print(f"[Load Fail] Using fallback defaults: {e}")
+            #print(f"[Load Fail] Using fallback defaults: {e}")
             self.data = {}
 
         self.data["Ticker"] = symbol  # Always overwrite with current symbol

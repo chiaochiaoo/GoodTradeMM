@@ -1,0 +1,415 @@
+10:32:20 [SUCCESS] Success log test
+10:32:20 [WARNING] Warning alert
+10:32:21 [ERROR] Error handling test
+10:32:21 [CRITICAL] Critical shutdown alert
+10:32:21 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 203
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 203, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:32:21 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 203
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 203, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:33:52 [SUCCESS] Success log test
+10:33:52 [WARNING] Warning alert
+10:33:52 [ERROR] Error handling test
+10:33:52 [CRITICAL] Critical shutdown alert
+10:33:52 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 203
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 203, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:33:52 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 203
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 203, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:34:05 [SUCCESS] Success log test
+10:34:05 [WARNING] Warning alert
+10:34:05 [ERROR] Error handling test
+10:34:05 [CRITICAL] Critical shutdown alert
+10:34:05 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 203
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 203, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:34:05 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 203
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 203, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:34:11 [SUCCESS] Success log test
+10:34:11 [WARNING] Warning alert
+10:34:11 [ERROR] Error handling test
+10:34:11 [CRITICAL] Critical shutdown alert
+10:34:11 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 202
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 202, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:34:11 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 202
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 202, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:34:35 [SUCCESS] Success log test
+10:34:35 [WARNING] Warning alert
+10:34:35 [ERROR] Error handling test
+10:34:45 [CRITICAL] Critical shutdown alert
+10:35:05 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 202
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 202, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:35:05 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 202
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 202, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:35:47 [SUCCESS] Success log test
+10:35:47 [WARNING] Warning alert
+10:35:47 [ERROR] Error handling test
+10:35:47 [CRITICAL] Critical shutdown alert
+10:35:48 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 201
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 201, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:35:48 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 201
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 201, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:36:43 [SUCCESS] Success log test
+10:36:43 [WARNING] Warning alert
+10:36:43 [ERROR] Error handling test
+10:36:44 [CRITICAL] Critical shutdown alert
+10:36:45 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 202
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 202, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:36:45 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 202
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 202, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:39:56 [SUCCESS] Success log test
+10:39:56 [WARNING] Warning alert
+10:39:56 [ERROR] Error handling test
+10:39:57 [CRITICAL] Critical shutdown alert
+10:39:59 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 201
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 201, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:39:59 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 201
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 201, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:40:48 [SUCCESS] Success log test
+10:40:48 [WARNING] Warning alert
+10:40:48 [ERROR] Error handling test
+10:40:49 [CRITICAL] Critical shutdown alert
+10:40:51 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 206
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 206, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:40:51 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 206
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 206, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:43:23 [SUCCESS] Success log test
+10:43:23 [WARNING] Warning alert
+10:43:23 [ERROR] Error handling test
+10:43:25 [CRITICAL] Critical shutdown alert
+10:43:26 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 208
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 208, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:43:26 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 208
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 208, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:44:48 [SUCCESS] Success log test
+10:44:48 [WARNING] Warning alert
+10:44:48 [ERROR] Error handling test
+10:44:49 [CRITICAL] Critical shutdown alert
+10:44:51 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:44:51 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:49:56 [SUCCESS] Success log test
+10:49:56 [WARNING] Warning alert
+10:49:57 [ERROR] Error handling test
+10:49:57 [CRITICAL] Critical shutdown alert
+10:49:59 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+10:49:59 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+11:10:34 [SUCCESS] Success log test
+11:10:34 [WARNING] Warning alert
+11:10:34 [ERROR] Error handling test
+11:10:35 [CRITICAL] Critical shutdown alert
+11:10:37 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+11:10:37 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+11:26:04 [SUCCESS] Success log test
+11:26:04 [WARNING] Warning alert
+11:26:04 [ERROR] Error handling test
+11:26:04 [CRITICAL] Critical shutdown alert
+11:26:06 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+11:26:06 [CRITICAL] Crash in calculation | ZeroDivisionError @ logging_module.py, line 209
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\logging_module.py", line 209, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+
+11:38:53 [WARNING] XIU.TO inventory reach max. switch to RESTRICTIVE_MODE.
+11:40:06 [WARNING] XIU.TO inventory reach max. switch to RESTRICTIVE_MODE.
+11:41:34 [WARNING] XIU.TO unreal PNL reach limit. switch to RESTRICTIVE_MODE.
+11:43:19 [WARNING] XIU.TO unreal PNL reach limit. switch to RESTRICTIVE_MODE.
+11:51:20 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:23 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:27 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:30 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:33 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:36 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:39 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:42 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:45 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:48 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:51 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:54 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:51:57 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:00 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:03 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:06 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:09 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:13 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:16 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:19 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:22 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:25 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:28 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:31 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:34 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:37 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:40 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:43 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:46 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:49 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:52 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:55 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:52:58 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:02 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:05 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:08 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:11 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:14 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:17 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:20 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:23 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+11:53:26 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+12:18:26 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+14:05:04 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+14:09:18 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:00:46 [ERROR] HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /GetOpenPositions?user=QIAOSUN (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it')) | ConnectionError @ Manager.py, line 53
+Traceback (most recent call last):
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 169, in _new_conn
+    conn = connection.create_connection(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\util\connection.py", line 96, in create_connection
+    raise err
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\util\connection.py", line 86, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connectionpool.py", line 699, in urlopen
+    httplib_response = self._make_request(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connectionpool.py", line 394, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 234, in request
+    super(HTTPConnection, self).request(method, url, body=body, headers=headers)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1255, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1301, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1250, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1010, in _send_output
+    self.send(msg)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 950, in send
+    self.connect()
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 200, in connect
+    conn = self._new_conn()
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 181, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connectionpool.py", line 755, in urlopen
+    retries = retries.increment(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\util\retry.py", line 574, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /GetOpenPositions?user=QIAOSUN (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\Manager.py", line 53, in get_current_positions
+    r= requests.get(p)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\api.py", line 75, in get
+    return request('get', url, params=params, **kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\adapters.py", line 516, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /GetOpenPositions?user=QIAOSUN (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+
+15:00:46 [ERROR] HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /GetOpenPositions?user=QIAOSUN (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it')) | ConnectionError @ Manager.py, line 53
+Traceback (most recent call last):
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 169, in _new_conn
+    conn = connection.create_connection(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\util\connection.py", line 96, in create_connection
+    raise err
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\util\connection.py", line 86, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connectionpool.py", line 699, in urlopen
+    httplib_response = self._make_request(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connectionpool.py", line 394, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 234, in request
+    super(HTTPConnection, self).request(method, url, body=body, headers=headers)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1255, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1301, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1250, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 1010, in _send_output
+    self.send(msg)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\http\client.py", line 950, in send
+    self.connect()
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 200, in connect
+    conn = self._new_conn()
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connection.py", line 181, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\connectionpool.py", line 755, in urlopen
+    retries = retries.increment(
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\urllib3\util\retry.py", line 574, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /GetOpenPositions?user=QIAOSUN (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Chiao\Desktop\GoodTradeMM\Manager.py", line 53, in get_current_positions
+    r= requests.get(p)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\api.py", line 75, in get
+    return request('get', url, params=params, **kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\Chiao\AppData\Local\Programs\Python\Python38-32\lib\site-packages\requests\adapters.py", line 516, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /GetOpenPositions?user=QIAOSUN (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0E9BC3E8>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+
+15:02:30 [CRITICAL] Algo Manger XIU.TO received rejection. current count: 1
+15:09:49 [WARNING] XIU.TO no position & no intend inventory. switch to INACTIVE.
+15:10:15 [CRITICAL] Algo Manger LEXT.CN received rejection. current count: 1
+15:14:45 [CRITICAL] Algo Manger NF.CN received rejection. current count: 1
+15:15:07 [CRITICAL] Algo Manger NF.CN received rejection. current count: 2
+15:15:28 [WARNING] NF.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:22:14 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:25:28 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:25:52 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:26:11 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:28:33 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:29:09 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:30:24 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:31:01 [WARNING] XIU.TO unreal PNL reach limit. switch to RESTRICTIVE_MODE.
+15:36:46 [WARNING] LEXT.CN inventory reach max. switch to RESTRICTIVE_MODE.
+15:50:17 [CRITICAL] Algo Manger CRTL.CN received rejection. current count: 1

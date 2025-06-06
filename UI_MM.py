@@ -165,24 +165,7 @@ class UI(pannel):
 		self.account_status.grid(sticky="w",column=2,row=row)
 		self.account_status["background"] = "red"
 
-		row +=1
-		self.ppro = ttk.Label(self.system_pannel, text="Ppro API:")
-		self.ppro.grid(sticky="w",column=1,row=row,padx=10)
-		self.ppro_api_status_label = ttk.Label(self.system_pannel, textvariable=self.ppro_api_status)
-		self.ppro_api_status_label.grid(sticky="w",column=2,row=row)
-		self.ppro_api_status_label["background"] = "red"
 
-		row +=1
-		self.al = ttk.Label(self.system_pannel, text="Total Algo Count::")
-		self.al.grid(sticky="w",column=1,row=row,padx=10)
-		self.algo_count_ = ttk.Label(self.system_pannel,  textvariable=self.algo_count_number)
-		self.algo_count_.grid(sticky="w",column=2,row=row,padx=10)
-
-		row +=1
-		self.al = ttk.Label(self.system_pannel, text="Active Algo Count::")
-		self.al.grid(sticky="w",column=1,row=row,padx=10)
-		self.algo_count_ = ttk.Label(self.system_pannel,  textvariable=self.active_algo_count_number)
-		self.algo_count_.grid(sticky="w",column=2,row=row,padx=10)
 
 		row +=1
 		self.al = ttk.Label(self.system_pannel, text="Position Count::")
@@ -196,14 +179,14 @@ class UI(pannel):
 
 
 
-		row +=1
+		# row +=1
 
-		ttk.Label(self.system_pannel, text="Disaster mode:").grid(sticky="w",column=1,row=row,padx=10)
+		# ttk.Label(self.system_pannel, text="Disaster mode:").grid(sticky="w",column=1,row=row,padx=10)
 
-		try:
-			ttk.Checkbutton(self.system_pannel, variable=self.manager.disaster_mode).grid(sticky="w",column=2,row=row)
-		except:
-			pass 
+		# try:
+		# 	ttk.Checkbutton(self.system_pannel, variable=self.manager.disaster_mode).grid(sticky="w",column=2,row=row)
+		# except:
+		# 	pass 
 
 
 
@@ -232,7 +215,7 @@ class UI(pannel):
 	            for symbol in saved:
 	                self.ticker_var.set(symbol)
 	                self.load_ticker_tab()  # This should call your full load logic
-	        print(f"[Loaded] {len(saved)} saved tickers from {TICKER_CONFIG_FILE}")
+	        #print(f"[Loaded] {len(saved)} saved tickers from {TICKER_CONFIG_FILE}")
 	    else:
 	        print("[Info] No saved ticker file found.")
 
