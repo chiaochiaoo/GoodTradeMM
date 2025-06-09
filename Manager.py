@@ -135,7 +135,7 @@ def force_close_port(port, process_name=None):
 # while True:
 # 	a=1
 
-TEST_MODE = True 
+TEST_MODE = False 
 class Manager:
 
 	def __init__(self,root):
