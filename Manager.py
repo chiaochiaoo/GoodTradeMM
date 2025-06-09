@@ -141,28 +141,32 @@ class Manager:
 	def __init__(self,root):
 
 		self.root = root 
-		self.cmd_text = tk.StringVar(value="Status:")
+		self.system_status = tk.StringVar(value="")
 
 		self.symbols ={}
 		
-		self.ui = UI(root,self,self.cmd_text)
+		self.ui = UI(root,self,self.system_status)
 
 
 		#ui = self.ui
 
-		set_ui( self.ui)
+		set_ui(self.ui)
+
 
 		self.user = "QIAOSUN"
+
+		
+		if not TEST_MODE:
+			self.user = ""
 
 		self.positions ={}
 		self.open_orders = {}
 
-		if not TEST_MODE:
-			self.user = get_env()
-
-		self.ui.set_user(self.user)
+		self.system_running = False 
 
 		self.lock = threading.Lock()
+
+		### ONLY RUN; when Both System & User check works ###
 
 		good = threading.Thread(target=self.position_update_loop, daemon=True)
 		good.start()
@@ -172,7 +176,20 @@ class Manager:
 		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
 		x.start()
 
-		self.start_all_restrictive()
+
+
+		x2 = threading.Thread(target=self.connectivity_check, daemon=True)
+		x2.start()
+
+
+		if not TEST_MODE:
+			self.user = get_env()
+
+		self.ui.set_user(self.user)
+
+
+		self.start_all_inactive()
+
 
 	def get_inventory(self,symbol):
 
@@ -200,29 +217,83 @@ class Manager:
 		for symbol in self.symbols.keys():
 			self.symbols[symbol].start_restrictive()
 
+	def set_connected(self):
+		self.system_status.set(CONNECTED)
+		self.ui.system_status["background"] = "lightgreen"
+	def set_disconnected(self):
+		self.system_status.set(DISCONNECTED)
+
+		self.ui.system_status["background"] = "red"
+
+	def get_connectivity(self):
+
+		return self.system_status.get()==CONNECTED
+
+
+	def connectivity_check(self):
+
+
+
+		while True:
+
+			try:
+				self.root.after(0, lambda: None)
+				break
+			except RuntimeError:
+				time.sleep(3)
+
+		print('CONNECTION CHECK')
+		while True:
+
+			postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+
+			r= requests.get(postbody)
+
+			stream_data = r.text
+
+			if "MarketTime" in stream_data:
+				ts = find_between(stream_data, "MarketTime=\"", "\"")
+
+				self.set_connected()
+				time.sleep(60)
+			else:
+				self.set_disconnected()
+				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+
+				r= requests.get(postbody)
+
+				postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
+				r= requests.get(postbody)
+
+				time.sleep(5)
+
+
+
 	def position_update_loop(self):
 
 		while True:
 
-			self.positions = get_current_positions(self.user)
-			self.open_orders = get_open_orders(self.user)
+			if self.system_running==CONNECTED:
+				self.positions = get_current_positions(self.user)
+				self.open_orders = get_open_orders(self.user)
 
 
-			#print(self.positions)
+				#print(self.positions)
 
-			## EACH TICKER, UPDATE STATUS. ##
+				## EACH TICKER, UPDATE STATUS. ##
 
-			for symbol in self.symbols.keys():
-				self.symbols[symbol].update_data()
+				for symbol in self.symbols.keys():
+					self.symbols[symbol].update_data()
 
-				if symbol in self.open_orders:
-					self.symbols[symbol].update_orderbook(self.open_orders[symbol])
-				else:
-					self.symbols[symbol].update_orderbook({})
+					if symbol in self.open_orders:
+						self.symbols[symbol].update_orderbook(self.open_orders[symbol])
+					else:
+						self.symbols[symbol].update_orderbook({})
 
-				self.symbols[symbol].sysmbol_inspection()
+					self.symbols[symbol].sysmbol_inspection()
 
-			time.sleep(3)
+				time.sleep(3)
+
 
 	def load_ticker(self,ticker):
 		
@@ -352,7 +423,7 @@ if __name__ == '__main__':
 	manager=Manager(root)
 
 
-	message("System Running",NOTIFICATION)
+	message("System Initialized",NOTIFICATION)
 	# root.minsize(1600, 1000)
 	# root.maxsize(1800, 1200)
 	root.mainloop() 

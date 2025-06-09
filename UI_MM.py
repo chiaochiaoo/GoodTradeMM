@@ -17,6 +17,12 @@ FIELDS_PER_ROW = 6
 TICKER_CONFIG_FILE = "configs/tickers.json"
 
 
+CONNECTED = " CONNECTED"
+DISCONNECTED = "DISCONNECTED"
+DELAYED = "DELAYED"
+
+
+
 def save_tickers(self):
 	os.makedirs("configs", exist_ok=True)
 	ticker_list = list(self.ticker_table_rows.keys())
@@ -78,7 +84,7 @@ class UI(pannel):
 		self.root = root
 
 		self.manager = manager
-		self.command_text = cmd_text
+		self.status_text = cmd_text
 		self.risk_timer = tk.DoubleVar(value=300)
 
 
@@ -154,9 +160,6 @@ class UI(pannel):
 		self.user_phone = tk.StringVar()
 		self.user_phone.set("")
 
-		self.system_status_text = tk.StringVar()
-		self.system_status_text.set("ERROR")
-
 		self.file_last_update = tk.StringVar(value="Disconnected")
 
 		self.algo_count_string = tk.StringVar(value="0")
@@ -170,7 +173,7 @@ class UI(pannel):
 		self.system = ttk.Label(self.system_pannel, text="SYSTEM:")
 		self.system.grid(sticky="w",column=1,row=row,padx=10)
 
-		self.system_status = tk.Button(self.system_pannel, textvariable=self.system_status_text,activebackground='red',activeforeground='yellow')
+		self.system_status = tk.Button(self.system_pannel, textvariable=self.status_text,activebackground='red',activeforeground='yellow')
 		self.system_status.grid(sticky="w",column=2,row=row)
 		self.system_status["background"] = "red"
 		row +=1
