@@ -49,7 +49,6 @@ def fetch_data(symbol):
         )
 
         if connection.is_connected():
-            print("Connected to MySQL database")
 
             # Create a cursor object
             cursor = connection.cursor()
@@ -65,8 +64,7 @@ def fetch_data(symbol):
 
             results = [dict(zip(column_names, row)) for row in rows]
 
-            # print(column_names)
-            # print(results[0])
+
             return results[0]
             # Print JSON with Decimal safely handled
             #print(json.dumps(results, indent=4, cls=DecimalEncoder))
@@ -170,6 +168,9 @@ class SymbolMM:
         self.opening = []
         self.set_up_venue()
 
+
+        self.vars['Status'][0].trace_add("write", self.update_status)
+
     def fetch_db_data(self):
 
         select = ['RealizedPnLShutdown','FavourableBuyingConditions','MaxInventorySize','MaxAllowedUPnL','BuyZone1','BuyZone2','BuyZone3','SellZone1','SellZone2','SellZone3','AdjustedSpread']
@@ -201,12 +202,10 @@ class SymbolMM:
         # 'AdjustedSpread' 'adj_Spread'
 
 
-
     def rejection_received(self):
 
         self.rejection+=1 
 
-        #print(self.symbol,self.rejection)
         message(f'{ALGO} {self.symbol} received rejection. current count: {self.rejection}',CRITICAL)
 
         #message(f'')
@@ -220,23 +219,11 @@ class SymbolMM:
         self.mode = INACTIVE
         self.vars['Status'][0].set(self.mode)
 
+
+
     def start_default(self):
         self.mode = DEFAULT_MODE 
         self.vars['Status'][0].set(self.mode)
-
-    def start_test(self):
-        self.mode = 'TEST' 
-
-        self.vars['Status'][0].set(self.mode)
-
-        # NBBO
-
-        action =BUY
-        price = self.nbids[0] 
-        order = self.vars['d_Venue'][0].get()
-        board_lot =self.vars['boardlot'][0].get()
-
-        self.post_cmd(order,price,board_lot,action)
 
 
     def start_restrictive(self):
@@ -254,6 +241,23 @@ class SymbolMM:
         self.mode = AGGRESIVE_MODE 
         self.vars['Status'][0].set(self.mode)
 
+
+    def update_status(self,*args):
+        message(f'{self.symbol} mode switch:{self.mode}.',NOTIFICATION)
+
+    def start_test(self):
+        self.mode = 'TEST' 
+
+        self.vars['Status'][0].set(self.mode)
+
+        # NBBO
+
+        action =BUY
+        price = self.nbids[0] 
+        order = self.vars['d_Venue'][0].get()
+        board_lot =self.vars['boardlot'][0].get()
+
+        self.post_cmd(order,price,board_lot,action)
 
     def inventory_check(self,vals):
         ###
@@ -287,22 +291,22 @@ class SymbolMM:
 
 
         if inv==0 and max_inv ==0 and self.mode != INACTIVE:
-            message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',WARNING)
+            message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
             self.start_pending()
 
         if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
 
-            message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',WARNING)
+            message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
             self.start_restrictive()
 
         if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-            message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',WARNING)
+            message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
 
             self.set_variable('r_nbbo',1)
             self.start_restrictive()
 
         if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-            message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',WARNING)
+            message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
             self.set_variable('r_nbbo',1)
             self.start_restrictive()
 
@@ -349,10 +353,10 @@ class SymbolMM:
         #print('cancel:',cancel_list,"  send:",send_list)
 
 
-        if len(cancel_list)>0:
-            print(cancel_list)
-        if len(send_list)>0:
-            print(send_list)
+        # if len(cancel_list)>0:
+        #     print(cancel_list)
+        # if len(send_list)>0:
+        #     print(send_list)
 
         for i in cancel_list:
             self.cancel_order(self.order_book[i])
@@ -373,7 +377,7 @@ class SymbolMM:
         vals = [self.nbids[0],self.nbids[1],self.nbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
         sellzone1 = self.get_variable('SellZone1')
 
-        print("Default Check:",self.spread>=self.adj_spread,self.bid <= sellzone1)
+        #print("Default Check:",self.spread>=self.adj_spread,self.bid <= sellzone1)
         if self.spread>=self.adj_spread and self.bid <= sellzone1:
             vals = [self.rbids[0],self.rbids[1],self.rbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
 

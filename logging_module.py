@@ -55,7 +55,7 @@ except ImportError:
 
 INFO     = "info"
 SUCCESS  = "success"
-WARNING  = "warning"
+NOTIFICATION  = "notification"
 ERROR    = "error"
 CRITICAL = "critical"
 DEBUG    = "debug"
@@ -64,10 +64,10 @@ REPORT   = "report"
 DISPATCH_RULES = {
     INFO:     ["print"],
     SUCCESS:  ["print", "file"],
-    WARNING:  ["print", "file", "ui"],
+    NOTIFICATION:  ["print", "file", "ui"],
     REPORT:   ["email"],
-    ERROR:    ["print", "file", "email"],
-    CRITICAL: ["print", "file", "email", "sms"],
+    ERROR:    ["print", "file", "email","ui"],
+    CRITICAL: ["print", "file", "email", "sms","ui"],
     DEBUG:    ["print"]
 }
 # print(DISPATCH_RULES.get(SUCCESS))

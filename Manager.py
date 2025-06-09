@@ -172,6 +172,7 @@ class Manager:
 		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
 		x.start()
 
+		self.start_all_restrictive()
 
 	def get_inventory(self,symbol):
 
@@ -188,6 +189,11 @@ class Manager:
 			return self.open_orders[symbol]
 		else:
 			return {}
+
+	def start_all_inactive(self):
+
+		for symbol in self.symbols.keys():
+			self.symbols[symbol].start_pending()	
 
 	def start_all_restrictive(self):
 
@@ -346,7 +352,7 @@ if __name__ == '__main__':
 	manager=Manager(root)
 
 
-	message("System Running",WARNING)
+	message("System Running",NOTIFICATION)
 	# root.minsize(1600, 1000)
 	# root.maxsize(1800, 1200)
 	root.mainloop() 

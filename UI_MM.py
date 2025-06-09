@@ -96,7 +96,7 @@ class UI(pannel):
 		self.ticker_management_frame .place(x=360,y=10,height=250,width=700)
 
 		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
-		self.notification_pannel.place(x=1070,y=10,height=250,width=400)
+		self.notification_pannel.place(x=1090,y=10,height=1200,width=400)
 
 		self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
 		self.notification_text.pack(anchor="nw", padx=0, pady=0, fill="both",expand=True)#
@@ -106,7 +106,7 @@ class UI(pannel):
 		# self.filter_pannel.place(x=360,y=200,height=60,width=1300)
 
 		self.mm_pannel = ttk.LabelFrame(self.root,text="MarketMaking") 
-		self.mm_pannel.place(x=10,y=270,height=950,width=1060)
+		self.mm_pannel.place(x=10,y=270,height=1000,width=1060)
 
 		self.marketmaking_notebook = ttk.Notebook(self.mm_pannel)
 		self.marketmaking_notebook.place(x=0,rely=0,relheight=1,relwidth=1)
@@ -214,14 +214,16 @@ class UI(pannel):
 		ttk.Button(self.system_pannel, text="Load/Create", command=self.load_ticker_tab).grid(row=row, column=3)
 
 		row +=1
-		ttk.Button(self.system_pannel, text="Save Tickers", command=self.save_tickers).grid(row=row, column=1)
+		ttk.Button(self.system_pannel, text="Save All Tickers", command=self.save_tickers).grid(row=row, column=1)
 
-		try:
-			ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
 
-			ttk.Button(self.system_pannel, text="Cancel All Orders", command=self.manager.cancel_all_orders).grid(row=row, column=3)
-		except:
-			pass
+		row +=1
+
+		ttk.Button(self.system_pannel, text="Start All Inactive", command=self.manager.start_all_inactive).grid(row=row, column=1)
+
+		ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
+
+		ttk.Button(self.system_pannel, text="Cancel All Orders", command=self.manager.cancel_all_orders).grid(row=row, column=3)
 
 
 		self.ticker_var.set('XIU.TO')
