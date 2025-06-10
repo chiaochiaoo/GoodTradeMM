@@ -404,7 +404,7 @@ class SymbolMM:
         if today not in self.opening:
             self.opening.append(today)
             if self.pc==0:
-                message(f'{ALGO} {self.symbol} have no previous closing price. skip opening phase')
+                message(f'{ALGO} {self.symbol} have no previous closing price. skip opening phase',NOTIFICATION)
             else:
 
                 order = self.vars['d_Venue'][0].get()
@@ -471,7 +471,7 @@ class SymbolMM:
 
         for i in cancel_list:
 
-            message(f'{self.symbol} cancel order: {i}')
+            message(f'{self.symbol} cancel order: {i}',LOG)
 
             self.cancel_order(self.order_book[i])
 
@@ -485,22 +485,26 @@ class SymbolMM:
 
     def post_cmd(self,order,price,share,action):
 
-        if self.manager.get_svi_order_check()==True:
+        try:
+            if self.manager.get_svi_order_check()==True:
 
-            if action == BUY:
-                side = "B"
-            else:
-                side = "S"
-            resp = requests.post("http://127.0.0.1:8000/order_exists", json={
-                "symbol": self.symbol,
-                "side": side,
-                "price": price
-            })
-            exist = resp.json()['exists']
+                if action == BUY:
+                    side = "B"
+                else:
+                    side = "S"
 
-            if exist:
-                message(f'{self.symbol} order: {price} {share} {action} order already exist, skipping.')
-                return 
+                resp = requests.post("http://127.0.0.1:8000/order_exists", json={
+                    "symbol": self.symbol,
+                    "side": side,
+                    "price": price
+                })
+                exist = resp.json()['exists']
+
+                if exist:
+                    message(f'{self.symbol} order: {price} {share} {action} order already exist, skipping.',LOG)
+                    return 
+        except:
+            message(f'{self.symbol} SVI order server unreachable',NOTIFICATION)
         order = order.replace("ACTION",action)
 
         if TEST_MODE:
@@ -510,7 +514,7 @@ class SymbolMM:
 
 
 
-        message(f'{self.symbol} order: {price} {share} {action} with {order}')
+        message(f'{self.symbol} order: {price} {share} {action} with {order}',LOG)
 
         r = requests.post(req)
 

@@ -54,7 +54,7 @@ except ImportError:
 
 
 INFO     = "info"
-SUCCESS  = "success"
+LOG  = "log"
 NOTIFICATION  = "notification"
 ERROR    = "error"
 CRITICAL = "critical"
@@ -63,7 +63,7 @@ REPORT   = "report"
 
 DISPATCH_RULES = {
     INFO:     ["print"],
-    SUCCESS:  ["print", "file"],
+    LOG:  ["print", "file"],
     NOTIFICATION:  ["print", "file", "ui"],
     REPORT:   ["email"],
     ERROR:    ["print", "file", "email","ui"],
