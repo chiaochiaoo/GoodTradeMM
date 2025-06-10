@@ -338,8 +338,9 @@ class SymbolMM:
         #print(vals)
         cancel_list = []
 
+        
         for price in self.order_book.keys():
-            if price not in vals.keys():
+            if price not in vals.keys() or price*-1 not in vals.keys():
                 cancel_list.append(price)
         ## cancel that.
 
