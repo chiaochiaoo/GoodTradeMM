@@ -21,6 +21,318 @@ import psutil
 from logging_module import *
 
 
+# get_open_orders('QIAOSUN')
+# while True:
+# 	a=1
+
+TEST_MODE = False 
+class Manager:
+
+	def __init__(self,root):
+
+		self.root = root 
+		self.system_status = tk.StringVar(value="")
+
+		self.SVI_cover_check = tk.BooleanVar(value=True)
+
+		self.symbols ={}
+		
+		self.ui = UI(root,self,self.system_status)
+
+
+		#ui = self.ui
+
+		set_ui(self.ui)
+
+
+		self.user = "QIAOSUN"
+
+		
+		if not TEST_MODE:
+			self.user = ""
+
+		self.positions ={}
+		self.open_orders = {}
+
+
+		self.lock = threading.Lock()
+
+		### ONLY RUN; when Both System & User check works ###
+
+		good = threading.Thread(target=self.position_update_loop, daemon=True)
+		good.start()
+
+		force_close_port(4399)
+
+		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
+		x.start()
+
+
+		x2 = threading.Thread(target=self.connectivity_check, daemon=True)
+		x2.start()
+
+
+		if not TEST_MODE:
+			self.user = get_env()
+
+		self.ui.set_user(self.user)
+
+
+		self.start_all_inactive()
+
+
+	def get_svi_order_check(self):
+
+		return self.SVI_cover_check.get()
+		
+	def get_inventory(self,symbol):
+
+
+		if symbol in self.positions:
+			return self.positions[symbol]
+
+		else:
+			return 0,0
+
+	def get_open_order(self,symbol):
+
+		if symbol in self.open_orders:
+			return self.open_orders[symbol]
+		else:
+			return {}
+
+	def start_all_inactive(self):
+
+		for symbol in self.symbols.keys():
+			self.symbols[symbol].start_pending()	
+
+	def start_all_restrictive(self):
+
+		for symbol in self.symbols.keys():
+			self.symbols[symbol].start_restrictive()
+
+	def set_connected(self):
+		if self.system_status.get()!=CONNECTED:
+			message("PPRO Connected",NOTIFICATION)
+
+		self.system_status.set(CONNECTED)
+		self.ui.system_status["background"] = "lightgreen"
+	def set_disconnected(self):
+
+		if self.system_status.get()!=DISCONNECTED:
+			message("Alert: Cannot Connect to PPRO",NOTIFICATION)
+		self.system_status.set(DISCONNECTED)
+
+		self.ui.system_status["background"] = "red"
+
+	def get_connectivity(self):
+
+		return self.system_status.get()==CONNECTED
+
+
+	def connectivity_check(self):
+
+
+		while True:
+
+			try:
+				self.root.after(0, lambda: None)
+				break
+			except RuntimeError:
+				time.sleep(3)
+
+		while True:
+
+			try:
+				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+
+				r= requests.get(postbody)
+
+				stream_data = r.text
+
+				if "MarketTime" in stream_data:
+					ts = find_between(stream_data, "MarketTime=\"", "\"")
+
+					self.set_connected()
+
+					# try:
+					# 	req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
+					# 	r = requests.post(req)
+					# except:
+						
+					# 	time.sleep(5)
+
+
+					time.sleep(60)
+				else:
+					self.set_disconnected()
+					postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+
+					r= requests.get(postbody)
+
+					postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
+					r= requests.get(postbody)
+
+					time.sleep(5)
+			except:
+				
+				time.sleep(10)
+
+
+	def position_update_loop(self):
+
+		while True:
+
+			try:
+				self.root.after(0, lambda: None)
+				break
+			except RuntimeError:
+				time.sleep(3)
+
+
+
+		while True:
+
+			if self.get_connectivity():
+				self.positions = get_current_positions(self.user)
+				self.open_orders = get_open_orders(self.user)
+
+
+				#print(self.positions)
+
+				## EACH TICKER, UPDATE STATUS. ##
+
+				for symbol in self.symbols.keys():
+					self.symbols[symbol].update_data()
+
+					if symbol in self.open_orders:
+						self.symbols[symbol].update_orderbook(self.open_orders[symbol])
+					else:
+						self.symbols[symbol].update_orderbook({})
+
+					self.symbols[symbol].sysmbol_inspection()
+
+				time.sleep(5)
+			else:
+
+				time.sleep(10)
+
+
+	def load_ticker(self,ticker):
+		
+		if ticker in self.symbols:
+			return 
+
+		else:
+
+			if os.path.exists(f"configs/{ticker}.json"):
+				mm = SymbolMM(ticker,self)
+			else:
+				mm = SymbolMM(ticker,self)
+				mm.save()
+
+			self.symbols[ticker] = mm
+
+			return self.symbols[ticker]
+
+	def manager_loop(self):
+
+		# fayila
+
+		pass 
+	
+	def cancel_all_orders(self):
+		pass
+
+
+	def Ppro_in(self,port):
+
+
+		last_ts = 0
+
+		UDP_IP = "localhost"
+		UDP_PORT = port
+
+		force_close_port(port)
+
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		sock.bind((UDP_IP, UDP_PORT))
+		sock.settimeout(1.0)
+
+		#sock.settimeout()
+		work = False
+
+		#print('ppro in actived')
+
+
+
+		while True:
+
+			try:
+				rec= False
+				try:
+					data, addr = sock.recvfrom(2048)
+					rec = True
+				except Exception as e:
+
+					work = False
+
+				if rec:
+					stream_data = str(data)
+
+					work=True
+					type_ = find_between(stream_data, "Message=", ",")
+					if type_ == "OrderStatus":
+						self.decode_order(stream_data)
+
+
+			except Exception as e:
+				PrintException(e,"PPRO IN error")
+		f.close()
+
+	def decode_order(self,stream_data):
+		if "OrderState" in stream_data:
+			#log_print(stream_data)
+			state = find_between(stream_data, "OrderState=", ",")
+			if state =="Filled" or state =="Partially Filled":
+				symbol = find_between(stream_data, "Symbol=", ",")
+				side = find_between(stream_data, "Side=", ",")
+				price = find_between(stream_data, "Price=", ",")
+				share = find_between(stream_data, "Shares=", ",")
+				ts=find_between(stream_data, "MarketDateTime=", ",")[9:-4]
+				#add time
+				if side =="T" or side =="S": side ="Short"
+				if side =="B": side = "Long"
+
+				data ={}
+				data["symbol"]= symbol
+				data["side"]= side
+				data["price"]= float(price)
+				data["shares"]= int(share)
+				data["timestamp"]= timestamp_seconds(ts)
+				#pipe.send(["order confirm",data])
+
+			if state =="Rejected":
+				symbol = find_between(stream_data, "Symbol=", ",")
+				side = find_between(stream_data, "Side=", ",")
+				info = find_between(stream_data, "InfoText=", ",")
+				data ={}
+				if side =="T" or side =="S": side ="Short"
+				if side =="B": side = "Long"
+
+				data["symbol"]= symbol
+				data["side"]= side
+				data["info"]=info
+
+				#print(symbol,side)
+
+				if symbol in self.symbols:
+
+					self.symbols[symbol].rejection_received()
+
+
+
+
 
 def find_between(data, first, last):
 	try:
@@ -131,298 +443,8 @@ def force_close_port(port, process_name=None):
 						except (psutil.NoSuchProcess, psutil.AccessDenied):
 							pass 
 
-# get_open_orders('QIAOSUN')
-# while True:
-# 	a=1
 
-TEST_MODE = False 
-class Manager:
 
-	def __init__(self,root):
-
-		self.root = root 
-		self.system_status = tk.StringVar(value="")
-
-		self.symbols ={}
-		
-		self.ui = UI(root,self,self.system_status)
-
-
-		#ui = self.ui
-
-		set_ui(self.ui)
-
-
-		self.user = "QIAOSUN"
-
-		
-		if not TEST_MODE:
-			self.user = ""
-
-		self.positions ={}
-		self.open_orders = {}
-
-		self.system_running = False 
-
-		self.lock = threading.Lock()
-
-		### ONLY RUN; when Both System & User check works ###
-
-		good = threading.Thread(target=self.position_update_loop, daemon=True)
-		good.start()
-
-		force_close_port(4399)
-
-		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
-		x.start()
-
-
-
-		x2 = threading.Thread(target=self.connectivity_check, daemon=True)
-		x2.start()
-
-
-		if not TEST_MODE:
-			self.user = get_env()
-
-		self.ui.set_user(self.user)
-
-
-		self.start_all_inactive()
-
-
-	def get_inventory(self,symbol):
-
-
-		if symbol in self.positions:
-			return self.positions[symbol]
-
-		else:
-			return 0,0
-
-	def get_open_order(self,symbol):
-
-		if symbol in self.open_orders:
-			return self.open_orders[symbol]
-		else:
-			return {}
-
-	def start_all_inactive(self):
-
-		for symbol in self.symbols.keys():
-			self.symbols[symbol].start_pending()	
-
-	def start_all_restrictive(self):
-
-		for symbol in self.symbols.keys():
-			self.symbols[symbol].start_restrictive()
-
-	def set_connected(self):
-		self.system_status.set(CONNECTED)
-		self.ui.system_status["background"] = "lightgreen"
-	def set_disconnected(self):
-		self.system_status.set(DISCONNECTED)
-
-		self.ui.system_status["background"] = "red"
-
-	def get_connectivity(self):
-
-		return self.system_status.get()==CONNECTED
-
-
-	def connectivity_check(self):
-
-
-		while True:
-
-			try:
-				self.root.after(0, lambda: None)
-				break
-			except RuntimeError:
-				time.sleep(3)
-
-		print('CONNECTION CHECK')
-
-		while True:
-
-			try:
-				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
-
-				r= requests.get(postbody)
-
-				stream_data = r.text
-
-				if "MarketTime" in stream_data:
-					ts = find_between(stream_data, "MarketTime=\"", "\"")
-
-					self.set_connected()
-
-					try:
-						req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
-						r = requests.post(req)
-					except:
-						message("Cannot Connect to PPRO",NOTIFICATION)
-						time.sleep(5)
-
-
-					time.sleep(60)
-				else:
-					self.set_disconnected()
-					postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
-
-					r= requests.get(postbody)
-
-					postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
-					r= requests.get(postbody)
-
-					time.sleep(5)
-			except:
-				message("Cannot Connect to PPRO",NOTIFICATION)
-				time.sleep(2)
-
-
-	def position_update_loop(self):
-
-		while True:
-
-			if self.system_running==CONNECTED:
-				self.positions = get_current_positions(self.user)
-				self.open_orders = get_open_orders(self.user)
-
-
-				#print(self.positions)
-
-				## EACH TICKER, UPDATE STATUS. ##
-
-				for symbol in self.symbols.keys():
-					self.symbols[symbol].update_data()
-
-					if symbol in self.open_orders:
-						self.symbols[symbol].update_orderbook(self.open_orders[symbol])
-					else:
-						self.symbols[symbol].update_orderbook({})
-
-					self.symbols[symbol].sysmbol_inspection()
-
-				time.sleep(3)
-
-
-	def load_ticker(self,ticker):
-		
-		if ticker in self.symbols:
-			return 
-
-		else:
-
-			if os.path.exists(f"configs/{ticker}.json"):
-				mm = SymbolMM(ticker,self)
-			else:
-				mm = SymbolMM(ticker,self)
-				mm.save()
-
-			self.symbols[ticker] = mm
-
-			return self.symbols[ticker]
-
-	def manager_loop(self):
-
-		# fayila
-
-		pass 
-	
-	def cancel_all_orders(self):
-		pass
-
-
-	def Ppro_in(self,port):
-
-
-		last_ts = 0
-
-		UDP_IP = "localhost"
-		UDP_PORT = port
-
-		force_close_port(port)
-
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		sock.bind((UDP_IP, UDP_PORT))
-
-
-		#sock.settimeout()
-		work = False
-
-		#print('ppro in actived')
-
-
-
-		while True:
-
-			try:
-				rec= False
-				try:
-					data, addr = sock.recvfrom(2048)
-					rec = True
-				except Exception as e:
-
-					work = False
-
-				if rec:
-					stream_data = str(data)
-
-					work=True
-					type_ = find_between(stream_data, "Message=", ",")
-					if type_ == "OrderStatus":
-						self.decode_order(stream_data)
-
-
-			except Exception as e:
-				PrintException(e,"PPRO IN error")
-		f.close()
-
-	def decode_order(self,stream_data):
-		if "OrderState" in stream_data:
-			#log_print(stream_data)
-			state = find_between(stream_data, "OrderState=", ",")
-			if state =="Filled" or state =="Partially Filled":
-				symbol = find_between(stream_data, "Symbol=", ",")
-				side = find_between(stream_data, "Side=", ",")
-				price = find_between(stream_data, "Price=", ",")
-				share = find_between(stream_data, "Shares=", ",")
-				ts=find_between(stream_data, "MarketDateTime=", ",")[9:-4]
-				#add time
-				if side =="T" or side =="S": side ="Short"
-				if side =="B": side = "Long"
-
-				data ={}
-				data["symbol"]= symbol
-				data["side"]= side
-				data["price"]= float(price)
-				data["shares"]= int(share)
-				data["timestamp"]= timestamp_seconds(ts)
-				#pipe.send(["order confirm",data])
-
-			if state =="Rejected":
-				symbol = find_between(stream_data, "Symbol=", ",")
-				side = find_between(stream_data, "Side=", ",")
-				info = find_between(stream_data, "InfoText=", ",")
-				data ={}
-				if side =="T" or side =="S": side ="Short"
-				if side =="B": side = "Long"
-
-				data["symbol"]= symbol
-				data["side"]= side
-				data["info"]=info
-
-				#print(symbol,side)
-
-				if symbol in self.symbols:
-
-					self.symbols[symbol].rejection_received()
-			# try:
-			# 	log_print(symbol,side,info)
-			# except:
-			# 	pass
-			# pipe.send(["order rejected",data])
 if __name__ == '__main__':
 
 	root = tk.Tk() 

@@ -208,9 +208,15 @@ class UI(pannel):
 		# 	pass 
 
 
+		row +=1
+		ttk.Label(self.system_pannel, text="SVI Order Check:").grid(row=row, column=1,  sticky="w",padx=10)
+		
+		ttk.Checkbutton(self.system_pannel, variable=self.manager.SVI_cover_check).grid(row=row, column=2,sticky="w")
+
 
 		row +=1
 		ttk.Label(self.system_pannel, text="Ticker:").grid(row=row, column=1,  sticky="w",padx=10)
+
 		self.ticker_var = tk.StringVar()
 		ttk.Entry(self.system_pannel, textvariable=self.ticker_var, width=15).grid(row=row, column=2,sticky="w")
 

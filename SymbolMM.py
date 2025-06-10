@@ -16,7 +16,6 @@ import mysql.connector
 from logging_module import *
 
 
-
 ALGO ="Algo Manger"
 def find_between(data, first, last):
     try:
@@ -485,12 +484,32 @@ class SymbolMM:
 
     def post_cmd(self,order,price,share,action):
 
+        if self.manager.get_svi_order_check()==True:
+
+            if action == BUY:
+                side = "B"
+            else:
+                side = "S"
+            resp = requests.post("http://127.0.0.1:8000/order_exists", json={
+                "symbol": self.symbol,
+                "side": side,
+                "price": price
+            })
+            exist = resp.json()['exists']
+
+            if exist:
+                message(f'{self.symbol} order: {price} {share} {action} order already exist, skipping.')
+                return 
         order = order.replace("ACTION",action)
 
         if TEST_MODE:
             order = order.replace("Broker ","")
         req = f'http://127.0.0.1:8080/ExecuteOrder?symbol={str(self.symbol)}&limitprice={str(price)}&ordername={order}&shares={str(share)}'
         
+
+
+
+        message(f'{self.symbol} order: {price} {share} {action} with {order}')
         #print(order,req)
         r = requests.post(req)
 
