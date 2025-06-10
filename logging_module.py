@@ -157,7 +157,7 @@ class message:
 
 
     def _handle_ui(self):
-        print(f"[UI] → {self.content}")
+        #print(f"[UI] → {self.content}")
 
         #global ui 
         if ui!=None:

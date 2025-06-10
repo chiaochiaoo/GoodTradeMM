@@ -286,31 +286,33 @@ VENUES = "Venues"
 CONFIG_SCHEMA = [
     {"name": "Ticker",      "label": "Ticker",            "section": STATUS, "type": "string", "row": 0},
     {"name": "Status",      "label": "Status",            "section": STATUS, "type": "string", "row": 0, "default": INACTIVE, "readonly": True},
+    {"name": "bid",  "label": "Bid",            "section": STATUS, "type": "float",  "row": 0, "readonly": True},
+    {"name": "ask",   "label": "Ask",            "section": STATUS, "type": "float",  "row": 0,"readonly":True},
+
     {"name": "cur_inv",     "label": "Current Inventory", "section": STATUS, "type": "int",    "row": 0, "readonly": True},
     {"name": "unrealized",  "label": "Unreal",            "section": STATUS, "type": "float",  "row": 0, "readonly": True},
     {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 1,"readonly":True},
     {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 1,"readonly":True},
-    {"name": "RealizedPnLShutdown",  "label": "RealizedPnLShutdown",            "section": STATUS, "type": "float",  "row": 1, "readonly": True},
-    {"name": "FavourableBuyingConditions",  "label": "FavourableBuyingConditions",   "section": STATUS, "type": "float",  "row": 1, "readonly": True},
+    {"name": "RealizedPnLShutdown",  "label": "RPnLShutdown",            "section": STATUS, "type": "float",  "row": 1, "readonly": True},
+    {"name": "FavourableBuyingConditions",  "label": "FavBuyingConds",   "section": STATUS, "type": "float",  "row": 1, "readonly": True},
 
-    {"name": "bid",  "label": "Bid",            "section": STATUS, "type": "float",  "row": 2, "readonly": True},
-    {"name": "ask",   "label": "Ask",            "section": STATUS, "type": "float",  "row": 2,"readonly":True},
+
 
 
 
     {"name": "d_Venue","label": "Default Venue",     "section": VENUES, "type": "string", "row": 0, "options": ["T1", "T2", "T3"]},
-    {"name": "a_Venue",    "label": "Aggressive Venue",  "section": VENUES, "type": "string", "row": 1, "options": ["T1", "T2", "T3"]},
+    {"name": "a_Venue",    "label": "Aggressive Venue",  "section": VENUES, "type": "string", "row": 0, "options": ["T1", "T2", "T3"]},
     # {"name": "d_enabled",     "label": "Default Mode",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
     # {"name": "r_enabled",     "label": "Restrictive Mode", "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
     # {"name": "a_enabled",     "label": "Aggresive Mode",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
     # {"name": "o_enabled",    "label": "Opening Enabled",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
 
-
     {"name": "start_pending",   "label": "Pause Algo",    "section": COMMANDS, "type": "button", "row": 0, "command": "start_pending"},
     {"name": "cancel_orders",   "label": "Cancel Orders",    "section": COMMANDS, "type": "button", "row": 0, "command": "cancel_orders"},
     {"name": "fetch_data",   "label": "Fetch Database",    "section": COMMANDS, "type": "button", "row": 0, "command": "fetch_data"},
+    {"name": "start_default",   "label": "Start Default",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_default"},
 
-
+    #{"name": "start_test",   "label": "Start Test",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_test"},
 
 
     {"name": "boardlot",    "label": "Board Lot",         "section": SETTINGS, "type": "int",    "row": 1,"default": 100,"readonly": True},
@@ -324,31 +326,26 @@ CONFIG_SCHEMA = [
 
 
     {"name": "AdjustedSpread",  "label": "Adj Spread",        "section": SETTINGS, "type": "float",  "row": 2, "default": 0.01},
-    {"name": "reserve_bidmult", "label": "Rsv Bid Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 2},
-    {"name": "reserve_askmult", "label": "Rsv Ask Mult",  "section": SETTINGS, "type": "int", "row": 3, "default": 2},
-    {"name": "BuyZone1",    "label": "Buy Zone1",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
-    {"name": "BuyZone2",    "label": "Buy Zone2",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
-    {"name": "BuyZone3",    "label": "Buy Zone3",         "section": SETTINGS, "type": "float", "row": 4, "default": 0},
-    {"name": "SellZone1",   "label": "Sell Zone1",        "section": SETTINGS, "type": "float", "row": 5, "default": 0},
-    {"name": "SellZone2",   "label": "Sell Zone2",        "section": SETTINGS, "type": "float", "row": 5, "default": 0},
-    {"name": "SellZone3",   "label": "Sell Zone3",        "section": SETTINGS, "type": "float", "row": 5, "default": 0},
+    {"name": "reserve_bidmult", "label": "Rsv Bid Mult",  "section": SETTINGS, "type": "int", "row": 2, "default": 2},
+    {"name": "reserve_askmult", "label": "Rsv Ask Mult",  "section": SETTINGS, "type": "int", "row": 2, "default": 2},
+    {"name": "BuyZone1",    "label": "Buy Zone1",         "section": SETTINGS, "type": "float", "row": 3, "default": 0},
+    {"name": "BuyZone2",    "label": "Buy Zone2",         "section": SETTINGS, "type": "float", "row": 3, "default": 0},
+    {"name": "BuyZone3",    "label": "Buy Zone3",         "section": SETTINGS, "type": "float", "row": 3, "default": 0},
+    {"name": "SellZone1",   "label": "Sell Zone1",        "section": SETTINGS, "type": "float", "row": 4, "default": 0},
+    {"name": "SellZone2",   "label": "Sell Zone2",        "section": SETTINGS, "type": "float", "row": 4, "default": 0},
+    {"name": "SellZone3",   "label": "Sell Zone3",        "section": SETTINGS, "type": "float", "row": 4, "default": 0},
 
     # {"name": "d_enabled",   "label": "Default Mode Enabled", "section": SETTINGS, "type": "bool",   "row": 0,"readonly":True},
-
-    {"name": "start_default",   "label": "Start Default",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_default"},
-
-    {"name": "start_test",   "label": "Start Test",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_test"},
     # {"name": "loadData",    "label": "Load Data",         "section": SETTINGS, "type": "button", "row": 3},
-
-
     # {"name": "r_enabled",         "label": "Restrictive Enabled", "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0,"readonly":True},
 
+    {"name": "start_restrictive",   "label": "Start Restrictive",    "section": RESTRICTIVE_MODE, "type": "button", "row": 0, "command": "start_restrictive"},
     {"name": "r_nbbo",      "label": "Post on L1 ask",    "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0},
     {"name": "r_bidmult",   "label": "Bid Mult",           "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
     {"name": "r_askmult",   "label": "Ask Mult",          "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
 
 
-    {"name": "start_restrictive",   "label": "Start Restrictive",    "section": RESTRICTIVE_MODE, "type": "button", "row": 1, "command": "start_restrictive"},
+
     # {"name": "PssVenue",    "label": "Passive Venue",     "section": RESTRICTIVE_MODE, "type": "string", "row": 2, "options": ["T1", "T2", "T3"]},
     # {"name": "AggVenue",    "label": "Aggressive Venue",  "section": RESTRICTIVE_MODE, "type": "string", "row": 2, "options": ["T1", "T2", "T3"]},
     # {"name": "OpnVenue",    "label": "Open Venue",        "section": RESTRICTIVE_MODE, "type": "string", "row": 2, "options": ["T1", "T2", "T3"]},
@@ -356,26 +353,30 @@ CONFIG_SCHEMA = [
 
 
     # {"name": "o_enabled",    "label": "Opening Enabled",      "section": OPENING_MODE, "type": "bool",   "row": 0,"readonly":True},
+    {"name": "start_opening",   "label": "Start Opening",    "section": OPENING_MODE, "type": "button", "row": 0, "command": "start_opening"},
     {"name": "o_bidmult",   "label": "Bid Mult",           "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
     {"name": "o_askmult",   "label": "Ask Mult",          "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
-    {"name": "start_opening",   "label": "Start Opening",    "section": OPENING_MODE, "type": "button", "row": 1, "command": "start_opening"},
+
 
     # {"name": "a_enabled",     "label": "Aggresive Enabled",      "section": AGGRESIVE_MODE, "type": "bool",   "row": 0},
 
+
+    {"name": "a_bidmult",   "label": "Bid Mult",           "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 1},
+    {"name": "a_askmult",   "label": "Ask Mult",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 1},
+
+
+
     {"name": "a_action",    "label": "Aggresive Action",  "section": AGGRESIVE_MODE, "type": "string", "row": 0, "options": ["Buy", "Sell"],'default':'Buy'},
-    {"name": "a_type",    "label": "Target Volume By",  "section": AGGRESIVE_MODE, "type": "string", "row": 0, "options": ["Size", "Percentage"],'default':'Size'},
-
-    {"name": "a_bidmult",   "label": "Bid Mult",           "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 1},
-    {"name": "a_askmult",   "label": "Ask Mult",          "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 1},
+    {"name": "a_size",       "label": "Total Size",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 100},
 
 
-    {"name": "a_size",       "label": "Total Size",          "section": AGGRESIVE_MODE, "type": "int",  "row": 2, "default": 100},
-    {"name": "a_percentage",   "label": "% Volume Target",          "section": AGGRESIVE_MODE, "type": "float",  "row": 2, "default": 0.05},
-    {"name": "a_duration",   "label": "Total Duration(Min)",          "section": AGGRESIVE_MODE, "type": "int",  "row": 2, "default": 60},
+    {"name": "a_percentage",   "label": "% Volume Target",          "section": AGGRESIVE_MODE, "type": "float",  "row": 1, "default": 0.05},
+    {"name": "a_duration",   "label": "Total Duration(Min)",          "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 60},
+    {"name": "a_type",    "label": "Target Volume By",  "section": AGGRESIVE_MODE, "type": "string", "row": 1, "options": ["Size", "Percentage"],'default':'Size'},
 
-    {"name": "v_hitalert",   "label": "Hit Notification",          "section": AGGRESIVE_MODE, "type": "bool",  "row": 2, "default": 1},
+    {"name": "v_hitalert",   "label": "Hit Notification",          "section": AGGRESIVE_MODE, "type": "bool",  "row": 1, "default": 1},
 
-    {"name": "start_aggresive",   "label": "Start Aggresive",    "section": AGGRESIVE_MODE, "type": "button", "row": 3, "command": "start_aggresive"},
+    {"name": "start_aggresive",   "label": "Start Aggresive",    "section": AGGRESIVE_MODE, "type": "button", "row": 2, "command": "start_aggresive"},
 
 ]
 

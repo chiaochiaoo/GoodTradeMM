@@ -233,7 +233,6 @@ class Manager:
 	def connectivity_check(self):
 
 
-
 		while True:
 
 			try:
@@ -243,30 +242,43 @@ class Manager:
 				time.sleep(3)
 
 		print('CONNECTION CHECK')
+
 		while True:
 
-			postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
-
-			r= requests.get(postbody)
-
-			stream_data = r.text
-
-			if "MarketTime" in stream_data:
-				ts = find_between(stream_data, "MarketTime=\"", "\"")
-
-				self.set_connected()
-				time.sleep(60)
-			else:
-				self.set_disconnected()
+			try:
 				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
 
 				r= requests.get(postbody)
 
-				postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
-				r= requests.get(postbody)
+				stream_data = r.text
 
-				time.sleep(5)
+				if "MarketTime" in stream_data:
+					ts = find_between(stream_data, "MarketTime=\"", "\"")
 
+					self.set_connected()
+
+					try:
+						req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
+						r = requests.post(req)
+					except:
+						message("Cannot Connect to PPRO",NOTIFICATION)
+						time.sleep(5)
+
+
+					time.sleep(60)
+				else:
+					self.set_disconnected()
+					postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+
+					r= requests.get(postbody)
+
+					postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
+					r= requests.get(postbody)
+
+					time.sleep(5)
+			except:
+				message("Cannot Connect to PPRO",NOTIFICATION)
+				time.sleep(2)
 
 
 	def position_update_loop(self):
@@ -341,8 +353,8 @@ class Manager:
 
 		#print('ppro in actived')
 
-		req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
-		requests.post(req)
+
+
 		while True:
 
 			try:
@@ -416,7 +428,7 @@ if __name__ == '__main__':
 	root = tk.Tk() 
 	root.title("GoodTrade Algo Manager Market Making v1") 
 	#root.geometry("1380x780")
-	root.geometry("1520x1280")
+	root.geometry("1520x1080")
 
 	
 

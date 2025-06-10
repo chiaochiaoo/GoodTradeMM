@@ -95,11 +95,11 @@ class UI(pannel):
 	def init_pannel(self):
 
 		self.system_pannel = ttk.LabelFrame(self.root,text="System")
-		self.system_pannel.place(x=10,y=10,height=250,width=350)
+		self.system_pannel.place(x=10,y=10,height=200,width=350)
 
 
 		self.ticker_management_frame  = ttk.LabelFrame(self.root,text="Ticker Management") 
-		self.ticker_management_frame .place(x=360,y=10,height=250,width=700)
+		self.ticker_management_frame .place(x=360,y=10,height=200,width=700)
 
 		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
 		self.notification_pannel.place(x=1090,y=10,height=1200,width=400)
@@ -112,7 +112,7 @@ class UI(pannel):
 		# self.filter_pannel.place(x=360,y=200,height=60,width=1300)
 
 		self.mm_pannel = ttk.LabelFrame(self.root,text="MarketMaking") 
-		self.mm_pannel.place(x=10,y=270,height=1000,width=1060)
+		self.mm_pannel.place(x=10,y=210,height=870,width=1060)
 
 		self.marketmaking_notebook = ttk.Notebook(self.mm_pannel)
 		self.marketmaking_notebook.place(x=0,rely=0,relheight=1,relwidth=1)
@@ -351,6 +351,7 @@ class UI(pannel):
 	def init_ticker_management_table(self):
 		# === Scrollable canvas inside ticker_management_frame ===
 		canvas = tk.Canvas(self.ticker_management_frame, height=200)
+
 		scrollbar = ttk.Scrollbar(self.ticker_management_frame, orient="vertical", command=canvas.yview)
 		
 		self.ticker_table_frame = ttk.Frame(canvas)
@@ -510,6 +511,10 @@ class UI(pannel):
 							widget = ttk.Entry(section_frame, textvariable=var, width=14)
 					widget.grid(row=row, column=col * 2 + 1, sticky="w", padx=5, pady=5)
 					row_tracker[row] = col + 1
+
+
+
+
 
 		# Save Button at the bottom of the last section
 		ttk.Button(tab, text="Save", command=lambda: mm.save()).grid(
