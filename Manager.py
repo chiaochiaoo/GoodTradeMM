@@ -45,12 +45,8 @@ class Manager:
 		set_ui(self.ui)
 
 
-		self.user = "QIAOSUN"
-
-		
-		if not TEST_MODE:
-			self.user = ""
-
+		self.user = ""
+	
 		self.positions ={}
 		self.open_orders = {}
 
@@ -71,11 +67,6 @@ class Manager:
 		x2 = threading.Thread(target=self.connectivity_check, daemon=True)
 		x2.start()
 
-
-		if not TEST_MODE:
-			self.user = get_env()
-
-		self.ui.set_user(self.user)
 
 
 		self.start_all_inactive()
@@ -114,6 +105,12 @@ class Manager:
 	def set_connected(self):
 		if self.system_status.get()!=CONNECTED:
 			message("PPRO Connected",NOTIFICATION)
+
+			self.user = get_env()
+
+			self.ui.set_user(self.user)
+			message(f"Trader id: {self.user}",NOTIFICATION)
+
 
 		self.system_status.set(CONNECTED)
 		self.ui.system_status["background"] = "lightgreen"

@@ -470,6 +470,9 @@ class SymbolMM:
             cancel_list.append(price)
 
         for i in cancel_list:
+
+            message(f'{self.symbol} cancel order: {i}')
+
             self.cancel_order(self.order_book[i])
 
 
@@ -479,8 +482,6 @@ class SymbolMM:
         
         r = requests.post(req)
 
-        # print(ordername)
-        # Message("REPROT: EMAIL CHECK",REPORT)
 
     def post_cmd(self,order,price,share,action):
 
@@ -510,7 +511,7 @@ class SymbolMM:
 
 
         message(f'{self.symbol} order: {price} {share} {action} with {order}')
-        #print(order,req)
+
         r = requests.post(req)
 
 
