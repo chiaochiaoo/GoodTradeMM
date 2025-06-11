@@ -318,8 +318,11 @@ class SymbolMM:
     def sysmbol_inspection(self):
 
         self.check_restrictive_condition()
-        self.update_var_data()
 
+        try:
+            self.update_var_data()
+        except :
+            pass 
         if self.mode == RESTRICTIVE_MODE:
             
             self.inspection_restrictive()
@@ -439,7 +442,7 @@ class SymbolMM:
             else:
 
 
-                if abs(val)>self.sellzone1:
+                if abs(val)>=self.sellzone1:
                     orders[val] = board_lot*global_ask_mult*reserve_askmult
                 else:
                     orders[val] = board_lot*global_ask_mult
