@@ -75,20 +75,12 @@ def fetch_data(symbol):
         print(e)
         return {}
 
-
 # d =fetch_data('CRTL.CN')
-
-
-
 # today = datetime.today().date()
-
-
 
 # Calculate the difference
 # days_remaining = (d['DayOfSharesUnrestricted'] - today).days
 # print(days_remaining)
-
-
 
 # AEQN Buy AequitasLIT Limit Broker DAY Reserve
 # AEQN Sell->Short AequitasLIT Limit Broker DAY Reserve
@@ -168,6 +160,14 @@ class SymbolMM:
         self.set_up_venue()
 
 
+        self.buyzone1=0
+        self.buyzone2=0
+        self.buyzone3=0
+        self.sellzone1=0
+        self.sellzone2=0
+        self.sellzone3=0
+
+
         self.vars['Status'][0].trace_add("write", self.update_status)
 
     def fetch_db_data(self):
@@ -182,23 +182,17 @@ class SymbolMM:
                 except:
                     print("problem:",j,i)
 
-        # 'RealizedPnLShutdown'  '1'
-        # 'FavourableBuyingConditions' '1'
+        self.update_var_data()
 
 
-        # 'MaxInventorySize' 'MAX_INV'
-        # 'MaxAllowedUPnL' 'maxLoss'
+    def update_var_data(self):
 
-
-        # 'BuyZone1':'bz1'
-        # 'BuyZone2' 'bz2'
-        # 'BuyZone3' 'bz3'
-        # 'SellZone1' 'sz1'
-        # 'SellZone2' 'sz2'
-        # 'SellZone3' 'sz3'
-
-        # # 'DayOfSharesUnrestricted' 'cur_inv'
-        # 'AdjustedSpread' 'adj_Spread'
+        self.buyzone1 =self.get_variable('BuyZone1')
+        self.buyzone2 =self.get_variable('BuyZone2')
+        self.buyzone3 =self.get_variable('BuyZone3')
+        self.sellzone1 =self.get_variable('SellZone1')
+        self.sellzone2 =self.get_variable('SellZone2')
+        self.sellzone3 =self.get_variable('SellZone3')
 
 
     def rejection_received(self):
@@ -210,6 +204,7 @@ class SymbolMM:
         #message(f'')
         if self.rejection>2:
             self.start_pending()
+
     def set_up_venue(self):
         pass
 
@@ -288,6 +283,10 @@ class SymbolMM:
 
         shutdown = self.get_variable('RealizedPnLShutdown')
 
+        ### 3 MODES CATEGORY. INACTIVE, RES, ELSE. 
+
+
+
 
         if inv==0 and max_inv ==0 and self.mode != INACTIVE:
             message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
@@ -309,16 +308,23 @@ class SymbolMM:
             self.set_variable('r_nbbo',1)
             self.start_restrictive()
 
+
+        if self.mode==RESTRICTIVE_MODE:
+            if u>upnl and inv<int(max_inv*0.8) and shutdown!=0:
+                message(f'{self.symbol} inventory under max limit. switch to DEFAULT_MODE.',NOTIFICATION)
+ 
+                self.start_default()
+
     def sysmbol_inspection(self):
 
         self.check_restrictive_condition()
+        self.update_var_data()
 
         if self.mode == RESTRICTIVE_MODE:
             
             self.inspection_restrictive()
 
         elif self.mode == INACTIVE:
-
 
             self.insepection_inactive()
 
@@ -333,30 +339,54 @@ class SymbolMM:
     def insepection_inactive(self):
         self.cancel_orders()
 
+
+    def svi_order_check(self,price):
+
+        try:
+            resp = requests.post("http://127.0.0.1:8000/order_exists", json={
+                "symbol": self.symbol,
+                "side": 'B',
+                "price": price
+            })
+            exist = resp.json()['exists']
+            if exist:
+                return True 
+                message(f'{self.symbol} order: {price} {share} {action} order already exist, skipping.',LOG)
+        except:
+                message(f'{self.symbol} SVI order server unreachable',NOTIFICATION)
+                return False 
+        return False 
+
     def update_order_book(self,vals):
+
+
+
 
         #print(vals)
         cancel_list = []
 
-
+        ## for the order already there' and not in order book. 
         for price in self.order_book.keys():
             if price not in vals.keys():
                 cancel_list.append(price)
-        ## cancel that.
+
+        ## for the order already there' and in svi. 
+
+
+        for price in self.order_book.keys():
+            if price>0 and price>self.buyzone3:
+                if self.svi_order_check(price)==True:
+                    cancel_list.append(price)
+
+        cancel_list=list(set(cancel_list))
+
+
+
 
         send_list = []
         for price in vals.keys():
             if price not in self.order_book.keys() and price*-1 not in self.order_book.keys():
                 send_list.append(price)
-
-        ## send that .
-        #print('cancel:',cancel_list,"  send:",send_list)
-
-
-        # if len(cancel_list)>0:
-        #     print(cancel_list)
-        # if len(send_list)>0:
-        #     print(send_list)
 
         for i in cancel_list:
             self.cancel_order(self.order_book[i])
@@ -370,7 +400,12 @@ class SymbolMM:
             else:
                 action =SELL
 
-            self.post_cmd(order, abs(price),vals[price],action)
+            overlap = False 
+            if action == BUY and self.manager.get_svi_order_check()==True:
+                overlap  = self.svi_order_check(price)
+
+            if not overlap:
+                self.post_cmd(order, abs(price),vals[price],action)
 
 
     def inspection_default(self):
@@ -384,21 +419,34 @@ class SymbolMM:
         global_bid_mult = self.get_variable('bidmult')
         global_ask_mult =  self.get_variable('askmult')
 
+
+        
+        reserve_bidmult = self.get_variable('reserve_bidmult')
+        reserve_askmult =  self.get_variable('reserve_askmult')
+
+
+
         board_lot =self.vars['boardlot'][0].get()
 
         orders = {}
 
         for val in vals:
             if val>0:
-                orders[val] = board_lot*global_bid_mult
+                if val<=self.buyzone3:
+                    orders[val] = board_lot*global_bid_mult*reserve_bidmult
+                else:
+                    orders[val] = board_lot*global_bid_mult
             else:
-                orders[val] = board_lot*global_ask_mult
+
+
+                if abs(val)>self.sellzone1:
+                    orders[val] = board_lot*global_ask_mult*reserve_askmult
+                else:
+                    orders[val] = board_lot*global_ask_mult
         orders = self.inventory_check(orders)
         self.update_order_book(orders)
 
-
     def inspection_opening(self):
-
 
         today = datetime.now().strftime("%Y-%m-%d")
 
@@ -486,26 +534,6 @@ class SymbolMM:
 
     def post_cmd(self,order,price,share,action):
 
-        try:
-            if self.manager.get_svi_order_check()==True:
-
-                if action == BUY:
-                    side = "B"
-                else:
-                    side = "S"
-
-                resp = requests.post("http://127.0.0.1:8000/order_exists", json={
-                    "symbol": self.symbol,
-                    "side": side,
-                    "price": price
-                })
-                exist = resp.json()['exists']
-
-                if exist:
-                    message(f'{self.symbol} order: {price} {share} {action} order already exist, skipping.',LOG)
-                    return 
-        except:
-            message(f'{self.symbol} SVI order server unreachable',NOTIFICATION)
         order = order.replace("ACTION",action)
 
         if TEST_MODE:
