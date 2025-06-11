@@ -191,24 +191,28 @@ class Manager:
 		while True:
 
 			if self.get_connectivity():
-				self.positions = get_current_positions(self.user)
-				self.open_orders = get_open_orders(self.user)
 
 
-				#print(self.positions)
+				try:
+					self.positions = get_current_positions(self.user)
+					self.open_orders = get_open_orders(self.user)
 
-				## EACH TICKER, UPDATE STATUS. ##
 
-				for symbol in self.symbols.keys():
-					self.symbols[symbol].update_data()
+					#print(self.positions)
 
-					if symbol in self.open_orders:
-						self.symbols[symbol].update_orderbook(self.open_orders[symbol])
-					else:
-						self.symbols[symbol].update_orderbook({})
+					## EACH TICKER, UPDATE STATUS. ##
 
-					self.symbols[symbol].sysmbol_inspection()
+					for symbol in self.symbols.keys():
+						self.symbols[symbol].update_data()
 
+						if symbol in self.open_orders:
+							self.symbols[symbol].update_orderbook(self.open_orders[symbol])
+						else:
+							self.symbols[symbol].update_orderbook({})
+
+						self.symbols[symbol].sysmbol_inspection()
+				except:
+					PrintException("Inspection error:")
 				time.sleep(5)
 			else:
 
