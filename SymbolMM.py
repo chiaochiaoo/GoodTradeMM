@@ -287,33 +287,40 @@ class SymbolMM:
 
 
 
+        now = datetime.now()
+        ts = now.hour*60 + now.minute
 
-        if inv==0 and max_inv ==0 and self.mode != INACTIVE:
-            message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
-            self.start_pending()
+        if ts>575:#if ts>575:
+            if inv==0 and max_inv ==0 and self.mode != INACTIVE:
+                message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
+                self.start_pending()
 
-        if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+            if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
 
-            message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-            self.start_restrictive()
+                message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+                self.start_restrictive()
 
-        if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-            message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+            if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+                message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
 
-            self.set_variable('r_nbbo',1)
-            self.start_restrictive()
+                if not shutdown:
+                    self.set_variable('r_nbbo',1)
+                self.start_restrictive()
 
-        if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-            message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-            self.set_variable('r_nbbo',1)
-            self.start_restrictive()
+            if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+                message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+
+                if not shutdown:
+                    self.set_variable('r_nbbo',1)
+                self.start_restrictive()
 
 
-        if self.mode==RESTRICTIVE_MODE:
-            if u>upnl and inv<int(max_inv*0.8) and shutdown!=0:
-                message(f'{self.symbol} inventory under max limit. switch to DEFAULT_MODE.',NOTIFICATION)
- 
-                self.start_default()
+            if self.mode==RESTRICTIVE_MODE:
+                print("cehcking:", u>upnl,inv<int(max_inv*0.8),shutdown)
+                if u>upnl and inv<int(max_inv*0.8) and shutdown!=1:
+                    message(f'{self.symbol} inventory under max limit. switch to DEFAULT_MODE.',NOTIFICATION)
+     
+                    self.start_default()
 
     def sysmbol_inspection(self):
 
@@ -356,14 +363,11 @@ class SymbolMM:
                 return True 
                 message(f'{self.symbol} order: {price} {share} {action} order already exist, skipping.',LOG)
         except:
-                message(f'{self.symbol} SVI order server unreachable',NOTIFICATION)
+                message(f'{self.symbol} SVI order server unreachable',LOG)
                 return False 
         return False 
 
     def update_order_book(self,vals):
-
-
-
 
         #print(vals)
         cancel_list = []
@@ -379,11 +383,11 @@ class SymbolMM:
         for price in self.order_book.keys():
             if price>0 and price>self.buyzone3:
                 if self.svi_order_check(price)==True:
+
+                    message(f'{self.symbol} SVI trader present at : {price}',LOG)
                     cancel_list.append(price)
 
         cancel_list=list(set(cancel_list))
-
-
 
 
         send_list = []
@@ -395,7 +399,16 @@ class SymbolMM:
             self.cancel_order(self.order_book[i])
 
         order = self.vars['d_Venue'][0].get()
-        
+
+
+        message(f'{self.symbol} order check, should have : {list(vals.keys())}',LOG)
+        message(f'{self.symbol} order check, already posted : {list(self.order_book.keys())}',LOG)
+        if len(cancel_list)>0:
+            message(f'{self.symbol} order check, canceling {cancel_list}',LOG)
+        if len(send_list)>0:
+            message(f'{self.symbol} order check, sending: {send_list}',LOG)
+
+
         for price in send_list:
 
             if price>0:
@@ -406,6 +419,9 @@ class SymbolMM:
             overlap = False 
             if action == BUY and self.manager.get_svi_order_check()==True:
                 overlap  = self.svi_order_check(price)
+
+                if overlap:
+                     message(f'{self.symbol} SVI trader present at : {price} skippin',LOG)
 
             if not overlap:
                 self.post_cmd(order, abs(price),vals[price],action)
@@ -437,6 +453,7 @@ class SymbolMM:
             if val>0:
                 if val<=self.buyzone3:
                     orders[val] = board_lot*global_bid_mult*reserve_bidmult
+                    message(f'{self.symbol} buy zone 3 orders: {val} and size {board_lot*global_bid_mult*reserve_bidmult}',LOG)
                 else:
                     orders[val] = board_lot*global_bid_mult
             else:
@@ -444,6 +461,7 @@ class SymbolMM:
 
                 if abs(val)>=self.sellzone1:
                     orders[val] = board_lot*global_ask_mult*reserve_askmult
+                    message(f'{self.symbol} sell zone 1 orders: {val} and size {board_lot*global_ask_mult*reserve_askmult}',LOG)
                 else:
                     orders[val] = board_lot*global_ask_mult
         orders = self.inventory_check(orders)
@@ -463,9 +481,21 @@ class SymbolMM:
                 board_lot =  self.vars['boardlot'][0].get()
                 tick_size =  self.vars['ticksize'][0].get()
 
+                inv =self.get_variable('cur_inv')
+                max_inv = self.get_variable('MaxInventorySize')
+
+                u = self.get_variable('unrealized')
+                upnl = abs(self.get_variable('MaxAllowedUPnL'))*-1
+
+                shutdown = self.get_variable('RealizedPnLShutdown')
 
 
-                send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+                if inv>=max_inv or u<=upnl or shutdown:
+                    send_list  = [(self.pc+tick_size)*-1]
+                    message(f' {self.symbol} opening mode max inv/pnl/shutdown reach. sell only {send_list}',NOTIFICATION)
+                else:
+                    send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+                    message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
 
                 send_list2= []
                 for i in send_list:
@@ -543,8 +573,6 @@ class SymbolMM:
             order = order.replace("Broker ","")
         req = f'http://127.0.0.1:8080/ExecuteOrder?symbol={str(self.symbol)}&limitprice={str(price)}&ordername={order}&shares={str(share)}'
         
-
-
 
         message(f'{self.symbol} order: {price} {share} {action} with {order}',LOG)
 

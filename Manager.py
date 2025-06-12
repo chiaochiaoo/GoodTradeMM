@@ -58,14 +58,13 @@ class Manager:
 		good = threading.Thread(target=self.position_update_loop, daemon=True)
 		good.start()
 
-		force_close_port(4399)
 
 		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
 		x.start()
 
 
-		x2 = threading.Thread(target=self.connectivity_check, daemon=True)
-		x2.start()
+		# x2 = threading.Thread(target=self.connectivity_check, daemon=True)
+		# x2.start()
 
 
 
@@ -104,14 +103,21 @@ class Manager:
 
 	def set_connected(self):
 		if self.system_status.get()!=CONNECTED:
-			message("PPRO Connected",NOTIFICATION)
+			
 
 			self.user = get_env()
 
+			if self.user =='x':
+				return 
 			self.ui.set_user(self.user)
 			message(f"Trader id: {self.user}",NOTIFICATION)
 
+			
+			req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(4399)+"&status=on"
+			r = requests.post(req)
 
+
+			message("PPRO Connected",NOTIFICATION)
 		self.system_status.set(CONNECTED)
 		self.ui.system_status["background"] = "lightgreen"
 	def set_disconnected(self):
@@ -127,53 +133,53 @@ class Manager:
 		return self.system_status.get()==CONNECTED
 
 
-	def connectivity_check(self):
+	# def connectivity_check(self):
 
 
-		while True:
+	# 	while True:
 
-			try:
-				self.root.after(0, lambda: None)
-				break
-			except RuntimeError:
-				time.sleep(3)
+	# 		try:
+	# 			self.root.after(0, lambda: None)
+	# 			break
+	# 		except RuntimeError:
+	# 			time.sleep(3)
 
-		while True:
+	# 	while True:
 
-			try:
-				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+	# 		try:
+	# 			postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
 
-				r= requests.get(postbody)
+	# 			r= requests.get(postbody)
 
-				stream_data = r.text
+	# 			stream_data = r.text
 
-				if "MarketTime" in stream_data:
-					ts = find_between(stream_data, "MarketTime=\"", "\"")
+	# 			if "MarketTime" in stream_data:
+	# 				ts = find_between(stream_data, "MarketTime=\"", "\"")
 
-					self.set_connected()
+	# 				self.set_connected()
 
-					# try:
-					# 	req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
-					# 	r = requests.post(req)
-					# except:
+	# 				# try:
+	# 				# 	req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
+	# 				# 	r = requests.post(req)
+	# 				# except:
 						
-					# 	time.sleep(5)
+	# 				# 	time.sleep(5)
 
 
-					time.sleep(60)
-				else:
-					self.set_disconnected()
-					postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
+	# 				time.sleep(60)
+	# 			else:
+	# 				self.set_disconnected()
+	# 				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
 
-					r= requests.get(postbody)
+	# 				r= requests.get(postbody)
 
-					postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
-					r= requests.get(postbody)
+	# 				postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
+	# 				r= requests.get(postbody)
 
-					time.sleep(5)
-			except:
+	# 				time.sleep(5)
+	# 		except:
 				
-				time.sleep(10)
+	# 			time.sleep(10)
 
 
 	def position_update_loop(self):
@@ -189,34 +195,30 @@ class Manager:
 
 
 		while True:
+			try:
+				self.set_connected()
+				self.positions = get_current_positions(self.user)
+				self.open_orders = get_open_orders(self.user)
+				
+			except Exception as e:
+				self.set_disconnected()
 
-			if self.get_connectivity():
+			try:
+				for symbol in self.symbols.keys():
+					self.symbols[symbol].update_data()
+
+					if symbol in self.open_orders:
+						self.symbols[symbol].update_orderbook(self.open_orders[symbol])
+					else:
+						self.symbols[symbol].update_orderbook({})
+
+					self.symbols[symbol].sysmbol_inspection()
+			except:
+				PrintException("Inspection error:")
 
 
-				try:
-					self.positions = get_current_positions(self.user)
-					self.open_orders = get_open_orders(self.user)
+			time.sleep(5)
 
-
-					#print(self.positions)
-
-					## EACH TICKER, UPDATE STATUS. ##
-
-					for symbol in self.symbols.keys():
-						self.symbols[symbol].update_data()
-
-						if symbol in self.open_orders:
-							self.symbols[symbol].update_orderbook(self.open_orders[symbol])
-						else:
-							self.symbols[symbol].update_orderbook({})
-
-						self.symbols[symbol].sysmbol_inspection()
-				except:
-					PrintException("Inspection error:")
-				time.sleep(5)
-			else:
-
-				time.sleep(10)
 
 
 	def load_ticker(self,ticker):
@@ -249,7 +251,7 @@ class Manager:
 	def Ppro_in(self,port):
 
 
-		last_ts = 0
+
 
 		UDP_IP = "localhost"
 		UDP_PORT = port
@@ -258,12 +260,12 @@ class Manager:
 
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		sock.bind((UDP_IP, UDP_PORT))
-		sock.settimeout(1.0)
+		# sock.settimeout(1.0)
 
 		#sock.settimeout()
 		work = False
 
-		#print('ppro in actived')
+		print('ppro in actived')
 
 
 
@@ -280,7 +282,7 @@ class Manager:
 
 				if rec:
 					stream_data = str(data)
-
+					#print(stream_data)
 					work=True
 					type_ = find_between(stream_data, "Message=", ",")
 					if type_ == "OrderStatus":
@@ -378,8 +380,8 @@ def get_current_positions(user):
 		#log_print("Ppro_in:, get positions:",d)
 		return d
 	except Exception as e:
-		PrintException(e)
-		return {}
+		#PrintException(e)
+		return None
 
 
 def get_open_orders(user):
