@@ -204,15 +204,16 @@ class Manager:
 				self.set_disconnected()
 
 			try:
-				for symbol in self.symbols.keys():
-					self.symbols[symbol].update_data()
+				if self.get_connectivity():
+					for symbol in self.symbols.keys():
+						self.symbols[symbol].update_data()
 
-					if symbol in self.open_orders:
-						self.symbols[symbol].update_orderbook(self.open_orders[symbol])
-					else:
-						self.symbols[symbol].update_orderbook({})
+						if symbol in self.open_orders:
+							self.symbols[symbol].update_orderbook(self.open_orders[symbol])
+						else:
+							self.symbols[symbol].update_orderbook({})
 
-					self.symbols[symbol].sysmbol_inspection()
+						self.symbols[symbol].sysmbol_inspection()
 			except:
 				PrintException("Inspection error:")
 
