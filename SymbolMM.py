@@ -256,6 +256,10 @@ class SymbolMM:
         self.vars['Status'][0].set(self.mode)
 
 
+
+        self.init_aggresive_mode()
+
+
     def update_status(self,*args):
         message(f'{self.symbol} mode switch:{self.mode}.',NOTIFICATION)
 
@@ -409,56 +413,7 @@ class SymbolMM:
                     self.start_pending()
 
 
-    # def check_restrictive_condition(self):
 
-    #     inv =self.get_variable('cur_inv')
-    #     max_inv = self.get_variable('MaxInventorySize')
-
-    #     u = self.get_variable('unrealized')
-    #     upnl = abs(self.get_variable('MaxAllowedUPnL'))*-1
-
-    #     shutdown = self.get_variable('RealizedPnLShutdown')
-
-    #     ### 3 MODES CATEGORY. INACTIVE, RES, ELSE. 
-
-
-
-    #     now = datetime.now()
-    #     ts = now.hour*60 + now.minute
-
-    #     if ts>575:#if ts>575:
-
-    #         self.update_volume_profile()
-    #         if inv==0 and max_inv ==0 and self.mode != INACTIVE:
-    #             message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
-    #             self.start_pending()
-
-    #         if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-
-    #             message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-    #             self.start_restrictive()
-
-    #         if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-    #             message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-
-    #             if not shutdown:
-    #                 self.set_variable('r_nbbo',1)
-    #             self.start_restrictive()
-
-    #         if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-    #             message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-
-    #             if not shutdown:
-    #                 self.set_variable('r_nbbo',1)
-    #             self.start_restrictive()
-
-
-    #         if self.mode==RESTRICTIVE_MODE:
-    #             print("cehcking:", u>upnl,inv<int(max_inv*0.8),shutdown)
-    #             if u>upnl and inv<int(max_inv*0.8) and shutdown!=1:
-    #                 message(f'{self.symbol} inventory under max limit. switch to DEFAULT_MODE.',NOTIFICATION)
-     
-    #                 self.start_default()
 
     def sysmbol_inspection(self):
 
@@ -483,6 +438,96 @@ class SymbolMM:
         elif self.mode == OPENING_MODE:
 
             self.inspection_opening()
+
+        elif self.mode == AGGRESIVE_MODE:
+
+            self.inspection_aggresive()
+
+    def init_aggresive_mode(self):
+
+        ##
+        mode = self.get_variable('a_type')
+
+        if mode =='Size':
+            size = self.get_variable('a_size')
+        elif mode=='Percentage':
+            size = int(self.get_variable('a_percentage')*self.total_trade*0.01)
+
+        board_lot =self.vars['boardlot'][0].get()
+        mult = self.vars['a_mult'][0].get()
+
+        size -= size%(board_lot*mult)
+
+        duration = int(self.get_variable('a_duration'))
+
+        self.target_size = size
+
+        self.set_variable('a_target_size',self.target_size)
+
+
+        self.aggresive_action = self.get_variable('a_action')
+
+
+        R,M,B = self.target_size,duration,board_lot*mult
+
+        lst = [0 for i in range(M)]
+
+        h=len(lst)//2
+
+        v= R
+        while v!=0: 
+            for i in range(h):
+
+                lst[i] +=B
+                v-=B
+
+                if v==0:
+                    break
+                lst[i+h] +=B
+                v-=B
+
+                if v==0:
+                    break
+                #print(i,i+h)
+
+
+        now = datetime.now()
+        ts = now.hour*60 + now.minute
+        tss = [ts+i+1 for i in range(M)]
+
+        agg = {}
+        for i in range(len(tss)):
+
+            agg[tss[i]] = lst[i]
+
+        self.aggresive_order_book = agg
+        self.aggresive_order_placement = []
+        message(f'{self.symbol} aggresive order book updated {agg}')
+
+
+    def inspection_aggresive(self):
+
+        now = datetime.now()
+        ts = now.hour*60 + now.minute
+
+        if ts in self.aggresive_order_book:
+
+            if ts not in self.aggresive_order_placement:
+
+                self.aggresive_order_placement.append(ts)
+
+
+                order = self.vars['a_Venue'][0].get()
+
+                if self.aggresive_action=='Buy':
+
+                    price = self.rasks[0]
+                    ACTION = BUY
+                elif self.aggresive_action  =='Sell':
+                    price = self.rbids[0]
+                    ACTION = SELL
+
+                self.post_cmd(order,price,self.aggresive_order_book[ts],ACTION)
 
     def insepection_inactive(self):
         self.cancel_orders()
@@ -1052,14 +1097,16 @@ class MyUI:
         self.notification_text.config(state='disabled')
 
 # Example usage
-if __name__ == "__main__":
-    root = tk.Tk()
-    ui = MyUI(root)
+# if __name__ == "__main__":
+#     root = tk.Tk()
+#     ui = MyUI(root)
 
-    # Simulate external function call
-    ui.show_notification("App started.")
+#     # Simulate external function call
+#     ui.show_notification("App started.")
 
-    for i in range(600):
-        ui.show_notification(f'Waiting for user input...{i}')
+#     for i in range(600):
+#         ui.show_notification(f'Waiting for user input...{i}')
 
-    root.mainloop()
+#     root.mainloop()
+
+

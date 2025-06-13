@@ -376,20 +376,26 @@ CONFIG_SCHEMA = [
     # {"name": "a_enabled",     "label": "Aggresive Enabled",      "section": AGGRESIVE_MODE, "type": "bool",   "row": 0},
 
 
-    {"name": "a_bidmult",   "label": "Bid Mult",           "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 1},
-    {"name": "a_askmult",   "label": "Ask Mult",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 1},
+    {"name": "a_mult",   "label": "Mult",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 1},
 
 
 
     {"name": "a_action",    "label": "Aggresive Action",  "section": AGGRESIVE_MODE, "type": "string", "row": 0, "options": ["Buy", "Sell"],'default':'Buy'},
     {"name": "a_size",       "label": "Total Size",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 100},
 
+    {"name": "size_remain",       "label": "Size remain",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 0,'readonly':True},
 
-    {"name": "a_percentage",   "label": "% Volume Target",          "section": AGGRESIVE_MODE, "type": "float",  "row": 1, "default": 0.05},
+
+    {"name": "a_target_size",       "label": "Target Size",          "section": AGGRESIVE_MODE, "type": "int",  "row": 0, "default": 0,'readonly':True},
+
+
+    {"name": "a_percentage",   "label": "% Volume Target",          "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 5},
+        {"name": "a_type",    "label": "Target Volume By",  "section": AGGRESIVE_MODE, "type": "string", "row": 1, "options": ["Size", "Percentage"],'default':'Size'},
+
     {"name": "a_duration",   "label": "Total Duration(Min)",          "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 60},
-    {"name": "a_type",    "label": "Target Volume By",  "section": AGGRESIVE_MODE, "type": "string", "row": 1, "options": ["Size", "Percentage"],'default':'Size'},
+    {"name": "a_duration_left",   "label": "Time Remain",       "section": AGGRESIVE_MODE, "type": "int",  "row": 1, "default": 0,"readonly":True},
 
-    {"name": "v_hitalert",   "label": "Hit Notification",          "section": AGGRESIVE_MODE, "type": "bool",  "row": 1, "default": 1},
+    #{"name": "v_hitalert",   "label": "Hit Notification",          "section": AGGRESIVE_MODE, "type": "bool",  "row": 1, "default": 1},
 
     {"name": "start_aggresive",   "label": "Start Aggresive",    "section": AGGRESIVE_MODE, "type": "button", "row": 2, "command": "start_aggresive"},
 
