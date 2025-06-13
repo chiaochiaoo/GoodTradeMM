@@ -238,8 +238,17 @@ class SymbolMM:
 
 
     def start_opening(self):
-        self.mode = OPENING_MODE 
-        self.vars['Status'][0].set(self.mode)
+
+
+        o_starttime = self.get_variable('o_starttime')
+
+        now = datetime.now()
+        ts = now.hour*60 + now.minute
+
+        if ts>o_starttime and ts<(o_starttime+6):
+
+            self.mode = OPENING_MODE 
+            self.vars['Status'][0].set(self.mode)
 
 
     def start_aggresive(self):
@@ -282,7 +291,12 @@ class SymbolMM:
                 result[key] = value
 
         #print("inv check:",vals,result)
-        return result 
+        result2={}
+
+        for key,value in result.items():
+            if value!=0:
+                result2[key] = value
+        return result2
 
 
     def update_volume_profile(self):
@@ -318,7 +332,6 @@ class SymbolMM:
 
 
 
-
     def check_restrictive_condition(self):
 
         inv =self.get_variable('cur_inv')
@@ -331,44 +344,121 @@ class SymbolMM:
 
         ### 3 MODES CATEGORY. INACTIVE, RES, ELSE. 
 
+        # r_starttime = self.get_variable('r_starttime')
+        # r_stoptime = self.get_variable('r_stoptime')
+
+
+        d_starttime= self.get_variable('d_starttime')
+        d_stoptime = self.get_variable('d_stoptime')
+
+        o_starttime = self.get_variable('o_starttime')
 
 
         now = datetime.now()
         ts = now.hour*60 + now.minute
 
-        if ts>575:#if ts>575:
+        if ts>560:
 
             self.update_volume_profile()
-            if inv==0 and max_inv ==0 and self.mode != INACTIVE:
-                message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
-                self.start_pending()
 
-            if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
 
-                message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-                self.start_restrictive()
-
-            if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-                message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-
-                if not shutdown:
-                    self.set_variable('r_nbbo',1)
-                self.start_restrictive()
-
-            if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
-                message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
-
-                if not shutdown:
-                    self.set_variable('r_nbbo',1)
-                self.start_restrictive()
+            # if ts==o_starttime:
+            #     self.start_opening()
 
 
             if self.mode==RESTRICTIVE_MODE:
-                print("cehcking:", u>upnl,inv<int(max_inv*0.8),shutdown)
-                if u>upnl and inv<int(max_inv*0.8) and shutdown!=1:
+                #print("cehcking:", u>upnl,inv<int(max_inv*0.8),shutdown)
+                if u>upnl and inv<int(max_inv*0.8) and shutdown!=1 and ts>d_starttime and ts<d_stoptime:
                     message(f'{self.symbol} inventory under max limit. switch to DEFAULT_MODE.',NOTIFICATION)
      
                     self.start_default()
+
+                if inv==0 and max_inv ==0:
+                    message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
+                    self.start_pending()
+
+                if ts<d_starttime or ts>d_stoptime:
+                    message(f'{self.symbol} out of RESTRICTIVE_MODE time block. switch to INACTIVE.',NOTIFICATION)
+                    self.start_pending()
+
+
+            if self.mode==DEFAULT_MODE:
+                if shutdown!=0:
+                    message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+                    self.start_restrictive()
+
+                if self.bid>self.buyzone3 :
+
+
+                    if  inv>=max_inv:
+                        message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+
+                        if not shutdown:
+                            self.set_variable('r_nbbo',1)
+                        self.start_restrictive()
+
+                    if u<=upnl:
+                        message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+
+                        if not shutdown:
+                            self.set_variable('r_nbbo',1)
+                        self.start_restrictive()
+
+                if ts<d_starttime or ts>d_stoptime:
+                    message(f'{self.symbol} out of DEFAULT time block. switch to INACTIVE.',NOTIFICATION)
+                    self.start_pending()
+
+
+    # def check_restrictive_condition(self):
+
+    #     inv =self.get_variable('cur_inv')
+    #     max_inv = self.get_variable('MaxInventorySize')
+
+    #     u = self.get_variable('unrealized')
+    #     upnl = abs(self.get_variable('MaxAllowedUPnL'))*-1
+
+    #     shutdown = self.get_variable('RealizedPnLShutdown')
+
+    #     ### 3 MODES CATEGORY. INACTIVE, RES, ELSE. 
+
+
+
+    #     now = datetime.now()
+    #     ts = now.hour*60 + now.minute
+
+    #     if ts>575:#if ts>575:
+
+    #         self.update_volume_profile()
+    #         if inv==0 and max_inv ==0 and self.mode != INACTIVE:
+    #             message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
+    #             self.start_pending()
+
+    #         if shutdown!=0 and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+
+    #             message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+    #             self.start_restrictive()
+
+    #         if inv>=max_inv and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+    #             message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+
+    #             if not shutdown:
+    #                 self.set_variable('r_nbbo',1)
+    #             self.start_restrictive()
+
+    #         if u<=upnl and self.mode != RESTRICTIVE_MODE and self.mode != INACTIVE:
+    #             message(f'{self.symbol} unreal PNL reach limit. switch to RESTRICTIVE_MODE.',NOTIFICATION)
+
+    #             if not shutdown:
+    #                 self.set_variable('r_nbbo',1)
+    #             self.start_restrictive()
+
+
+    #         if self.mode==RESTRICTIVE_MODE:
+    #             print("cehcking:", u>upnl,inv<int(max_inv*0.8),shutdown)
+    #             if u>upnl and inv<int(max_inv*0.8) and shutdown!=1:
+    #                 message(f'{self.symbol} inventory under max limit. switch to DEFAULT_MODE.',NOTIFICATION)
+     
+    #                 self.start_default()
 
     def sysmbol_inspection(self):
 
@@ -448,7 +538,7 @@ class SymbolMM:
 
         order = self.vars['d_Venue'][0].get()
 
-
+        print(self.symbol,vals)
         message(f'{self.symbol} order check, should have : {list(vals.keys())}',LOG)
         message(f'{self.symbol} order check, already posted : {list(self.order_book.keys())}',LOG)
         if len(cancel_list)>0:
@@ -566,11 +656,14 @@ class SymbolMM:
     def inspection_restrictive(self):
 
         ## get should.
-        vals = [self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1]
+        vals = [self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1,self.rasks[2]*-1]
         a1enable = self.get_variable('r_nbbo')
 
         if a1enable:
             vals.append(self.nasks[0]*-1)
+        else:
+            if self.nasks[0]*-1 in vals:
+                vals.remove(self.nasks[0]*-1)
 
 
         global_bid_mult = self.get_variable('bidmult')

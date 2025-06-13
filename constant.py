@@ -352,8 +352,8 @@ CONFIG_SCHEMA = [
     # {"name": "r_enabled",         "label": "Restrictive Enabled", "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0,"readonly":True},
 
     {"name": "start_restrictive",   "label": "Start Restrictive",    "section": RESTRICTIVE_MODE, "type": "button", "row": 0, "command": "start_restrictive"},
-    {"name": "r_starttime", "label": "StartTime",  "section": RESTRICTIVE_MODE, "type": "int", "row": 0, "default": 575},
-    {"name": "r_stoptime", "label": "StopTime",  "section": RESTRICTIVE_MODE, "type": "int", "row": 0, "default": 955},
+    # {"name": "r_starttime", "label": "StartTime",  "section": RESTRICTIVE_MODE, "type": "int", "row": 0, "default": 575},
+    # {"name": "r_stoptime", "label": "StopTime",  "section": RESTRICTIVE_MODE, "type": "int", "row": 0, "default": 955},
     {"name": "r_nbbo",      "label": "Post on L1 ask",    "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0},
     {"name": "r_bidmult",   "label": "Bid Mult",           "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
     {"name": "r_askmult",   "label": "Ask Mult",          "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},

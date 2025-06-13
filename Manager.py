@@ -102,6 +102,12 @@ class Manager:
 
 		for symbol in self.symbols.keys():
 			self.symbols[symbol].start_default()
+
+	def start_all_opening(self):
+
+		for symbol in self.symbols.keys():
+			self.symbols[symbol].start_opening()
+
 	def set_connected(self):
 		if self.system_status.get()!=CONNECTED:
 			
@@ -121,6 +127,7 @@ class Manager:
 			message("PPRO Connected",NOTIFICATION)
 		self.system_status.set(CONNECTED)
 		self.ui.system_status["background"] = "lightgreen"
+
 	def set_disconnected(self):
 
 		if self.system_status.get()!=DISCONNECTED:

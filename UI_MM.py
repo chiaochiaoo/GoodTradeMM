@@ -224,7 +224,7 @@ class UI(pannel):
 
 		row +=1
 		ttk.Button(self.system_pannel, text="Save All Tickers", command=self.save_tickers).grid(row=row, column=1)
-
+		ttk.Button(self.system_pannel, text="Fetch All Database", command=self.manager.fetch_all_database).grid(row=row, column=2)
 
 		row +=1
 
@@ -235,8 +235,10 @@ class UI(pannel):
 		ttk.Button(self.system_pannel, text="Start All Default", command=self.manager.start_all_default).grid(row=row, column=2)
 
 		#row +=1
-		ttk.Button(self.system_pannel, text="Fetch All Database", command=self.manager.fetch_all_database).grid(row=row, column=3)
 
+
+
+		ttk.Button(self.system_pannel, text="Start All Opening", command=self.manager.start_all_opening).grid(row=row, column=3)
 
 		self.ticker_var.set('XIU.TO')
 		self.load_ticker_tab()
