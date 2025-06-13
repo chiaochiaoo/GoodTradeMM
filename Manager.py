@@ -98,7 +98,10 @@ class Manager:
 
 		for symbol in self.symbols.keys():
 			self.symbols[symbol].start_restrictive()
+	def start_all_default(self):
 
+		for symbol in self.symbols.keys():
+			self.symbols[symbol].start_default()
 	def set_connected(self):
 		if self.system_status.get()!=CONNECTED:
 			
@@ -196,7 +199,9 @@ class Manager:
 		pass
 
 	def fetch_all_database(self):
-		pass 
+
+		for symbol in self.symbols.keys():
+			self.symbols[symbol].fetch_db_data()
 
 
 	def Ppro_in(self,port):

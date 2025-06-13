@@ -32,6 +32,7 @@ def find_between(data, first, last):
 def fetch_data(symbol):
 
     try:
+        print('trying to fetch',symbol)
         MYSQL_USER = "webuser"
         MYSQL_PASSWORD = "Domination77$$"
         MYSQL_DATABASE = "summitdata"
@@ -63,13 +64,14 @@ def fetch_data(symbol):
 
             results = [dict(zip(column_names, row)) for row in rows]
 
-
+            print("Successful on ",symbol)
             return results[0]
             # Print JSON with Decimal safely handled
             #print(json.dumps(results, indent=4, cls=DecimalEncoder))
 
         cursor.close()
         connection.close()
+        
     except Exception as e:
 
         print(e)
@@ -179,18 +181,20 @@ class SymbolMM:
 
     def fetch_db_data(self):
 
-        select = ['RealizedPnLShutdown','FavourableBuyingConditions','MaxInventorySize','MaxAllowedUPnL','BuyZone1','BuyZone2','BuyZone3','SellZone1','SellZone2','SellZone3','AdjustedSpread']
-        d = fetch_data(self.symbol)
+        try:
+            select = ['RealizedPnLShutdown','FavourableBuyingConditions','MaxInventorySize','MaxAllowedUPnL','BuyZone1','BuyZone2','BuyZone3','SellZone1','SellZone2','SellZone3','AdjustedSpread']
+            d = fetch_data(self.symbol)
 
-        for j,i in d.items():
-            if j in select:
-                try:
-                    self.set_variable(j,i)
-                except:
-                    print("problem:",j,i)
+            for j,i in d.items():
+                if j in select:
+                    try:
+                        self.set_variable(j,i)
+                    except:
+                        print("problem:",j,i)
 
-        self.update_var_data()
-
+            self.update_var_data()
+        except:
+            PrintException("Fetch data from databse error")
 
     def update_var_data(self):
 

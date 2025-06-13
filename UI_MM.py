@@ -232,7 +232,7 @@ class UI(pannel):
 
 		#ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
 
-		ttk.Button(self.system_pannel, text="Start All Default", command=self.manager.cancel_all_orders).grid(row=row, column=3)
+		ttk.Button(self.system_pannel, text="Start All Default", command=self.manager.start_all_default).grid(row=row, column=2)
 
 		#row +=1
 		ttk.Button(self.system_pannel, text="Fetch All Database", command=self.manager.fetch_all_database).grid(row=row, column=3)
