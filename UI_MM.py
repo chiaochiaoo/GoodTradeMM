@@ -134,6 +134,26 @@ class UI(pannel):
 
 		self.notification_text.config(state='disabled')
 
+	def show_notification(self, message: str, max_lines=500, color="black"):
+	    self.notification_text.config(state='normal')
+
+	    # Create or configure a tag with the desired color
+
+	    if 'mode switch' in message:
+	    	color='red'
+	    if not self.notification_text.tag_names().__contains__(color):
+	        self.notification_text.tag_config(color, foreground=color)
+
+	    # Insert the message with the color tag
+	    self.notification_text.insert(tk.END, message + '\n', color)
+	    self.notification_text.see(tk.END)
+
+	    # Trim to keep only the last 500 lines
+	    lines = self.notification_text.get("1.0", tk.END).splitlines()
+	    if len(lines) > max_lines:
+	        self.notification_text.delete("1.0", f"{len(lines) - max_lines + 1}.0")
+
+	    self.notification_text.config(state='disabled')
 
 	def init_system_pannel(self):
 
@@ -240,8 +260,8 @@ class UI(pannel):
 
 		ttk.Button(self.system_pannel, text="Start All Opening", command=self.manager.start_all_opening).grid(row=row, column=3)
 
-		self.ticker_var.set('XIU.TO')
-		self.load_ticker_tab()
+		#self.ticker_var.set('XIU.TO')
+		#self.load_ticker_tab()
 
 
 	def load_saved_tickers(self):
