@@ -167,6 +167,13 @@ class SymbolMM:
         self.sellzone2=0
         self.sellzone3=0
 
+        self.cur_trade = 0
+        self.cur_tradep = 0
+        self.total_trade =0
+        self.svi_trade = 0
+        self.svi_tradep =0 
+
+        self.today =  datetime.now().strftime("%Y-%m-%d")
 
         self.vars['Status'][0].trace_add("write", self.update_status)
 
@@ -273,6 +280,41 @@ class SymbolMM:
         #print("inv check:",vals,result)
         return result 
 
+
+    def update_volume_profile(self):
+
+
+        # self.cur_trade = 0
+        # self.cur_tradep = 0
+        # self.total_trade =0
+        # self.svi_trade = 0
+        # self.svi_tradep =0 
+
+        try:
+            resp = requests.get("http://127.0.0.1:8000/traded_volume", params={"symbol": self.symbol})
+            self.svi_trade = resp.json()['volume']
+
+            
+        except:
+            print('svi server cannot reach.')
+
+
+        if self.total_trade!=0:
+            self.svi_tradep = round(self.svi_trade/self.total_trade,2)
+            self.cur_tradep = round(self.cur_trade/self.total_trade,2)
+
+        #print(self.symbol,self.cur_trade,self.cur_tradep,self.cur_trade/self.total_trade,self.total_trade)
+
+        #print(self.symbol,self.cur_trade,self.cur_tradep,self.svi_trade,self.svi_tradep,self.total_trade)
+
+        self.set_variable('cur_traded',self.cur_trade)
+        self.set_variable('cur_tradedp',self.cur_tradep)
+        self.set_variable('svi_traded',self.svi_trade)
+        self.set_variable('svi_tradedp',self.svi_tradep)
+
+
+
+
     def check_restrictive_condition(self):
 
         inv =self.get_variable('cur_inv')
@@ -291,6 +333,8 @@ class SymbolMM:
         ts = now.hour*60 + now.minute
 
         if ts>575:#if ts>575:
+
+            self.update_volume_profile()
             if inv==0 and max_inv ==0 and self.mode != INACTIVE:
                 message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
                 self.start_pending()
@@ -587,6 +631,20 @@ class SymbolMM:
         self.set_variable('openOrderCount',self.open_order_number)
 
 
+    def add_trade_volume(self,shares):
+
+
+        ### check if today
+
+        now = datetime.now().strftime("%Y-%m-%d")
+
+        if now !=self.today:
+            self.today = now 
+            self.cur_trade = 0
+
+        self.cur_trade+=shares
+
+
 
     def get_l1(self):
 
@@ -601,6 +659,7 @@ class SymbolMM:
             ask = float(find_between(stream_data, "AskPrice=\"", "\""))
             pc = float(find_between(stream_data, "ClosePrice=\"", "\""))
             ts = find_between(stream_data, "MarketTime=\"", "\"")
+            volume = int(find_between(stream_data, "Volume=\"", "\""))
 
             if self.bid!=bid:
                 self.bid_change = True 
@@ -614,6 +673,8 @@ class SymbolMM:
 
             self.bid = bid
             self.ask = ask
+
+            self.total_trade = volume
 
             self.spread = self.ask-self.bid
 

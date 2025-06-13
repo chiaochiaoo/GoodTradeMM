@@ -66,8 +66,6 @@ class Manager:
 		# x2 = threading.Thread(target=self.connectivity_check, daemon=True)
 		# x2.start()
 
-
-
 		self.start_all_inactive()
 
 
@@ -132,56 +130,6 @@ class Manager:
 
 		return self.system_status.get()==CONNECTED
 
-
-	# def connectivity_check(self):
-
-
-	# 	while True:
-
-	# 		try:
-	# 			self.root.after(0, lambda: None)
-	# 			break
-	# 		except RuntimeError:
-	# 			time.sleep(3)
-
-	# 	while True:
-
-	# 		try:
-	# 			postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
-
-	# 			r= requests.get(postbody)
-
-	# 			stream_data = r.text
-
-	# 			if "MarketTime" in stream_data:
-	# 				ts = find_between(stream_data, "MarketTime=\"", "\"")
-
-	# 				self.set_connected()
-
-	# 				# try:
-	# 				# 	req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
-	# 				# 	r = requests.post(req)
-	# 				# except:
-						
-	# 				# 	time.sleep(5)
-
-
-	# 				time.sleep(60)
-	# 			else:
-	# 				self.set_disconnected()
-	# 				postbody ="http://127.0.0.1:8080/GetLv1?symbol=XIU.TO"
-
-	# 				r= requests.get(postbody)
-
-	# 				postbody = f"http://127.0.0.1:8080/Register?symbol=XIU.TO&feedtype=L1" 
-	# 				r= requests.get(postbody)
-
-	# 				time.sleep(5)
-	# 		except:
-				
-	# 			time.sleep(10)
-
-
 	def position_update_loop(self):
 
 		while True:
@@ -191,7 +139,6 @@ class Manager:
 				break
 			except RuntimeError:
 				time.sleep(3)
-
 
 
 		while True:
@@ -248,11 +195,11 @@ class Manager:
 	def cancel_all_orders(self):
 		pass
 
+	def fetch_all_database(self):
+		pass 
+
 
 	def Ppro_in(self,port):
-
-
-
 
 		UDP_IP = "localhost"
 		UDP_PORT = port
@@ -302,19 +249,24 @@ class Manager:
 				symbol = find_between(stream_data, "Symbol=", ",")
 				side = find_between(stream_data, "Side=", ",")
 				price = find_between(stream_data, "Price=", ",")
-				share = find_between(stream_data, "Shares=", ",")
+				share = int(find_between(stream_data, "Shares=", ","))
 				ts=find_between(stream_data, "MarketDateTime=", ",")[9:-4]
 				#add time
-				if side =="T" or side =="S": side ="Short"
-				if side =="B": side = "Long"
+				# if side =="T" or side =="S": side ="Short"
+				# if side =="B": side = "Long"
 
-				data ={}
-				data["symbol"]= symbol
-				data["side"]= side
-				data["price"]= float(price)
-				data["shares"]= int(share)
-				data["timestamp"]= timestamp_seconds(ts)
-				#pipe.send(["order confirm",data])
+				# data ={}
+				# data["symbol"]= symbol
+				# data["side"]= side
+				# data["price"]= float(price)
+				# data["shares"]= int(share)
+				# data["timestamp"]= timestamp_seconds(ts)
+				# #pipe.send(["order confirm",data])
+
+
+				if symbol in self.symbols:
+
+					self.symbols[symbol].add_trade_volume(share)
 
 			if state =="Rejected":
 				symbol = find_between(stream_data, "Symbol=", ",")

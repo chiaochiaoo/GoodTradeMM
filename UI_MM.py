@@ -102,7 +102,7 @@ class UI(pannel):
 		self.ticker_management_frame .place(x=360,y=10,height=200,width=700)
 
 		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
-		self.notification_pannel.place(x=1090,y=10,height=1200,width=400)
+		self.notification_pannel.place(x=1090,y=10,height=1000,width=400)
 
 		self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
 		self.notification_text.pack(anchor="nw", padx=0, pady=0, fill="both",expand=True)#
@@ -230,9 +230,12 @@ class UI(pannel):
 
 		ttk.Button(self.system_pannel, text="Start All Inactive", command=self.manager.start_all_inactive).grid(row=row, column=1)
 
-		ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
+		#ttk.Button(self.system_pannel, text="Start All Restrictive", command=self.manager.start_all_restrictive).grid(row=row, column=2)
 
-		ttk.Button(self.system_pannel, text="Cancel All Orders", command=self.manager.cancel_all_orders).grid(row=row, column=3)
+		ttk.Button(self.system_pannel, text="Start All Default", command=self.manager.cancel_all_orders).grid(row=row, column=3)
+
+		#row +=1
+		ttk.Button(self.system_pannel, text="Fetch All Database", command=self.manager.fetch_all_database).grid(row=row, column=3)
 
 
 		self.ticker_var.set('XIU.TO')
@@ -326,6 +329,18 @@ class UI(pannel):
 		inventory = mm.vars['cur_inv'][0]
 		open_orders = mm.vars['openOrderCount'][0]
 		notional = mm.vars['notionalAmount'][0]
+
+		cur_trade = mm.vars['cur_traded'][0]
+		cur_tradep= mm.vars['cur_tradedp'][0]
+
+		svi_trade = mm.vars['svi_traded'][0]
+		svi_tradep= mm.vars['svi_tradedp'][0]
+
+
+
+
+
+
 		# === Create and place widgets ===
 		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2")
 		label.grid(row=row_idx, column=0, padx=5, sticky="w")
@@ -344,14 +359,29 @@ class UI(pannel):
 		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders)
 		orders_label.grid(row=row_idx, column=4, padx=5, sticky="w")
 
+		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade)
+		ct_label.grid(row=row_idx, column=5, padx=5, sticky="w")
+
+		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep)
+		ctp_label.grid(row=row_idx, column=6, padx=5, sticky="w")
+
+		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade)
+		svi_label.grid(row=row_idx, column=7, padx=5, sticky="w")
+
+		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep)
+		svip_label.grid(row=row_idx, column=8, padx=5, sticky="w")
 		# Store all info + widgets for future sorting
 		self.ticker_table_rows[symbol] = {
 			"status": status,
 			"inventory": inventory,
 			'notional amount':notional,
 			"orders": open_orders,
+			'curt':cur_trade,
+			'curtp':cur_tradep,
+			'svit':svi_trade,
+			'svitp':svi_tradep,
 			"row": row_idx,
-			"widgets": [label, status_label, inv_label, not_label,orders_label]
+			"widgets": [label, status_label, inv_label, not_label,orders_label,ct_label,ctp_label,svi_label,svip_label]
 		}
 
 	def init_ticker_management_table(self):
@@ -379,7 +409,11 @@ class UI(pannel):
 				   ("Status", "status"),
 				   ("Inventory", "inventory"),
 				   ("Notional$","notional"),
-				   ("Open Orders", "orders"),]
+				   ("Open Orders", "Open Orders"),
+					("Current Trade", "orders"),
+					("Trade %", "orders"),
+					("SVI Trade", "orders"),
+					("SVI %", "orders"),									   				   ]
 
 		for col, (label, key) in enumerate(headers):
 			btn = ttk.Button(
@@ -387,7 +421,7 @@ class UI(pannel):
 				text=label,
 				command=lambda k=key: self.sort_ticker_table(k)
 			)
-			btn.grid(row=0, column=col, padx=5, pady=2, sticky="w")
+			btn.grid(row=0, column=col, padx=0, pady=2, sticky="w")
 			self.sort_order[key] = True
 
 		self.ticker_table_rows = {}  # symbol -> data/vars

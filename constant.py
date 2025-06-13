@@ -291,10 +291,19 @@ CONFIG_SCHEMA = [
 
     {"name": "cur_inv",     "label": "Current Inventory", "section": STATUS, "type": "int",    "row": 0, "readonly": True},
     {"name": "unrealized",  "label": "Unreal",            "section": STATUS, "type": "float",  "row": 0, "readonly": True},
-    {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 1,"readonly":True},
-    {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 1,"readonly":True},
-    {"name": "RealizedPnLShutdown",  "label": "RPnLShutdown",            "section": STATUS, "type": "float",  "row": 1, "readonly": True},
-    {"name": "FavourableBuyingConditions",  "label": "FavBuyingConds",   "section": STATUS, "type": "float",  "row": 1, "readonly": True},
+
+
+    {"name": "cur_traded",   "label": "Current Trade", "section": STATUS, "type": "int",    "row": 1,'default':0, "readonly": True},
+    {"name": "cur_tradedp",   "label": "Current Trade %", "section": STATUS, "type": "float",    "row": 1, 'default':0,"readonly": True},
+    {"name": "svi_traded",     "label": "SVI trade", "section": STATUS, "type": "int",    "row": 1, 'default':0,"readonly": True},
+
+    {"name": "svi_tradedp",     "label": "SVI trade %", "section": STATUS, "type": "float",    "row": 1,'default':0, "readonly": True},
+
+
+    {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 2,"readonly":True},
+    {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 2,"readonly":True},
+    {"name": "RealizedPnLShutdown",  "label": "RPnLShutdown",            "section": STATUS, "type": "float",  "row": 2, "readonly": True},
+    {"name": "FavourableBuyingConditions",  "label": "FavBuyingConds",   "section": STATUS, "type": "float",  "row": 2, "readonly": True},
 
 
 
@@ -310,11 +319,14 @@ CONFIG_SCHEMA = [
     {"name": "start_pending",   "label": "Pause Algo",    "section": COMMANDS, "type": "button", "row": 0, "command": "start_pending"},
     {"name": "cancel_orders",   "label": "Cancel Orders",    "section": COMMANDS, "type": "button", "row": 0, "command": "cancel_orders"},
     {"name": "fetch_data",   "label": "Fetch Database",    "section": COMMANDS, "type": "button", "row": 0, "command": "fetch_data"},
+
     {"name": "start_default",   "label": "Start Default",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_default"},
 
     #{"name": "start_test",   "label": "Start Test",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_test"},
 
 
+    {"name": "d_starttime", "label": "StartTime",  "section": SETTINGS, "type": "int", "row": 1, "default": 575},
+    {"name": "d_stoptime", "label": "StopTime",  "section": SETTINGS, "type": "int", "row": 1, "default": 955},
     {"name": "boardlot",    "label": "Board Lot",         "section": SETTINGS, "type": "int",    "row": 1,"default": 100,"readonly": True},
     {"name": "ticksize",    "label": "Tick Size",         "section": SETTINGS, "type": "float",  "row": 1,"default": 0.01,"readonly": True},
     {"name": "MaxInventorySize",     "label": "Max Inventory",   "section": SETTINGS, "type": "int",    "row": 1,"default": 1000,},
@@ -340,6 +352,8 @@ CONFIG_SCHEMA = [
     # {"name": "r_enabled",         "label": "Restrictive Enabled", "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0,"readonly":True},
 
     {"name": "start_restrictive",   "label": "Start Restrictive",    "section": RESTRICTIVE_MODE, "type": "button", "row": 0, "command": "start_restrictive"},
+    {"name": "r_starttime", "label": "StartTime",  "section": RESTRICTIVE_MODE, "type": "int", "row": 0, "default": 575},
+    {"name": "r_stoptime", "label": "StopTime",  "section": RESTRICTIVE_MODE, "type": "int", "row": 0, "default": 955},
     {"name": "r_nbbo",      "label": "Post on L1 ask",    "section": RESTRICTIVE_MODE, "type": "bool",   "row": 0},
     {"name": "r_bidmult",   "label": "Bid Mult",           "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
     {"name": "r_askmult",   "label": "Ask Mult",          "section": RESTRICTIVE_MODE, "type": "int",  "row": 0, "default": 1},
@@ -354,6 +368,7 @@ CONFIG_SCHEMA = [
 
     # {"name": "o_enabled",    "label": "Opening Enabled",      "section": OPENING_MODE, "type": "bool",   "row": 0,"readonly":True},
     {"name": "start_opening",   "label": "Start Opening",    "section": OPENING_MODE, "type": "button", "row": 0, "command": "start_opening"},
+    {"name": "o_starttime", "label": "StartTime",  "section": OPENING_MODE, "type": "int", "row": 0, "default": 565},
     {"name": "o_bidmult",   "label": "Bid Mult",           "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
     {"name": "o_askmult",   "label": "Ask Mult",          "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
 

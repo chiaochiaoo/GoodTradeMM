@@ -8,6 +8,5 @@ resp = requests.post("http://127.0.0.1:8000/order_exists", json={
 })
 print(resp.json())
 
-# Get traded volume
-# resp = requests.get("http://localhost:8000/traded_volume", params={"symbol": "TD.TO"})
-# print(resp.json())
+resp = requests.get("http://127.0.0.1:8000/traded_volume", params={"symbol": "TD.TO"})
+print(resp.json()['volume'])
