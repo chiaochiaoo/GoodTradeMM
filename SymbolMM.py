@@ -529,6 +529,10 @@ class SymbolMM:
 
                 self.post_cmd(order,price,self.aggresive_order_book[ts],ACTION)
 
+        if ts> list(self.aggresive_order_book.keys())[-1]:
+            message(f'{self.symbol} aggresive mode finish')
+            self.start_pending()
+
     def insepection_inactive(self):
         self.cancel_orders()
 
