@@ -707,20 +707,28 @@ class SymbolMM:
                 o_bid_mult = self.get_variable('o_bidmult')
                 o_ask_mult =  self.get_variable('o_askmult')
 
-                if inv>=max_inv or u<=upnl or shutdown:
-                    send_list  = [(self.pc+tick_size)*-1]
 
-                    
-                    message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
+                if shutdown:
+                    send_list = []
+
+                    message(f' {self.symbol} shutdown. no opening orders {send_list}',NOTIFICATION)
                 else:
+                    if inv>=max_inv or u<=upnl:
+                        send_list  = [(self.pc+tick_size)*-1]
 
-
-                    if inv<int(o_ask_mult*board_lot):
-                        send_list =  [self.pc-tick_size]
-                        message(f' {self.symbol} insufficient inventory. opening mode bid only. {send_list}',NOTIFICATION)
+                        
+                        message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
                     else:
-                        send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
-                        message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
+
+
+                        if inv<int(o_ask_mult*board_lot):
+                            send_list =  [self.pc-tick_size]
+                            message(f' {self.symbol} insufficient inventory. opening mode bid only. {send_list}',NOTIFICATION)
+                        else:
+                            send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+                            message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
+
+
 
                 send_list2= []
                 for i in send_list:
