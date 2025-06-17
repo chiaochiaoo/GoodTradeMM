@@ -336,8 +336,8 @@ CONFIG_SCHEMA = [
     {"name": "MaxAllowedUPnL",     "label": "Max Loss",          "section": SETTINGS, "type": "int",    "row": 1,"default": 1000,},
     # {"name": "email_alert", "label": "Email Alert",       "section": SETTINGS, "type": "bool",   "row": 0},
 
-    {"name": "bidmult",     "label": "Glb Bid Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
-    {"name": "askmult",     "label": "Glb Ask Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
+    {"name": "bidmult",     "label": "Bid Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
+    {"name": "askmult",     "label": "Ask Mult",      "section": SETTINGS, "type": "int",    "row": 2, "default": 1},
 
 
     {"name": "AdjustedSpread",  "label": "Adj Spread",        "section": SETTINGS, "type": "float",  "row": 2, "default": 0.01},

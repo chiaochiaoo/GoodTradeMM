@@ -651,8 +651,8 @@ class SymbolMM:
         for val in vals:
             if val>0:
                 if val<=self.buyzone3:
-                    orders[val] = board_lot*global_bid_mult*reserve_bidmult
-                    message(f'{self.symbol} buy zone 3 orders: {val} and size {board_lot*global_bid_mult*reserve_bidmult}',LOG)
+                    orders[val] = board_lot*reserve_bidmult
+                    message(f'{self.symbol} buy zone 3 orders: {val} and size {board_lot*reserve_bidmult}',LOG)
 
                     self.reserve_orders.append(val)
                 else:
@@ -661,8 +661,8 @@ class SymbolMM:
 
 
                 if abs(val)>=self.sellzone1:
-                    orders[val] = board_lot*global_ask_mult*reserve_askmult
-                    message(f'{self.symbol} sell zone 1 orders: {val} and size {board_lot*global_ask_mult*reserve_askmult}',LOG)
+                    orders[val] = board_lot*reserve_askmult
+                    message(f'{self.symbol} sell zone 1 orders: {val} and size {board_lot*reserve_askmult}',LOG)
                     self.reserve_orders.append(val)
                 else:
                     orders[val] = board_lot*global_ask_mult
