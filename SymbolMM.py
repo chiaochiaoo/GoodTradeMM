@@ -747,9 +747,6 @@ class SymbolMM:
                 vals.remove(self.nasks[0]*-1)
 
 
-        global_bid_mult = self.get_variable('bidmult')
-        global_ask_mult =  self.get_variable('askmult')
-
 
         res_bid_mult = self.get_variable('r_bidmult')
         res_ask_mult =  self.get_variable('r_askmult')
@@ -760,9 +757,9 @@ class SymbolMM:
 
         for val in vals:
             if val>0:
-                orders[val] = board_lot*res_bid_mult*global_bid_mult
+                orders[val] = board_lot*res_bid_mult
             else:
-                orders[val] = board_lot*res_ask_mult*global_ask_mult
+                orders[val] = board_lot*res_ask_mult
 
         orders = self.inventory_check(orders)
         self.update_order_book(orders)
