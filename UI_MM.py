@@ -102,7 +102,7 @@ class UI(pannel):
 		self.ticker_management_frame .place(x=360,y=10,height=200,width=700)
 
 		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
-		self.notification_pannel.place(x=1090,y=10,height=900,width=400)
+		self.notification_pannel.place(x=1090,y=10,height=1000,width=400)
 
 		self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
 		self.notification_text.pack(anchor="nw", padx=0, pady=0, fill="both",expand=True)#
@@ -361,36 +361,36 @@ class UI(pannel):
 
 
 
-
+		w =10
 
 		# === Create and place widgets ===
 		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2")
 		label.grid(row=row_idx, column=0, padx=5, sticky="w")
 		label.bind("<Button-1>", lambda e, sym=symbol: self.open_ticker_tab(sym))
 
-		status_label = ttk.Label(self.ticker_table_frame, textvariable=status)
+		status_label = ttk.Label(self.ticker_table_frame, textvariable=status,width=w)
 		status_label.grid(row=row_idx, column=1, padx=5, sticky="w")
 
-		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory)
+		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory,width=w)
 		inv_label.grid(row=row_idx, column=2, padx=5, sticky="w")
 
 
-		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional)
+		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional,width=w)
 		not_label.grid(row=row_idx, column=3, padx=5, sticky="w")
 
-		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders)
+		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders,width=w)
 		orders_label.grid(row=row_idx, column=4, padx=5, sticky="w")
 
-		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade)
+		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade,width=w)
 		ct_label.grid(row=row_idx, column=5, padx=5, sticky="w")
 
-		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep)
+		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep,width=w)
 		ctp_label.grid(row=row_idx, column=6, padx=5, sticky="w")
 
-		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade)
+		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade,width=w)
 		svi_label.grid(row=row_idx, column=7, padx=5, sticky="w")
 
-		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep)
+		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep,width=w)
 		svip_label.grid(row=row_idx, column=8, padx=5, sticky="w")
 		# Store all info + widgets for future sorting
 		self.ticker_table_rows[symbol] = {
@@ -406,13 +406,82 @@ class UI(pannel):
 			"widgets": [label, status_label, inv_label, not_label,orders_label,ct_label,ctp_label,svi_label,svip_label]
 		}
 
-	def init_ticker_management_table(self):
-		# === Scrollable canvas inside ticker_management_frame ===
-		canvas = tk.Canvas(self.ticker_management_frame, height=200)
+	# def init_ticker_management_table(self):
+	# 	# === Scrollable canvas inside ticker_management_frame ===
+	# 	canvas = tk.Canvas(self.ticker_management_frame, height=200)
 
-		scrollbar = ttk.Scrollbar(self.ticker_management_frame, orient="vertical", command=canvas.yview)
+	# 	scrollbar = ttk.Scrollbar(self.ticker_management_frame, orient="vertical", command=canvas.yview)
 		
+	# 	self.ticker_table_frame = ttk.Frame(canvas)
+	# 	self.ticker_table_frame.bind(
+	# 		"<Configure>",
+	# 		lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+	# 	)
+
+	# 	canvas.create_window((0, 0), window=self.ticker_table_frame, anchor="nw")
+	# 	canvas.configure(yscrollcommand=scrollbar.set)
+
+	# 	canvas.pack(side="left", fill="both", expand=True)
+	# 	scrollbar.pack(side="right", fill="y")
+
+	# 	# === Header row with sortable buttons ===
+	# 	self.sort_order = {}  # Track current sort direction
+
+	# 	headers = [("Ticker", "ticker"),
+	# 			   ("Status", "status"),
+	# 			   ("Inventory", "inventory"),
+	# 			   ("Notional$","notional"),
+	# 			   ("Open Orders", "Open Orders"),
+	# 				("Current Trade", "orders"),
+	# 				("Trade %", "orders"),
+	# 				("SVI Trade", "orders"),
+	# 				("SVI %", "orders"),									   				   ]
+
+	# 	for col, (label, key) in enumerate(headers):
+	# 		btn = ttk.Button(
+	# 			self.ticker_table_frame,
+	# 			text=label,width=12,
+	# 			command=lambda k=key: self.sort_ticker_table(k)
+	# 		)
+	# 		btn.grid(row=0, column=col, padx=0, pady=2, sticky="w")
+	# 		self.sort_order[key] = True
+
+	# 	self.ticker_table_rows = {}  # symbol -> data/vars
+
+	def init_ticker_management_table(self):
+		# === Create container frame ===
+		# self.ticker_management_frame = ttk.Frame(self.parent)  # or whatever your parent is
+		# self.ticker_management_frame.pack(fill="both", expand=True)
+
+		# === Fixed Header Frame ===
+		header_frame = ttk.Frame(self.ticker_management_frame)
+		header_frame.pack(fill="x")
+
+		headers = [("Ticker", "ticker"),
+				   ("Status", "status"),
+				   ("Inventory", "inventory"),
+				   ("Notional$", "notional"),
+				   ("Open Orders", "Open Orders"),
+				   ("Current Trade", "orders"),
+				   ("Trade %", "orders"),
+				   ("SVI Trade", "orders"),
+				   ("SVI %", "orders")]
+
+		self.sort_order = {}
+		for col, (label, key) in enumerate(headers):
+			btn = ttk.Button(
+				header_frame,
+				text=label,width=10,
+				command=lambda k=key: self.sort_ticker_table(k)
+			)
+			btn.grid(row=0, column=col, padx=1, pady=2, sticky="w")
+			self.sort_order[key] = True
+
+		# === Scrollable Canvas ===
+		canvas = tk.Canvas(self.ticker_management_frame, height=200)
+		scrollbar = ttk.Scrollbar(self.ticker_management_frame, orient="vertical", command=canvas.yview)
 		self.ticker_table_frame = ttk.Frame(canvas)
+
 		self.ticker_table_frame.bind(
 			"<Configure>",
 			lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
@@ -424,31 +493,8 @@ class UI(pannel):
 		canvas.pack(side="left", fill="both", expand=True)
 		scrollbar.pack(side="right", fill="y")
 
-		# === Header row with sortable buttons ===
-		self.sort_order = {}  # Track current sort direction
+		self.ticker_table_rows = {}
 
-		headers = [("Ticker", "ticker"),
-				   ("Status", "status"),
-				   ("Inventory", "inventory"),
-				   ("Notional$","notional"),
-				   ("Open Orders", "Open Orders"),
-					("Current Trade", "orders"),
-					("Trade %", "orders"),
-					("SVI Trade", "orders"),
-					("SVI %", "orders"),									   				   ]
-
-		for col, (label, key) in enumerate(headers):
-			btn = ttk.Button(
-				self.ticker_table_frame,
-				text=label,
-				command=lambda k=key: self.sort_ticker_table(k)
-			)
-			btn.grid(row=0, column=col, padx=0, pady=2, sticky="w")
-			self.sort_order[key] = True
-
-		self.ticker_table_rows = {}  # symbol -> data/vars
-
-		
 	def open_ticker_tab(self, symbol):
 
 		#print(self.marketmaking_tabs)
