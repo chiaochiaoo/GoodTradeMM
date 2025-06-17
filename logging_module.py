@@ -83,7 +83,7 @@ SMTP_PORT = 465
 
 # Twilio Configuration
 TWILIO_ACCOUNT_SID = "ACa7c055c4e8dc87cce8fd42d8a560ee9d"
-TWILIO_AUTH_TOKEN = "d703dbd4b638a0af9bbaa701ba77483b"  # Replace with real token
+TWILIO_AUTH_TOKEN = "6c6611008d78727970740ba2ad27cf67"  # Replace with real token
 TWILIO_FROM = "+15076827269"       # Your Twilio number
 TWILIO_TO = "+16472170498"         # Your phone number
 
