@@ -311,6 +311,9 @@ CONFIG_SCHEMA = [
 
     {"name": "d_Venue","label": "Default Venue",     "section": VENUES, "type": "string", "row": 0, "options": ["T1", "T2", "T3"]},
     {"name": "a_Venue",    "label": "Aggressive Venue",  "section": VENUES, "type": "string", "row": 0, "options": ["T1", "T2", "T3"]},
+
+    {"name": "o_Venue",    "label": "Opening Venue",  "section": VENUES, "type": "string", "row": 1, "options": ["T1", "T2", "T3"]},
+    {"name": "r_Venue",    "label": "Reserve Venue",  "section": VENUES, "type": "string", "row": 1, "options": ["T1", "T2", "T3"]},
     # {"name": "d_enabled",     "label": "Default Mode",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
     # {"name": "r_enabled",     "label": "Restrictive Mode", "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
     # {"name": "a_enabled",     "label": "Aggresive Mode",      "section": STATUS, "type": "bool",   "row": 1,"readonly":True},
