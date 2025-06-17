@@ -710,8 +710,8 @@ class SymbolMM:
                 if inv>=max_inv or u<=upnl or shutdown:
                     send_list  = [(self.pc+tick_size)*-1]
 
-                    if inv>=max_inv:
-                        message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
+                    
+                    message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
                 else:
 
 
