@@ -322,6 +322,11 @@ CONFIG_SCHEMA = [
     {"name": "start_pending",   "label": "Pause Algo",    "section": COMMANDS, "type": "button", "row": 0, "command": "start_pending"},
     {"name": "cancel_orders",   "label": "Cancel Orders",    "section": COMMANDS, "type": "button", "row": 0, "command": "cancel_orders"},
     {"name": "fetch_data",   "label": "Fetch Database",    "section": COMMANDS, "type": "button", "row": 0, "command": "fetch_data"},
+    {"name": "save",   "label": "Save Info",    "section": COMMANDS, "type": "button", "row": 0, "command": "save"},
+    {"name": "delete",   "label": "Delete Ticker",    "section": COMMANDS, "type": "button", "row": 0, "command": "delete"},
+
+
+
 
     {"name": "start_default",   "label": "Start Default",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_default"},
 
@@ -346,9 +351,9 @@ CONFIG_SCHEMA = [
     {"name": "BuyZone1",    "label": "Buy Zone1",         "section": SETTINGS, "type": "float", "row": 3, "default": 0},
     {"name": "BuyZone2",    "label": "Buy Zone2",         "section": SETTINGS, "type": "float", "row": 3, "default": 0},
     {"name": "BuyZone3",    "label": "Buy Zone3",         "section": SETTINGS, "type": "float", "row": 3, "default": 0},
-    {"name": "SellZone1",   "label": "Sell Zone1",        "section": SETTINGS, "type": "float", "row": 4, "default": 0},
-    {"name": "SellZone2",   "label": "Sell Zone2",        "section": SETTINGS, "type": "float", "row": 4, "default": 0},
-    {"name": "SellZone3",   "label": "Sell Zone3",        "section": SETTINGS, "type": "float", "row": 4, "default": 0},
+    {"name": "SellZone1",   "label": "Sell Zone1",        "section": SETTINGS, "type": "float", "row": 3, "default": 0},
+    {"name": "SellZone2",   "label": "Sell Zone2",        "section": SETTINGS, "type": "float", "row": 3, "default": 0},
+    {"name": "SellZone3",   "label": "Sell Zone3",        "section": SETTINGS, "type": "float", "row": 3, "default": 0},
 
     # {"name": "d_enabled",   "label": "Default Mode Enabled", "section": SETTINGS, "type": "bool",   "row": 0,"readonly":True},
     # {"name": "loadData",    "label": "Load Data",         "section": SETTINGS, "type": "button", "row": 3},

@@ -111,6 +111,8 @@ class SymbolMM:
             'start_pending':self.start_pending,
             'cancel_orders':self.cancel_orders,
             'fetch_data':self.fetch_db_data,
+            'save':self.save,
+            'delete':self.delete,
             # Add more as needed
         }
 
@@ -182,6 +184,11 @@ class SymbolMM:
         self.vars['Status'][0].trace_add("write", self.update_status)
 
 
+    # def save(self):
+    #     pass 
+
+    def delete(self):
+        self.manager.ui.delete_ticker(self.symbol)
     def clear_reserve_orders(self):
         self.reserve_orders = []
 

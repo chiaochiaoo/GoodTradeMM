@@ -625,18 +625,18 @@ class UI(pannel):
 
 
 		# Save Button at the bottom of the last section
-		ttk.Button(tab, text="Save", command=lambda: mm.save()).grid(
-			row=row_counter + 10, column=0, columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
-		)
+		# ttk.Button(tab, text="Save", command=lambda: mm.save()).grid(
+		# 	row=row_counter + 10, column=0, columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
+		# )
 
-		ttk.Button(
-			tab,
-			text="Delete Ticker",
-			command=lambda sym=ticker: self.delete_ticker(sym)
-		).grid(
-			row=row_counter + 10, column=1,
-			columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
-		)
+		# ttk.Button(
+		# 	tab,
+		# 	text="Delete Ticker",
+		# 	command=lambda sym=ticker: self.delete_ticker(sym)
+		# ).grid(
+		# 	row=row_counter + 10, column=1,
+		# 	columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
+		# )
 
 class CollapsibleSection(ttk.Frame):
 	def __init__(self, parent, title="", *args, **kwargs):
