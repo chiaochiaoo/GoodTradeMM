@@ -631,8 +631,13 @@ class SymbolMM:
         sellzone1 = self.get_variable('SellZone1')
 
         #print("Default Check:",self.spread>=self.adj_spread,self.bid <= sellzone1)
-        if self.spread>=self.adj_spread and self.bid <= sellzone1:
+        if self.spread>=self.adj_spread and self.ask < sellzone1:
             vals = [self.rbids[0],self.rbids[1],self.rbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
+
+        elif self.spread>=self.adj_spread and self.ask >= sellzone1:
+            vals = [self.nbids[0],self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1,self.rasks[2]*-1]
+
+
 
         global_bid_mult = self.get_variable('bidmult')
         global_ask_mult =  self.get_variable('askmult')
@@ -737,7 +742,20 @@ class SymbolMM:
     def inspection_restrictive(self):
 
         ## get should.
-        vals = [self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1,self.rasks[2]*-1]
+
+
+        shutdown = self.get_variable('RealizedPnLShutdown')
+
+        if shutdown:
+
+            vals = [self.nbids[1],self.nbids[2],self.nasks[0]*-1,self.nasks[1]*-1]
+
+        else:
+
+            vals = [self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1,self.rasks[2]*-1]
+
+
+
         a1enable = self.get_variable('r_nbbo')
 
         if a1enable:
