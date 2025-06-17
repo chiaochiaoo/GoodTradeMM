@@ -102,7 +102,7 @@ class UI(pannel):
 		self.ticker_management_frame .place(x=360,y=10,height=200,width=700)
 
 		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
-		self.notification_pannel.place(x=1090,y=10,height=1000,width=400)
+		self.notification_pannel.place(x=1090,y=10,height=900,width=400)
 
 		self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
 		self.notification_text.pack(anchor="nw", padx=0, pady=0, fill="both",expand=True)#
