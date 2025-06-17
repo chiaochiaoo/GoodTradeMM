@@ -328,7 +328,7 @@ CONFIG_SCHEMA = [
     #{"name": "start_test",   "label": "Start Test",    "section": SETTINGS, "type": "button", "row": 7, "command": "start_test"},
 
 
-    {"name": "d_starttime", "label": "StartTime",  "section": SETTINGS, "type": "int", "row": 1, "default": 575},
+    {"name": "d_starttime", "label": "StartTime",  "section": SETTINGS, "type": "int", "row": 1, "default": 574},
     {"name": "d_stoptime", "label": "StopTime",  "section": SETTINGS, "type": "int", "row": 1, "default": 955},
     {"name": "boardlot",    "label": "Board Lot",         "section": SETTINGS, "type": "int",    "row": 1,"default": 100,"readonly": True},
     {"name": "ticksize",    "label": "Tick Size",         "section": SETTINGS, "type": "float",  "row": 1,"default": 0.01,"readonly": True},
@@ -371,7 +371,7 @@ CONFIG_SCHEMA = [
 
     # {"name": "o_enabled",    "label": "Opening Enabled",      "section": OPENING_MODE, "type": "bool",   "row": 0,"readonly":True},
     {"name": "start_opening",   "label": "Start Opening",    "section": OPENING_MODE, "type": "button", "row": 0, "command": "start_opening"},
-    {"name": "o_starttime", "label": "StartTime",  "section": OPENING_MODE, "type": "int", "row": 0, "default": 565},
+    {"name": "o_starttime", "label": "StartTime",  "section": OPENING_MODE, "type": "int", "row": 0, "default": 564},
     {"name": "o_bidmult",   "label": "Bid Mult",           "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
     {"name": "o_askmult",   "label": "Ask Mult",          "section": OPENING_MODE, "type": "int",  "row": 0, "default": 1},
 

@@ -175,9 +175,16 @@ class SymbolMM:
         self.svi_trade = 0
         self.svi_tradep =0 
 
+        self.reserve_orders = []
+
         self.today =  datetime.now().strftime("%Y-%m-%d")
 
         self.vars['Status'][0].trace_add("write", self.update_status)
+
+
+    def clear_reserve_orders(self):
+        self.reserve_orders = []
+
 
     def fetch_db_data(self):
 
@@ -418,6 +425,7 @@ class SymbolMM:
     def sysmbol_inspection(self):
 
         self.check_restrictive_condition()
+        self.clear_reserve_orders()
 
         try:
             self.update_var_data()
@@ -598,6 +606,10 @@ class SymbolMM:
 
         for price in send_list:
 
+            if price in self.reserve_orders:
+                order = self.vars['r_Venue'][0].get()
+            else:
+                order = self.vars['d_Venue'][0].get()
             if price>0:
                 action = BUY 
             else:
@@ -641,6 +653,8 @@ class SymbolMM:
                 if val<=self.buyzone3:
                     orders[val] = board_lot*global_bid_mult*reserve_bidmult
                     message(f'{self.symbol} buy zone 3 orders: {val} and size {board_lot*global_bid_mult*reserve_bidmult}',LOG)
+
+                    self.reserve_orders.append(val)
                 else:
                     orders[val] = board_lot*global_bid_mult
             else:
@@ -649,9 +663,11 @@ class SymbolMM:
                 if abs(val)>=self.sellzone1:
                     orders[val] = board_lot*global_ask_mult*reserve_askmult
                     message(f'{self.symbol} sell zone 1 orders: {val} and size {board_lot*global_ask_mult*reserve_askmult}',LOG)
+                    self.reserve_orders.append(val)
                 else:
                     orders[val] = board_lot*global_ask_mult
         orders = self.inventory_check(orders)
+
         self.update_order_book(orders)
 
     def inspection_opening(self):
@@ -664,7 +680,7 @@ class SymbolMM:
                 message(f'{ALGO} {self.symbol} have no previous closing price. skip opening phase',NOTIFICATION)
             else:
 
-                order = self.vars['d_Venue'][0].get()
+                order = self.vars['o_Venue'][0].get()
                 board_lot =  self.vars['boardlot'][0].get()
                 tick_size =  self.vars['ticksize'][0].get()
 
@@ -676,13 +692,23 @@ class SymbolMM:
 
                 shutdown = self.get_variable('RealizedPnLShutdown')
 
+                o_bid_mult = self.get_variable('o_bidmult')
+                o_ask_mult =  self.get_variable('o_askmult')
 
                 if inv>=max_inv or u<=upnl or shutdown:
                     send_list  = [(self.pc+tick_size)*-1]
-                    message(f' {self.symbol} opening mode max inv/pnl/shutdown reach. sell only {send_list}',NOTIFICATION)
+
+                    if inv>=max_inv:
+                        message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
                 else:
-                    send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
-                    message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
+
+
+                    if inv<int(o_ask_mult*board_lot):
+                        send_list =  [self.pc-tick_size]
+                        message(f' {self.symbol} insufficient inventory. opening mode bid only. {send_list}',NOTIFICATION)
+                    else:
+                        send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+                        message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
 
                 send_list2= []
                 for i in send_list:
@@ -699,7 +725,13 @@ class SymbolMM:
                     else:
                         action =SELL
 
-                    self.post_cmd(order, abs(price),board_lot,action)
+
+                    if action==BUY:
+
+                        self.post_cmd(order, abs(price),int(board_lot*o_bid_mult),action)
+                    else:
+                        self.post_cmd(order, abs(price),int(board_lot*o_ask_mult),action)
+
 
 
     def inspection_restrictive(self):
