@@ -4,7 +4,7 @@ import tkinter as tk
 import requests 
 from dataclasses import make_dataclass, asdict, field
 from Util_functions import *
-
+import time
 import tkinter as tk
 from tkinter import ttk
 import os
@@ -600,6 +600,9 @@ class SymbolMM:
         for i in cancel_list:
             self.cancel_order(self.order_book[i])
 
+        #if len(cancel_list)>0:
+            
+
         order = self.vars['d_Venue'][0].get()
 
         print(self.symbol,vals)
@@ -607,6 +610,7 @@ class SymbolMM:
         message(f'{self.symbol} order check, already posted : {list(self.order_book.keys())}',LOG)
         if len(cancel_list)>0:
             message(f'{self.symbol} order check, canceling {cancel_list}',LOG)
+            time.sleep(0.2)
         if len(send_list)>0:
             message(f'{self.symbol} order check, sending: {send_list}',LOG)
 
