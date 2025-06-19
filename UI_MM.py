@@ -714,8 +714,7 @@ MARKET['.CC'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
 				 "CHIX ACTION SMART Limit Broker DAY"]
 
 
-MARKET['RESERVE'] = ['AEQN Buy AequitasLIT Limit Broker DAY Reserve',
-'AEQN Sell->Short AequitasLIT Limit Broker DAY Reserve']
+MARKET['RESERVE'] = ['AEQN ACTION AequitasLIT Limit Broker DAY Reserve']
 
 if __name__ == '__main__':
 
