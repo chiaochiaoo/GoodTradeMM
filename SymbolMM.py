@@ -177,6 +177,10 @@ class SymbolMM:
         self.svi_trade = 0
         self.svi_tradep =0 
 
+        self.board_lot = 100
+        self.tick_size = 0.01
+
+
         self.reserve_orders = []
 
         self.today =  datetime.now().strftime("%Y-%m-%d")
@@ -830,7 +834,11 @@ class SymbolMM:
         req = f'http://127.0.0.1:8080/ExecuteOrder?symbol={str(self.symbol)}&limitprice={str(price)}&ordername={order}&shares={str(share)}'
         
 
-        message(f'{self.symbol} order: {price} {share} {action} with {order}',LOG)
+        if 'Reserve' in order:
+            req = req +'&displaysize='+str(int(self.board_lot))
+            message(f'{self.symbol} order: {price} {share} {action} with {order}   cmd {req}',LOG)
+        else:
+            message(f'{self.symbol} order: {price} {share} {action} with {order}',LOG)
 
         r = requests.post(req)
 
@@ -960,6 +968,9 @@ class SymbolMM:
 
         self.vars['boardlot'][0].set(board_lot)
         self.vars['ticksize'][0].set(tick_size)
+
+        self.board_lot = board_lot
+        self.tick_size = tick_size
 
         self.board_setting= True 
 

@@ -603,9 +603,15 @@ class UI(pannel):
 							if ticker[-3:] in MARKET:
 								options = MARKET[ticker[-3:]]
 
-								if var.get()=="":
-									var.set(options[0])
+
+							if 'Reserve Venue' in label:
+								options = MARKET['RESERVE']
+
+							if var.get()=="":
+								var.set(options[0])
 							widget = ttk.Combobox(section_frame, textvariable=var, values=options, state="readonly", width=45)
+
+
 						else:
 							widget = ttk.Combobox(section_frame, textvariable=var, values=options, state="readonly", width=10)
 						#mm.venues_options[name] = widget
@@ -706,6 +712,11 @@ MARKET['.CC'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
 				 "OMGA ACTION OMEGASOR Limit Broker DAY",\
 				 "CXD ACTION NasdaqCXD Limit DAY",\
 				 "CHIX ACTION SMART Limit Broker DAY"]
+
+
+MARKET['RESERVE'] = ['AEQN Buy AequitasLIT Limit Broker DAY Reserve',
+'AEQN Sell->Short AequitasLIT Limit Broker DAY Reserve']
+
 if __name__ == '__main__':
 
 	root = tk.Tk() 
