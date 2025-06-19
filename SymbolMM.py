@@ -91,7 +91,7 @@ def fetch_data(symbol):
 BUY = "Buy"
 SELL ="Sell->Short"
 
-TEST_MODE = True 
+TEST_MODE = False 
 
 class SymbolMM:
     def __init__(self, symbol: str,manager, folder="configs", override=False, **override_values):
@@ -610,7 +610,7 @@ class SymbolMM:
         message(f'{self.symbol} order check, already posted : {list(self.order_book.keys())}',LOG)
         if len(cancel_list)>0:
             message(f'{self.symbol} order check, canceling {cancel_list}',LOG)
-            time.sleep(0.2)
+            time.sleep(0.5)
         if len(send_list)>0:
             message(f'{self.symbol} order check, sending: {send_list}',LOG)
 
