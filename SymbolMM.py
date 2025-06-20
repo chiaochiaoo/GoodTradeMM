@@ -91,7 +91,7 @@ def fetch_data(symbol):
 BUY = "Buy"
 SELL ="Sell->Short"
 
-TEST_MODE = False 
+TEST_MODE = True 
 
 class SymbolMM:
     def __init__(self, symbol: str,manager, folder="configs", override=False, **override_values):
@@ -356,26 +356,31 @@ class SymbolMM:
 
     def check_restrictive_condition(self):
 
-        inv =self.get_variable('cur_inv')
-        max_inv = self.get_variable('MaxInventorySize')
+        try:
+            inv = int(self.get_variable('cur_inv'))
+            max_inv = int(self.get_variable('MaxInventorySize'))
 
-        u = self.get_variable('unrealized')
-        upnl = abs(self.get_variable('MaxAllowedUPnL'))*-1
-
-        shutdown = self.get_variable('RealizedPnLShutdown')
-
-        ### 3 MODES CATEGORY. INACTIVE, RES, ELSE. 
-
-        # r_starttime = self.get_variable('r_starttime')
-        # r_stoptime = self.get_variable('r_stoptime')
+            u = int(self.get_variable('unrealized'))
 
 
-        d_starttime= self.get_variable('d_starttime')
-        d_stoptime = self.get_variable('d_stoptime')
+            upnl = abs(self.get_variable('MaxAllowedUPnL'))*-1
 
-        o_starttime = self.get_variable('o_starttime')
+            shutdown = int(self.get_variable('RealizedPnLShutdown'))
+
+            ### 3 MODES CATEGORY. INACTIVE, RES, ELSE. 
+
+            # r_starttime = self.get_variable('r_starttime')
+            # r_stoptime = self.get_variable('r_stoptime')
 
 
+            d_starttime= self.get_variable('d_starttime')
+            d_stoptime = self.get_variable('d_stoptime')
+
+            o_starttime = self.get_variable('o_starttime')
+
+        except:
+            message(f"{self.symbol} variables are not correctly set up ")
+            
         now = datetime.now()
         ts = now.hour*60 + now.minute
 
@@ -441,26 +446,32 @@ class SymbolMM:
         try:
             self.update_var_data()
         except :
-            pass 
-        if self.mode == RESTRICTIVE_MODE:
-            
-            self.inspection_restrictive()
+            pass
 
-        elif self.mode == INACTIVE:
 
-            self.insepection_inactive()
+        try: 
+            if self.mode == RESTRICTIVE_MODE:
+                
+                self.inspection_restrictive()
 
-        elif self.mode == DEFAULT_MODE:
+            elif self.mode == INACTIVE:
 
-            self.inspection_default()
+                self.insepection_inactive()
 
-        elif self.mode == OPENING_MODE:
+            elif self.mode == DEFAULT_MODE:
 
-            self.inspection_opening()
+                self.inspection_default()
 
-        elif self.mode == AGGRESIVE_MODE:
+            elif self.mode == OPENING_MODE:
 
-            self.inspection_aggresive()
+                self.inspection_opening()
+
+            elif self.mode == AGGRESIVE_MODE:
+
+                self.inspection_aggresive()
+        except Exception as e:
+            PrintException("Inspetion error")
+
 
     def init_aggresive_mode(self):
 
