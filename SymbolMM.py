@@ -598,7 +598,7 @@ class SymbolMM:
 
         send_list = []
         for price in vals.keys():
-            if price not in self.order_book.keys() and price*-1 not in self.order_book.keys():
+            if abs(price) not in self.order_book.keys() and abs(price) not in send_list:
                 send_list.append(price)
 
         for i in cancel_list:
