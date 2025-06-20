@@ -20,6 +20,7 @@ import psutil
 
 from logging_module import *
 
+from flask import Flask
 
 # get_open_orders('QIAOSUN')
 # while True:
@@ -62,12 +63,27 @@ class Manager:
 		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
 		x.start()
 
-
+		self.app = Flask('GoodTrade')
+		self._setup_routes()
 		# x2 = threading.Thread(target=self.connectivity_check, daemon=True)
 		# x2.start()
 
+		self.start_server()
 		self.start_all_inactive()
 
+	def _setup_routes(self):
+		@self.app.route('/symbol', methods=['GET'])
+		def get_symbol():
+			# You can customize this return as needed
+			return f"{list(self.symbols.keys())}"
+
+	def start_server(self):
+		thread = threading.Thread(target=self._run_flask)
+		thread.daemon = True  # allows program to exit even if thread is running
+		thread.start()
+
+	def _run_flask(self):
+		self.app.run(port=8888, use_reloader=False)
 
 	def get_svi_order_check(self):
 
