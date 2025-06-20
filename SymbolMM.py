@@ -586,12 +586,12 @@ class SymbolMM:
         ## for the order already there' and in svi. 
 
 
-        # for price in self.order_book.keys():
-        #     if price>0 and price>self.buyzone3:
-        #         if self.svi_order_check(price)==True:
+        for price in self.order_book.keys():
+            if price>0 and price>self.buyzone3:
+                if self.svi_order_check(price)==True:
 
-        #             message(f'{self.symbol} SVI trader present at : {price}',LOG)
-        #             cancel_list.append(price)
+                    message(f'{self.symbol} SVI trader present at : {price}',LOG)
+                    cancel_list.append(price)
 
         cancel_list=list(set(cancel_list))
 
