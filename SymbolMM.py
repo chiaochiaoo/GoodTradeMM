@@ -91,7 +91,7 @@ def fetch_data(symbol):
 BUY = "Buy"
 SELL ="Sell->Short"
 
-TEST_MODE = True 
+TEST_MODE = False 
 
 class SymbolMM:
     def __init__(self, symbol: str,manager, folder="configs", override=False, **override_values):
@@ -380,7 +380,7 @@ class SymbolMM:
 
         except:
             message(f"{self.symbol} variables are not correctly set up ")
-            
+
         now = datetime.now()
         ts = now.hour*60 + now.minute
 
