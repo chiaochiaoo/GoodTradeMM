@@ -336,7 +336,7 @@ class SymbolMM:
 
             
         except:
-            print('svi server cannot reach.')
+            message('svi server cannot reach.',NOTIFICATION)
 
 
         if self.total_trade!=0:
@@ -379,7 +379,7 @@ class SymbolMM:
             o_starttime = self.get_variable('o_starttime')
 
         except:
-            message(f"{self.symbol} variables are not correctly set up ")
+            message(f"{self.symbol} variables are not correctly set up ",NOTIFICATION)
 
         now = datetime.now()
         ts = now.hour*60 + now.minute
