@@ -596,9 +596,12 @@ class SymbolMM:
         cancel_list=list(set(cancel_list))
 
 
+        abs_keys_set = {abs(key) for key in self.order_book.keys()}
+
+
         send_list = []
         for price in vals.keys():
-            if abs(price) not in self.order_book.keys() and abs(price) not in send_list:
+            if abs(price) not in abs_keys_set and abs(price) not in send_list:
                 send_list.append(price)
 
         for i in cancel_list:
@@ -612,6 +615,7 @@ class SymbolMM:
         print(self.symbol,vals)
         message(f'{self.symbol} order check, should have : {list(vals.keys())}',LOG)
         message(f'{self.symbol} order check, already posted : {list(self.order_book.keys())}',LOG)
+        message(f'{self.symbol} order set : {abs_keys_set}',LOG)
         if len(cancel_list)>0:
             message(f'{self.symbol} order check, canceling {cancel_list}',LOG)
             time.sleep(0.5)
@@ -621,7 +625,7 @@ class SymbolMM:
 
         for price in send_list:
 
-            if price in self.reserve_orders:
+            if price in self.reserve_orders and TEST_MODE==False:
                 order = self.vars['r_Venue'][0].get()
             else:
                 order = self.vars['d_Venue'][0].get()
