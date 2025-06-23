@@ -557,7 +557,8 @@ class SymbolMM:
                     price = self.rbids[0]
                     ACTION = SELL
 
-                self.post_cmd(order,price,self.aggresive_order_book[ts],ACTION)
+                if self.aggresive_order_book[ts]!=0:
+                    self.post_cmd(order,price,self.aggresive_order_book[ts],ACTION)
 
         if ts> list(self.aggresive_order_book.keys())[-1]:
             message(f'{self.symbol} aggresive mode finish')
