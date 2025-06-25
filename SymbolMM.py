@@ -190,6 +190,12 @@ class SymbolMM:
 
         self.volume_update_ts = 0
 
+
+        self.sell_percentage = 0
+        self.ask_sell_percentage = 0
+        self.buy_percentage = 0
+        self.bid_buy_percentage =0
+
         
         self.reserve_orders = []
 
