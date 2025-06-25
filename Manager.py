@@ -101,20 +101,75 @@ class Manager:
 		# print("Columns in 'orderdata' table:")
 		# for column in self.cursor.fetchall():
 		# 	print(f"- {column[0]}")
-		query = """
-		SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, EXTRA
-		FROM INFORMATION_SCHEMA.COLUMNS
-		WHERE TABLE_SCHEMA = 'summitdata' AND TABLE_NAME = 'orderdata'
-		"""
-		self.cursor.execute(query)
-		for row in self.cursor.fetchall():
-			print(row)
+		# query = """
+		# SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, EXTRA
+		# FROM INFORMATION_SCHEMA.COLUMNS
+		# WHERE TABLE_SCHEMA = 'summitdata' AND TABLE_NAME = 'mmdata'
+		# """
+		# self.cursor.execute(query)
+		# for row in self.cursor.fetchall():
+		# 	print(row)
 
 		# self.insert_order('test','test','test',1,1)
 		
 		# self.insert_cancel(1,'test','test')
 
 		#self.insert_order('symbol','side','order_number','price',shares,1,'test')
+
+		#self.insert_volume_status('test',1,1,1,1,1)
+	def insert_volume_status(self, symbol, p_timeatbid, p_timeatl1bid, p_timeatask, p_timeatl1ask, volume):
+	    computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	    marketdate    = datetime.now().strftime('%Y-%m-%d')
+
+	    # if you ever want to store raw counters instead of zeros, compute them here
+	    timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
+
+	    try:
+	        query = """
+	        INSERT INTO mmdata (
+	            MarketDate,
+	            Symbol,
+	            TimeAtBid,
+	            TimeAtAsk,
+	            TimeAtL1Bid,
+	            TimeAtL1Ask,
+	            TimeAtBidPercentage,
+	            TimeAtAskPercentage,
+	            TimeAtL1BidPercentage,
+	            TimeAtL1AskPercentage,
+	            TradedSharesByUs
+	        ) VALUES (
+	            %s, %s, %s, %s, %s,
+	            %s, %s, %s, %s, %s, %s
+	        )
+	        ON DUPLICATE KEY UPDATE
+	            TimeAtBid             = VALUES(TimeAtBid),
+	            TimeAtAsk             = VALUES(TimeAtAsk),
+	            TimeAtL1Bid           = VALUES(TimeAtL1Bid),
+	            TimeAtL1Ask           = VALUES(TimeAtL1Ask),
+	            TimeAtBidPercentage   = VALUES(TimeAtBidPercentage),
+	            TimeAtAskPercentage   = VALUES(TimeAtAskPercentage),
+	            TimeAtL1BidPercentage = VALUES(TimeAtL1BidPercentage),
+	            TimeAtL1AskPercentage = VALUES(TimeAtL1AskPercentage),
+	            TradedSharesByUs      = VALUES(TradedSharesByUs)
+	        """
+	        self.cursor.execute(query, (
+	            marketdate,
+	            symbol,
+	            timeatbid,
+	            timeatask,
+	            timeatl1bid,
+	            timeatl1ask,
+	            p_timeatbid,
+	            p_timeatl1ask,
+	            p_timeatl1bid,
+	            p_timeatask,
+	            volume
+	        ))
+	        self.conn.commit()
+
+	    except Exception as e:
+	        message(f"Database volume submission error: {e}", NOTIFICATION)
 
 	def insert_order(
 		self,

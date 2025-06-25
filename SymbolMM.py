@@ -219,8 +219,11 @@ class SymbolMM:
             self.time_at_ask=0
             self.time_best_bid=0
             self.time_best_ask=0
-            
 
+        if ts%2==0:
+
+            self.manager.insert_volume_status(self.symbol,self.time_at_bid,self.time_best_bid,self.time_at_ask,self.time_best_ask,self.cur_trade)
+            message(f'submimit {self.symbol,self.time_at_bid,self.time_best_bid,self.time_at_ask,self.time_best_ask,self.cur_trade} to databse',LOG)
     def delete(self):
         self.manager.ui.delete_ticker(self.symbol)
     def clear_reserve_orders(self):
