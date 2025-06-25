@@ -16,6 +16,10 @@ import mysql.connector
 from logging_module import *
 
 
+
+TEST_MODE = False 
+
+
 ALGO ="Algo Manger"
 def find_between(data, first, last):
     try:
@@ -24,9 +28,6 @@ def find_between(data, first, last):
         return data[start:end]
     except ValueError:
         return data
-
-
-# http://localhost:8080/CancelOrder?type=ordernumber&ordernumber=QIAOSUN_00000007M17D25C100000
 
 
 def fetch_data(symbol):
@@ -91,7 +92,6 @@ def fetch_data(symbol):
 BUY = "Buy"
 SELL ="Sell->Short"
 
-TEST_MODE = False 
 
 class SymbolMM:
     def __init__(self, symbol: str,manager, folder="configs", override=False, **override_values):
@@ -181,6 +181,14 @@ class SymbolMM:
         self.tick_size = 0.01
 
 
+
+        self.inspection_count=0
+        self.time_at_bid=0
+        self.time_at_ask=0
+        self.time_best_bid=0
+        self.time_best_ask=0
+
+
         self.reserve_orders = []
 
         self.today =  datetime.now().strftime("%Y-%m-%d")
@@ -190,6 +198,28 @@ class SymbolMM:
 
     # def save(self):
     #     pass 
+
+    def check_today(self):
+
+        today = datetime.now().strftime("%Y-%m-%d")
+
+
+
+        now = datetime.now()
+        ts = now.hour*60 + now.minute
+
+
+        if ts>=570 and ts<=960:
+            self.inspection_count+=1
+
+        if today!=self.today:
+            message(f'New Day detected {today}',NOTIFICATION)
+            self.inspection_count=0
+            self.time_at_bid=0
+            self.time_at_ask=0
+            self.time_best_bid=0
+            self.time_best_ask=0
+            
 
     def delete(self):
         self.manager.ui.delete_ticker(self.symbol)
@@ -443,10 +473,14 @@ class SymbolMM:
         self.check_restrictive_condition()
         self.clear_reserve_orders()
 
+        self.check_today()
+
         try:
             self.update_var_data()
         except :
             pass
+
+
 
 
         try: 
@@ -704,7 +738,35 @@ class SymbolMM:
                     orders[val] = board_lot*global_ask_mult
         orders = self.inventory_check(orders)
 
+
+
+        self.bid_ask_time_check(orders)
         self.update_order_book(orders)
+
+
+    def bid_ask_time_check(self,orders):
+
+        on_bid = any(price <= self.bid for price in orders)
+        on_ask = any(abs(price) >= self.ask for price in orders)
+        has_bid = any(price > 0 for price in orders)
+        has_ask = any(price < 0 for price in orders)
+
+        if on_bid:
+            self.time_best_bid+=1
+        if on_ask:
+            self.time_best_ask+=1
+        if has_bid:
+            self.time_at_bid+=1
+        if has_ask:
+            self.time_at_ask+=1
+
+
+        self.sell_percentage = round(self.time_at_ask*100/self.inspection_count,2)
+        self.ask_sell_percentage = round(self.time_best_ask*100/self.inspection_count,2)
+        self.buy_percentage = round(self.time_at_bid*100/self.inspection_count,2)
+        self.bid_buy_percentage =round(self.time_best_bid*100/self.inspection_count,2)
+
+        message(f'{self.symbol} current BuyP {self.buy_percentage} BidP {self.bid_buy_percentage} SellP {self.ask_sell_percentage} AskP {self.sell_percentage}',LOG)
 
     def inspection_opening(self):
 
@@ -818,7 +880,9 @@ class SymbolMM:
             else:
                 orders[val] = board_lot*res_ask_mult
 
+
         orders = self.inventory_check(orders)
+        self.bid_ask_time_check(orders)
         self.update_order_book(orders)
 
     def cancel_orders(self):
@@ -843,10 +907,26 @@ class SymbolMM:
 
     def post_cmd(self,order,price,share,action):
 
+
+
+
+        # symbol,                # e.g., "ACHR.NY"
+        # side,                  # e.g., "B" or "S"
+        # order_number,          # for tracking, stored in PapiID
+        # price,                 # float
+        # shares,                # int, optional (can be None)
+        # depth_level=0,         # default value if unknown
+
+        if action==BUY:
+            self.manager.insert_order(self.symbol,'B',0,price,share)
+        else:
+            self.manager.insert_order(self.symbol,'S',0,price,share)
+
         order = order.replace("ACTION",action)
 
         if TEST_MODE:
             order = order.replace("Broker ","")
+
         req = f'http://127.0.0.1:8080/ExecuteOrder?symbol={str(self.symbol)}&limitprice={str(price)}&ordername={order}&shares={str(share)}'
         
 

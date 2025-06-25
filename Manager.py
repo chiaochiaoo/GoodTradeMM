@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 
 from psutil import process_iter
 import psutil
-
+import mysql.connector
 from logging_module import *
 
 from flask import Flask
@@ -68,8 +68,112 @@ class Manager:
 		# x2 = threading.Thread(target=self.connectivity_check, daemon=True)
 		# x2.start()
 
+		try:
+			self.conn = mysql.connector.connect(
+				user="webuser",
+				password="Domination77$$",
+				host="10.29.10.143",
+				database="summitdata",
+				port=3306,
+				auth_plugin='mysql_native_password'
+			)
+			self.cursor = self.conn.cursor()
+			message(f'Database connected',NOTIFICATION)
+		except Exception as e:
+			message(f'Database cannot connect',NOTIFICATION)
+
 		self.start_server()
 		self.start_all_inactive()
+
+
+
+		# Query to get columns
+		# self.cursor.execute("SHOW COLUMNS FROM orderdata")
+
+		# print("Columns in 'orderdata' table:")
+		# for column in self.cursor.fetchall():
+		# 	print(f"- {column[0]}")
+
+
+		# 	# Query to get columns
+		# self.cursor.execute("SHOW COLUMNS FROM canceldata")
+
+		# print("Columns in 'orderdata' table:")
+		# for column in self.cursor.fetchall():
+		# 	print(f"- {column[0]}")
+		query = """
+		SELECT COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, EXTRA
+		FROM INFORMATION_SCHEMA.COLUMNS
+		WHERE TABLE_SCHEMA = 'summitdata' AND TABLE_NAME = 'orderdata'
+		"""
+		self.cursor.execute(query)
+		for row in self.cursor.fetchall():
+			print(row)
+
+		# self.insert_order('test','test','test',1,1)
+		
+		# self.insert_cancel(1,'test','test')
+
+		#self.insert_order('symbol','side','order_number','price',shares,1,'test')
+
+	def insert_order(
+		self,
+		symbol,                # e.g., "ACHR.NY"
+		side,                  # e.g., "B" or "S"
+		order_number,          # for tracking, stored in PapiID
+		price,                 # float
+		shares,                # int, optional (can be None)
+		depth_level=0,         # default value if unknown
+		messageX="OrderStatus"  # optional, for completeness
+	):
+
+
+		try:
+			query = """
+				INSERT INTO orderdata (
+					MarketDate,
+					ComputerTime,
+					Message,
+					Symbol,
+					Trader,
+					DepthLevel,
+					Price,
+					Side,
+					PapiID,
+					Size
+				) VALUES (
+					%s, %s, %s, %s, %s,
+					%s, %s, %s, %s, %s
+				)
+			"""
+
+			computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+			self.cursor.execute(query, (
+				computer_time,
+				computer_time,
+				messageX,
+				symbol,
+				self.user,
+				depth_level,
+				price,
+				side,
+				order_number,  # stored in PapiID
+				shares
+			))
+			self.conn.commit()
+			print('databse order submited')
+		except Exception as e:
+			message(f"database order submission error {e}",NOTIFICATION)
+
+			
+	def insert_cancel(self, order_number, symbol, reason):
+		query = """
+			INSERT INTO canceldata (order_number, symbol, reason)
+			VALUES (%s, %s, %s)
+		"""
+		self.cursor.execute(query, (order_number, symbol, reason))
+		self.conn.commit()
+
 
 	def _setup_routes(self):
 		@self.app.route('/symbol', methods=['GET'])
