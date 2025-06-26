@@ -11,6 +11,7 @@ import os
 from constant import *
 from datetime import datetime
 
+from collections import deque
 import mysql.connector
 
 from logging_module import *
@@ -199,6 +200,10 @@ class SymbolMM:
         
         self.reserve_orders = []
 
+        self.price_check = deque(maxlen=5)
+
+        self.price_check_successful = True
+
         self.today =  datetime.now().strftime("%Y-%m-%d")
 
         self.vars['Status'][0].trace_add("write", self.update_status)
@@ -207,6 +212,28 @@ class SymbolMM:
     # def save(self):
     #     pass 
 
+    def check_price_validity(self,bid,ask):
+
+
+        self.price_check.append(bid)
+
+       # print(len(self.price_check))
+
+        c=0
+        d=0
+        for i in self.price_check:
+            d+=abs(bid-i)
+            c+=1
+
+        avg_diff = round(d/c,2)
+
+        if bid!=self.bid:
+            if avg_diff>=0.15:
+                message(f'{self.symbol} l1 update UNSUCCES, {avg_diff} current price {bid}  and {ask} , pool {self.price_check}',LOG)
+                self.price_check_successful=False
+            else:
+                message(f'{self.symbol} l1 update success, {avg_diff} current price {bid}  and {ask} , pool {self.price_check}',LOG)
+                self.price_check_successful=True
     def check_today(self):
 
         today = datetime.now().strftime("%Y-%m-%d")
@@ -484,41 +511,45 @@ class SymbolMM:
 
     def sysmbol_inspection(self):
 
-        self.check_restrictive_condition()
-        self.clear_reserve_orders()
 
-        self.check_today()
+        if self.price_check_successful:
+            self.check_restrictive_condition()
+            self.clear_reserve_orders()
 
-        try:
-            self.update_var_data()
-        except :
-            pass
+            self.check_today()
+
+            try:
+                self.update_var_data()
+            except :
+                pass
 
 
 
 
-        try: 
-            if self.mode == RESTRICTIVE_MODE:
-                
-                self.inspection_restrictive()
+            try: 
+                if self.mode == RESTRICTIVE_MODE:
+                    
+                    self.inspection_restrictive()
 
-            elif self.mode == INACTIVE:
+                elif self.mode == INACTIVE:
 
-                self.insepection_inactive()
+                    self.insepection_inactive()
 
-            elif self.mode == DEFAULT_MODE:
+                elif self.mode == DEFAULT_MODE:
 
-                self.inspection_default()
+                    self.inspection_default()
 
-            elif self.mode == OPENING_MODE:
+                elif self.mode == OPENING_MODE:
 
-                self.inspection_opening()
+                    self.inspection_opening()
 
-            elif self.mode == AGGRESIVE_MODE:
+                elif self.mode == AGGRESIVE_MODE:
 
-                self.inspection_aggresive()
-        except Exception as e:
-            PrintException("Inspetion error")
+                    self.inspection_aggresive()
+            except Exception as e:
+                PrintException("Inspetion error")
+        else:
+            message(f' {self.symbol} may have erroenous price. skip inspection.',LOG)
 
 
     def init_aggresive_mode(self):
@@ -991,6 +1022,11 @@ class SymbolMM:
             ts = find_between(stream_data, "MarketTime=\"", "\"")
             volume = int(find_between(stream_data, "Volume=\"", "\""))
 
+            ################################
+            ##### need validity check. #####
+            ################################
+
+
             if self.bid!=bid:
                 self.bid_change = True 
             else:
@@ -1000,55 +1036,60 @@ class SymbolMM:
                 self.ask_change = True 
             else:
                 self.ask_change = False 
+            
+            self.check_price_validity(bid,ask)
 
-            self.bid = bid
-            self.ask = ask
+            if self.price_check_successful:
+                self.bid = bid
+                self.ask = ask
 
-            self.total_trade = volume
+                
 
-            self.spread = self.ask-self.bid
+                self.total_trade = volume
 
-            self.nbids[0]=bid
-            self.nasks[0]=ask
+                self.spread = self.ask-self.bid
 
-
-            self.adj_spread =  self.vars['AdjustedSpread'][0].get()
-
-            if self.adj_spread>=self.ask-self.bid:
-                self.adj_spread = self.ask-self.bid
-
-            if self.adj_spread<0.005:
-                self.adj_spread=0.005
-
-            if ask>=0.51:
-                self.rbids[0]=round(ask-self.adj_spread,2)
-            else:
-                self.rbids[0]=round(ask-self.adj_spread,3)
-
-            if bid>=0.51:
-                self.rasks[0]=round(bid+self.adj_spread,2)
-            else:
-                self.rasks[0]=round(bid+self.adj_spread,3)
+                self.nbids[0]=bid
+                self.nasks[0]=ask
 
 
-            self.pc = pc
-            self.l1_ts =ts
+                self.adj_spread =  self.vars['AdjustedSpread'][0].get()
+
+                if self.adj_spread>=self.ask-self.bid:
+                    self.adj_spread = self.ask-self.bid
+
+                if self.adj_spread<0.005:
+                    self.adj_spread=0.005
+
+                if ask>=0.51:
+                    self.rbids[0]=round(ask-self.adj_spread,2)
+                else:
+                    self.rbids[0]=round(ask-self.adj_spread,3)
+
+                if bid>=0.51:
+                    self.rasks[0]=round(bid+self.adj_spread,2)
+                else:
+                    self.rasks[0]=round(bid+self.adj_spread,3)
 
 
-            if self.inv>0:
-                self.unreal = round(((self.bid-self.average_price)*self.inv),2)
-            else:
-                self.unreal = round(((self.average_price-self.ask)*abs(self.inv)),2)
+                self.pc = pc
+                self.l1_ts =ts
 
 
-            self.vars['bid'][0].set(self.bid)
-            self.vars['ask'][0].set(self.ask)
-            self.vars['unrealized'][0].set(self.unreal)
+                if self.inv>0:
+                    self.unreal = round(((self.bid-self.average_price)*self.inv),2)
+                else:
+                    self.unreal = round(((self.average_price-self.ask)*abs(self.inv)),2)
 
-            if self.bid>0 and self.board_setting==False:
-                self.check_boardlot()
 
-            self.get_nbbo_depth()
+                self.vars['bid'][0].set(self.bid)
+                self.vars['ask'][0].set(self.ask)
+                self.vars['unrealized'][0].set(self.unreal)
+
+                if self.bid>0 and self.board_setting==False:
+                    self.check_boardlot()
+
+                self.get_nbbo_depth()
 
         except Exception as e:
             #print(e)
