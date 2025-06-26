@@ -760,8 +760,8 @@ class SymbolMM:
 
     def bid_ask_time_check(self,orders):
 
-        on_bid = any(price <= self.bid for price in orders)
-        on_ask = any(abs(price) >= self.ask for price in orders)
+        on_bid = any(price == self.bid for price in orders)
+        on_ask = any(abs(price) == self.ask for price in orders)
         has_bid = any(price > 0 for price in orders)
         has_ask = any(price < 0 for price in orders)
 
