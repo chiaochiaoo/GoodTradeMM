@@ -229,7 +229,7 @@ class SymbolMM:
 
         if bid!=self.bid:
             if avg_diff>=0.15:
-                message(f'{self.symbol} l1 update UNSUCCES, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check}',LOG)
+                message(f'{self.symbol} l1 update UNSUCCES, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check} please check',NOTIFICATION)
                 self.price_check_successful=False
             else:
                 message(f'{self.symbol} l1 update success, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check}',LOG)
