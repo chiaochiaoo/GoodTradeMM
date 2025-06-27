@@ -405,6 +405,8 @@ class SymbolMM:
             resp = requests.get("http://127.0.0.1:8000/traded_volume", params={"symbol": self.symbol})
             self.svi_trade = resp.json()['volume']
 
+            self.svi_trade += self.cur_trade
+
             
         except:
             message('svi server cannot reach.',NOTIFICATION)
