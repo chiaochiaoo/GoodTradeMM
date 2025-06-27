@@ -413,8 +413,8 @@ class SymbolMM:
 
 
         if self.total_trade!=0:
-            self.svi_tradep = round(self.svi_trade/self.total_trade,2)
-            self.cur_tradep = round(self.cur_trade/self.total_trade,2)
+            self.svi_tradep = round(self.svi_trade*100/self.total_trade,2)
+            self.cur_tradep = round(self.cur_trade*100/self.total_trade,2)
 
         #print(self.symbol,self.cur_trade,self.cur_tradep,self.cur_trade/self.total_trade,self.total_trade)
 
