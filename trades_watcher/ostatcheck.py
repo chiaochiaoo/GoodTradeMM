@@ -63,7 +63,11 @@ def order_exists():
     price = data.get("price")
     if not all([symbol, side, price]):
         return jsonify({"error": "Missing parameters"}), 400
-    exists = bridge.OrderExists(symbol, side, price)
+
+    try:
+        exists = bridge.OrderExists(symbol, side, price)
+    except:
+        exists = False
     return jsonify({"exists": exists})
 
 @app.route('/traded_volume', methods=['GET'])
@@ -71,7 +75,11 @@ def traded_volume():
     symbol = request.args.get("symbol")
     if not symbol:
         return jsonify({"error": "Missing symbol"}), 400
-    volume = bridge.GetTradedVolume(symbol)
+
+    try:
+        volume = bridge.GetTradedVolume(symbol)
+    except:
+        volume =0
     return jsonify({"volume": volume})
 
 if __name__ == '__main__':
