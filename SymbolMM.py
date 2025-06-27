@@ -425,7 +425,7 @@ class SymbolMM:
         self.set_variable('svi_traded',self.svi_trade)
         self.set_variable('svi_tradedp',self.svi_tradep)
 
-        message(f'{self.symbol} our trade volume {self.cur_trade} firm trade volume {self.svi_trade}',LOG)
+        #message(f'{self.symbol} our trade volume {self.cur_trade} firm trade volume {self.svi_trade}',LOG)
 
     def check_restrictive_condition(self):
 
