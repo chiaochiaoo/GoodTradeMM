@@ -405,7 +405,7 @@ class SymbolMM:
             resp = requests.get("http://127.0.0.1:8000/traded_volume", params={"symbol": self.symbol})
             self.svi_trade = resp.json()['volume']
 
-            self.svi_trade += self.cur_trade
+            #self.svi_trade += self.cur_trade
 
             
         except:
@@ -425,7 +425,7 @@ class SymbolMM:
         self.set_variable('svi_traded',self.svi_trade)
         self.set_variable('svi_tradedp',self.svi_tradep)
 
-
+        message(f'{self.symbol} our trade volume {self.cur_trade} firm trade volume {self.svi_trade}',NOTIFICATION)
 
     def check_restrictive_condition(self):
 
