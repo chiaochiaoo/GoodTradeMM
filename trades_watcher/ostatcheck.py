@@ -43,7 +43,7 @@ def init_at_930():
     global bridge
     while True:
         now = datetime.now().time()
-        if now >= dtime(9, 30):
+        if now >= dtime(7, 30):
             print("[Init] Time reached 09:30. Initializing bridge...")
             bridge = OstatPythonBridge()
             bridge.StartListening()
