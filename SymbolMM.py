@@ -741,10 +741,14 @@ class SymbolMM:
         sellzone1 = self.get_variable('SellZone1')
 
         #print("Default Check:",self.spread>=self.adj_spread,self.bid <= sellzone1)
+
+        inv = int(self.get_variable('cur_inv'))
+        max_inv = int(self.get_variable('MaxInventorySize'))
+
         if self.spread>=self.adj_spread and self.ask < sellzone1:
             vals = [self.rbids[0],self.rbids[1],self.rbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
 
-        elif self.spread>=self.adj_spread and self.ask >= sellzone1:
+        elif self.spread>=self.adj_spread and self.ask >= sellzone1 and inv>=int(max_inv*0.8):
             vals = [self.nbids[0],self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1,self.rasks[2]*-1]
 
 

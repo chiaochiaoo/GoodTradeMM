@@ -591,7 +591,7 @@ def force_close_port(port, process_name=None):
 if __name__ == '__main__':
 
 	root = tk.Tk() 
-	root.title("GoodTrade Algo Manager Market Making v1") 
+	root.title("GoodTrade Algo Manager Market Making b.v.1") 
 	#root.geometry("1380x780")
 	root.geometry("1520x1080")
 
