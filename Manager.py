@@ -161,9 +161,9 @@ class Manager:
 	            timeatl1bid,
 	            timeatl1ask,
 	            p_timeatbid,
-	            p_timeatl1ask,
-	            p_timeatl1bid,
 	            p_timeatask,
+	            p_timeatl1bid,
+	            p_timeatl1ask,
 	            volume
 	        ))
 	        self.conn.commit()
