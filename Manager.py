@@ -451,7 +451,10 @@ class Manager:
 				# #pipe.send(["order confirm",data])
 
 
-				if symbol in self.symbols:
+		        now = datetime.now()
+		        ts = now.hour*60 + now.minute
+
+				if symbol in self.symbols and ts>=565:
 
 					self.symbols[symbol].add_trade_volume(share)
 
