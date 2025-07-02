@@ -451,8 +451,8 @@ class Manager:
 				# #pipe.send(["order confirm",data])
 
 
-		        now = datetime.now()
-		        ts = now.hour*60 + now.minute
+				now = datetime.now()
+				ts = now.hour*60 + now.minute
 
 				if symbol in self.symbols and ts>=565:
 
