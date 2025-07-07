@@ -245,7 +245,8 @@ class UI(pannel):
 		row +=1
 		ttk.Button(self.system_pannel, text="Save All Tickers", command=self.save_tickers).grid(row=row, column=1)
 		ttk.Button(self.system_pannel, text="Fetch All Database", command=self.manager.fetch_all_database).grid(row=row, column=2)
-
+		ttk.Button(self.system_pannel, text="TMS Mode",command=self.manager.tms_testing_mode).grid(row=row,column=3)
+		
 		row +=1
 
 		ttk.Button(self.system_pannel, text="Start All Inactive", command=self.manager.start_all_inactive).grid(row=row, column=1)

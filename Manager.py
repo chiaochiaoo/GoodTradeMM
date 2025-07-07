@@ -26,7 +26,7 @@ from flask import Flask
 # while True:
 # 	a=1
 
-TEST_MODE = False 
+
 class Manager:
 
 	def __init__(self,root):
@@ -40,7 +40,7 @@ class Manager:
 		
 		self.ui = UI(root,self,self.system_status)
 
-
+		self.TEST_MODE = False 
 		#ui = self.ui
 
 		set_ui(self.ui)
@@ -117,6 +117,11 @@ class Manager:
 		#self.insert_order('symbol','side','order_number','price',shares,1,'test')
 
 		#self.insert_volume_status('test',1,1,1,1,1)
+
+	def tms_testing_mode(self):
+		self.TEST_MODE=True
+		print('test mode on')
+
 	def insert_volume_status(self, symbol, p_timeatbid, p_timeatl1bid, p_timeatask, p_timeatl1ask, volume):
 	    computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 	    marketdate    = datetime.now().strftime('%Y-%m-%d')

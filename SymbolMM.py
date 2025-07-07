@@ -17,10 +17,6 @@ import mysql.connector
 from logging_module import *
 
 
-
-TEST_MODE = False 
-
-
 ALGO ="Algo Manger"
 def find_between(data, first, last):
     try:
@@ -718,7 +714,7 @@ class SymbolMM:
 
         for price in send_list:
 
-            if price in self.reserve_orders and TEST_MODE==False:
+            if price in self.reserve_orders and self.manager.TEST_MODE==False:
                 order = self.vars['r_Venue'][0].get()
             else:
                 order = self.vars['d_Venue'][0].get()
@@ -975,7 +971,7 @@ class SymbolMM:
 
         order = order.replace("ACTION",action)
 
-        if TEST_MODE:
+        if self.manager.TEST_MODE:
             order = order.replace("Broker ","")
 
         req = f'http://127.0.0.1:8080/ExecuteOrder?symbol={str(self.symbol)}&limitprice={str(price)}&ordername={order}&shares={str(share)}'
