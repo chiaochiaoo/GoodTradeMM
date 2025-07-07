@@ -281,21 +281,35 @@ class Manager:
 
 	def start_all_inactive(self):
 
-		for symbol in self.symbols.keys():
+
+		keys =  list(self.symbols.keys())
+		
+		for symbol in keys:
 			self.symbols[symbol].start_pending()	
 
 	def start_all_restrictive(self):
 
-		for symbol in self.symbols.keys():
+		#for symbol in self.symbols.keys():
+		
+		keys =  list(self.symbols.keys())
+		
+		for symbol in keys:
 			self.symbols[symbol].start_restrictive()
 	def start_all_default(self):
 
-		for symbol in self.symbols.keys():
+		#for symbol in self.symbols.keys():
+
+		keys =  list(self.symbols.keys())
+		
+		for symbol in keys:
 			self.symbols[symbol].start_default()
 
 	def start_all_opening(self):
 
-		for symbol in self.symbols.keys():
+		keys =  list(self.symbols.keys())
+		
+		for symbol in keys:
+		#for symbol in self.symbols.keys():
 			self.symbols[symbol].start_opening()
 
 	def set_connected(self):
@@ -355,7 +369,7 @@ class Manager:
 				#print("DIC check:",len(self.positions),c)
 
 
-				self.position_count.set(len(self.positions))
+				self.position_count.set(len(self.symbols))
 				self.order_count.set(c)
 				
 			except Exception as e:
@@ -364,15 +378,20 @@ class Manager:
 
 			try:
 				if self.get_connectivity():
-					for symbol in self.symbols.keys():
-						self.symbols[symbol].update_data()
 
-						if symbol in self.open_orders:
-							self.symbols[symbol].update_orderbook(self.open_orders[symbol])
-						else:
-							self.symbols[symbol].update_orderbook({})
+					keys =  list(self.symbols.keys())
 
-						self.symbols[symbol].sysmbol_inspection()
+					for symbol in keys:
+
+						if symbol in self.symbols:
+							self.symbols[symbol].update_data()
+
+							if symbol in self.open_orders:
+								self.symbols[symbol].update_orderbook(self.open_orders[symbol])
+							else:
+								self.symbols[symbol].update_orderbook({})
+
+							self.symbols[symbol].sysmbol_inspection()
 			except:
 				PrintException("Inspection error:")
 
@@ -409,7 +428,10 @@ class Manager:
 
 	def fetch_all_database(self):
 
-		for symbol in self.symbols.keys():
+
+		keys =  list(self.symbols.keys())
+		
+		for symbol in keys:
 			self.symbols[symbol].fetch_db_data()
 
 
