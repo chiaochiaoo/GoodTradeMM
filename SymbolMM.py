@@ -482,12 +482,14 @@ class SymbolMM:
                 if shutdown!=0:
                     message(f'{self.symbol} realize shutdown activated. switch to RESTRICTIVE_MODE.',NOTIFICATION)
                     self.start_restrictive()
-
+                    return 
+                if inv==0 and max_inv ==0:
+                    message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
+                    self.start_pending()
+                    return
                 if self.bid>self.buyzone3 :
 
-                    if inv==0 and max_inv ==0:
-                        message(f'{self.symbol} no position & no intend inventory. switch to INACTIVE.',NOTIFICATION)
-                        self.start_pending()
+
 
                     if  inv>=max_inv:
                         message(f'{self.symbol} inventory reach max. switch to RESTRICTIVE_MODE.',NOTIFICATION)
