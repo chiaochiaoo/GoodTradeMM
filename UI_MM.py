@@ -287,7 +287,9 @@ class UI(pannel):
 			json.dump(ticker_list, f, indent=4)
 		print(f"[Saved] {len(ticker_list)} tickers to {TICKER_CONFIG_FILE}")
 
-
+		for i in ticker_list:
+			if i in self.manager.symbols:
+				self.manager.symbols[i].save()
 
 
 	def set_user(self,user):
