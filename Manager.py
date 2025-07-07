@@ -127,58 +127,61 @@ class Manager:
 		print('test mode on')
 
 	def insert_volume_status(self, symbol, p_timeatbid, p_timeatl1bid, p_timeatask, p_timeatl1ask, volume):
-	    computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	    marketdate    = datetime.now().strftime('%Y-%m-%d')
 
-	    # if you ever want to store raw counters instead of zeros, compute them here
-	    timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
 
-	    try:
-	        query = """
-	        INSERT INTO mmdata (
-	            MarketDate,
-	            Symbol,
-	            TimeAtBid,
-	            TimeAtAsk,
-	            TimeAtL1Bid,
-	            TimeAtL1Ask,
-	            TimeAtBidPercentage,
-	            TimeAtAskPercentage,
-	            TimeAtL1BidPercentage,
-	            TimeAtL1AskPercentage,
-	            TradedSharesByUs
-	        ) VALUES (
-	            %s, %s, %s, %s, %s,
-	            %s, %s, %s, %s, %s, %s
-	        )
-	        ON DUPLICATE KEY UPDATE
-	            TimeAtBid             = VALUES(TimeAtBid),
-	            TimeAtAsk             = VALUES(TimeAtAsk),
-	            TimeAtL1Bid           = VALUES(TimeAtL1Bid),
-	            TimeAtL1Ask           = VALUES(TimeAtL1Ask),
-	            TimeAtBidPercentage   = VALUES(TimeAtBidPercentage),
-	            TimeAtAskPercentage   = VALUES(TimeAtAskPercentage),
-	            TimeAtL1BidPercentage = VALUES(TimeAtL1BidPercentage),
-	            TimeAtL1AskPercentage = VALUES(TimeAtL1AskPercentage),
-	            TradedSharesByUs      = VALUES(TradedSharesByUs)
-	        """
-	        self.cursor.execute(query, (
-	            marketdate,
-	            symbol,
-	            timeatbid,
-	            timeatask,
-	            timeatl1bid,
-	            timeatl1ask,
-	            p_timeatbid,
-	            p_timeatask,
-	            p_timeatl1bid,
-	            p_timeatl1ask,
-	            volume
-	        ))
-	        self.conn.commit()
+		if self.TEST_MODE==False:
+		    computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+		    marketdate    = datetime.now().strftime('%Y-%m-%d')
 
-	    except Exception as e:
-	        message(f"Database volume submission error: {e}", NOTIFICATION)
+		    # if you ever want to store raw counters instead of zeros, compute them here
+		    timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
+
+		    try:
+		        query = """
+		        INSERT INTO mmdata (
+		            MarketDate,
+		            Symbol,
+		            TimeAtBid,
+		            TimeAtAsk,
+		            TimeAtL1Bid,
+		            TimeAtL1Ask,
+		            TimeAtBidPercentage,
+		            TimeAtAskPercentage,
+		            TimeAtL1BidPercentage,
+		            TimeAtL1AskPercentage,
+		            TradedSharesByUs
+		        ) VALUES (
+		            %s, %s, %s, %s, %s,
+		            %s, %s, %s, %s, %s, %s
+		        )
+		        ON DUPLICATE KEY UPDATE
+		            TimeAtBid             = VALUES(TimeAtBid),
+		            TimeAtAsk             = VALUES(TimeAtAsk),
+		            TimeAtL1Bid           = VALUES(TimeAtL1Bid),
+		            TimeAtL1Ask           = VALUES(TimeAtL1Ask),
+		            TimeAtBidPercentage   = VALUES(TimeAtBidPercentage),
+		            TimeAtAskPercentage   = VALUES(TimeAtAskPercentage),
+		            TimeAtL1BidPercentage = VALUES(TimeAtL1BidPercentage),
+		            TimeAtL1AskPercentage = VALUES(TimeAtL1AskPercentage),
+		            TradedSharesByUs      = VALUES(TradedSharesByUs)
+		        """
+		        self.cursor.execute(query, (
+		            marketdate,
+		            symbol,
+		            timeatbid,
+		            timeatask,
+		            timeatl1bid,
+		            timeatl1ask,
+		            p_timeatbid,
+		            p_timeatask,
+		            p_timeatl1bid,
+		            p_timeatl1ask,
+		            volume
+		        ))
+		        self.conn.commit()
+
+		    except Exception as e:
+		        message(f"Database volume submission error: {e}", NOTIFICATION)
 
 	def insert_order(
 		self,
@@ -191,52 +194,55 @@ class Manager:
 		messageX="OrderStatus"  # optional, for completeness
 	):
 
+		if self.TEST_MODE==False:
+			try:
+				query = """
+					INSERT INTO orderdata (
+						MarketDate,
+						ComputerTime,
+						Message,
+						Symbol,
+						Trader,
+						DepthLevel,
+						Price,
+						Side,
+						PapiID,
+						Size
+					) VALUES (
+						%s, %s, %s, %s, %s,
+						%s, %s, %s, %s, %s
+					)
+				"""
 
-		try:
-			query = """
-				INSERT INTO orderdata (
-					MarketDate,
-					ComputerTime,
-					Message,
-					Symbol,
-					Trader,
-					DepthLevel,
-					Price,
-					Side,
-					PapiID,
-					Size
-				) VALUES (
-					%s, %s, %s, %s, %s,
-					%s, %s, %s, %s, %s
-				)
-			"""
-
-			computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-			self.cursor.execute(query, (
-				computer_time,
-				computer_time,
-				messageX,
-				symbol,
-				self.user,
-				depth_level,
-				price,
-				side,
-				order_number,  # stored in PapiID
-				shares
-			))
-			self.conn.commit()
-			print('databse order submited')
-		except Exception as e:
-			message(f"database order submission error {e}",NOTIFICATION)
+				computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+				self.cursor.execute(query, (
+					computer_time,
+					computer_time,
+					messageX,
+					symbol,
+					self.user,
+					depth_level,
+					price,
+					side,
+					order_number,  # stored in PapiID
+					shares
+				))
+				self.conn.commit()
+				print('databse order submited')
+			except Exception as e:
+				message(f"database order submission error {e}",NOTIFICATION)
 
 			
 	def insert_cancel(self, order_number, symbol, reason):
-		query = """
-			INSERT INTO canceldata (order_number, symbol, reason)
-			VALUES (%s, %s, %s)
-		"""
-		self.cursor.execute(query, (order_number, symbol, reason))
-		self.conn.commit()
+
+
+		if self.TEST_MODE==False:
+			query = """
+				INSERT INTO canceldata (order_number, symbol, reason)
+				VALUES (%s, %s, %s)
+			"""
+			self.cursor.execute(query, (order_number, symbol, reason))
+			self.conn.commit()
 
 
 	def _setup_routes(self):
@@ -350,9 +356,10 @@ class Manager:
 
 
 				self.position_count.set(len(self.positions))
-				self.open_orders.set(c)
+				self.order_count.set(c)
 				
 			except Exception as e:
+				print(e)
 				self.set_disconnected()
 
 			try:
