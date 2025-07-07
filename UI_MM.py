@@ -209,12 +209,14 @@ class UI(pannel):
 		row +=1
 		self.al = ttk.Label(self.system_pannel, text="Position Count::")
 		self.al.grid(sticky="w",column=1,row=row,padx=10)
-		self.algo_count_ = ttk.Label(self.system_pannel,  textvariable=self.position_count)
+		self.algo_count_ = ttk.Label(self.system_pannel,  textvariable=self.manager.position_count)
 		self.algo_count_.grid(sticky="w",column=2,row=row,padx=10)
 
 		row +=1
 		self.ol = ttk.Label(self.system_pannel, text="Orders Count::")
 		self.ol.grid(sticky="w",column=1,row=row,padx=10)
+		self.o_count_ = ttk.Label(self.system_pannel,  textvariable=self.manager.order_count)
+		self.o_count_.grid(sticky="w",column=2,row=row,padx=10)
 
 
 

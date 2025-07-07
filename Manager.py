@@ -36,6 +36,10 @@ class Manager:
 
 		self.SVI_cover_check = tk.BooleanVar(value=True)
 
+
+		self.position_count = tk.IntVar(value=0)
+		self.order_count = tk.IntVar(value=0)
+
 		self.symbols ={}
 		
 		self.ui = UI(root,self,self.system_status)
@@ -336,6 +340,17 @@ class Manager:
 				self.set_connected()
 				self.positions = get_current_positions(self.user)
 				self.open_orders = get_open_orders(self.user)
+
+				c=0
+
+				for i in self.open_orders.keys():
+
+					c+=len(self.open_orders[i])
+				#print("DIC check:",len(self.positions),c)
+
+
+				self.position_count.set(len(self.positions))
+				self.open_orders.set(c)
 				
 			except Exception as e:
 				self.set_disconnected()
