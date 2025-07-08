@@ -687,7 +687,9 @@ MARKET['.TO'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
 				 "TSX ACTION SweepSOR Limit Broker DAY",\
 				 "XCSE ACTION CSESMRT Limit Broker DAY",\
 				 "CX2 ACTION SMART Limit DAY",\
-				 "CXD ACTION NasdaqCXD Limit DAY"]
+				 "CXD ACTION NasdaqCXD Limit DAY",\
+				 "XATX ACTION AlphaX Limit Broker DAY",\
+				 "TSX ACTION TSXDark Limit Broker DAY Hidden"]
 
 
 MARKET['.VN'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
@@ -699,7 +701,9 @@ MARKET['.VN'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
 				 "TSX ACTION SweepSOR Limit Broker DAY",\
 				 "XCSE ACTION CSESMRT Limit Broker DAY",\
 				 "CX2 ACTION SMART Limit DAY",\
-				 "CXD ACTION NasdaqCXD Limit DAY"]
+				 "CXD ACTION NasdaqCXD Limit DAY",\
+				 "XATX ACTION AlphaX Limit Broker DAY",\
+				 "TSX ACTION TSXDark Limit Broker DAY Hidden"]
 
 
 MARKET['.CN'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
@@ -716,7 +720,13 @@ MARKET['.CC'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
 				 "AEQN ACTION AequitasNEO Limit Broker DAY",\
 				 "OMGA ACTION OMEGASOR Limit Broker DAY",\
 				 "CXD ACTION NasdaqCXD Limit DAY",\
-				 "CHIX ACTION SMART Limit Broker DAY"]
+				 "CHIX ACTION SMART Limit Broker DAY",\
+				 "AEQN ACTION AequitasLIT Limit Broker DAY",\
+				 "AEQN ACTION AequitasNEO Limit Broker DAY",\
+				 "OMGA ACTION OMEGASOR Limit Broker DAY",\
+				 "CXD ACTION NasdaqCXD Limit DAY",\
+				 "CHIX ACTION SMART Limit Broker DAY",\
+				 "CX2 ACTION SMART Limit Broker DAY"]
 
 
 MARKET['RESERVE'] = ['AEQN ACTION AequitasLIT Limit Broker DAY Reserve']
