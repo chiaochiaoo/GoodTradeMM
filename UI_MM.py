@@ -731,6 +731,17 @@ MARKET['.CC'] = ["AEQN ACTION AequitasLIT Limit Broker DAY",\
 
 MARKET['RESERVE'] = ['AEQN ACTION AequitasLIT Limit Broker DAY Reserve']
 
+
+for key in MARKET:
+    seen = set()
+    unique_list = []
+    for item in MARKET[key]:
+        if item not in seen:
+            seen.add(item)
+            unique_list.append(item)
+    MARKET[key] = unique_list
+
+    
 if __name__ == '__main__':
 
 	root = tk.Tk() 
