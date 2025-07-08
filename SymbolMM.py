@@ -988,7 +988,8 @@ class SymbolMM:
         else:
             message(f'{self.symbol} order: {price} {share} {action} with {order}',LOG)
 
-        r = requests.post(req)
+        if share!=0:
+            r = requests.post(req)
 
 
     def update_orderbook(self,new_order):
