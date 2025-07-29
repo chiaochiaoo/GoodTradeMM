@@ -615,6 +615,7 @@ def get_open_orders(user):
 	#print(dic)		
 
 	return dic
+	
 def force_close_port(port, process_name=None):
 	"""Terminate a process that is bound to a port.
 	
