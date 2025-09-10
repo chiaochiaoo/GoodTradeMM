@@ -1123,8 +1123,11 @@ class SymbolMM:
         tick_size =  self.vars['ticksize'][0].get()
 
 
-        if self.pc>1 and board_lot<=100:
+        if self.pc>1: #and board_lot<=100:
             board_lot =100
+
+        # elif self.pc>1 and board_lot>100:
+        #     board_lot = 100 
         elif self.pc>=0.1 and board_lot<=500:
             board_lot =500
         else:
