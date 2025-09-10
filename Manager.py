@@ -525,6 +525,16 @@ class Manager:
 
 					self.symbols[symbol].rejection_received()
 
+			if state =="Cancelled":
+
+				info = find_between(stream_data, "InfoText=", ",")
+				symbol = find_between(stream_data, "Symbol=", ",")
+
+				if "open shares have no where to go" in info:
+					if symbol in self.symbols:
+						self.symbols[symbol].rejection_received()
+
+
 
 
 

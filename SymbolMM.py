@@ -907,7 +907,17 @@ class SymbolMM:
 
             vals = [self.nbids[1],self.nbids[2],self.rasks[0]*-1,self.rasks[1]*-1,self.rasks[2]*-1]
 
+        max_inv = self.get_variable('MaxInventorySize')
 
+        if max_inv==0:
+
+            v = []
+            for i in vals:
+                if i<0:
+                    v.append(i)
+
+
+            vals = v[:]
 
         a1enable = self.get_variable('r_nbbo')
 
