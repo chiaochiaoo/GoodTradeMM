@@ -477,7 +477,7 @@ class Manager:
 	def load_ticker(self,ticker):
 		
 		if ticker in self.symbols:
-			return 
+			return self.symbols[ticker]
 
 		else:
 

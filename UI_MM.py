@@ -22,6 +22,92 @@ DISCONNECTED = "DISCONNECTED"
 DELAYED = "DELAYED"
 
 
+class CollapsibleSection:
+	"""A collapsible section with toggle button - supports both place() and grid() layouts"""
+	def __init__(self, parent, title, x=None, y=None, width=None, height=None):
+		self.parent = parent
+		self.title = title
+		self.is_collapsed = False
+		self.x = x
+		self.y = y
+		self.width = width if width else 700
+		self.stored_height = height if height else 200
+		
+		# Use place() if x and y are provided, otherwise use grid()
+		self.use_place = (x is not None) and (y is not None)
+		
+		if self.use_place:
+			# Header frame with place()
+			self.header = tk.Frame(parent)
+			self.header.place(x=x, y=y, width=self.width, height=30)
+			
+			# Toggle button with original styling
+			self.toggle_btn = tk.Button(
+				self.header,
+				text="▼ " + title,
+				command=self.toggle,
+				anchor="w",
+				padx=5
+			)
+			self.toggle_btn.pack(fill="both", expand=True)
+			
+			# Content frame (LabelFrame) with place() - no repeated text
+			self.content_frame = ttk.LabelFrame(parent, text="")
+			self.content_frame.place(x=x, y=y+30, width=self.width, height=self.stored_height)
+		else:
+			# Use grid() layout for tabs
+			self.header = tk.Frame(parent)
+			
+			# Toggle button with original styling
+			self.toggle_btn = tk.Button(
+				self.header,
+				text="▼ " + title,
+				command=self.toggle,
+				anchor="w",
+				padx=5
+			)
+			self.toggle_btn.pack(fill="both", expand=True)
+			
+			# Content frame (LabelFrame) with grid - no repeated text
+			self.content_frame = ttk.LabelFrame(parent, text="")
+			
+			# Store for grid() call - will be called externally
+			self.header_placed = False
+			self.content_placed = False
+		
+		# Public property for accessing content
+		self.content = self.content_frame
+	
+	def toggle(self):
+		if self.is_collapsed:
+			# Expand
+			if self.use_place:
+				self.content_frame.place(x=self.x, y=self.y+30, width=self.width, height=self.stored_height)
+			else:
+				self.content_frame.grid()
+			self.toggle_btn.config(text="▼ " + self.title)
+			self.is_collapsed = False
+		else:
+			# Collapse
+			if self.use_place:
+				self.content_frame.place_forget()
+			else:
+				self.content_frame.grid_remove()
+			self.toggle_btn.config(text="▶ " + self.title)
+			self.is_collapsed = True
+	
+	def get_frame(self):
+		"""Return the content frame for adding widgets"""
+		return self.content_frame
+	
+	def grid(self, **kwargs):
+		"""Grid layout wrapper for tab-based usage"""
+		self.header.grid(**kwargs)
+		self.content_frame.grid(row=kwargs.get('row', 0)+1, column=kwargs.get('column', 0), 
+								columnspan=kwargs.get('columnspan', 1), sticky="w", padx=10)
+
+
+
 
 def save_tickers(self):
 	os.makedirs("configs", exist_ok=True)
@@ -97,12 +183,13 @@ class UI(pannel):
 		self.system_pannel = ttk.LabelFrame(self.root,text="System")
 		self.system_pannel.place(x=10,y=10,height=200,width=350)
 
+		# Create collapsible Ticker Management section
+		self.ticker_section = CollapsibleSection(self.root, "Ticker Management", x=360, y=10, width=700, height=200)
+		self.ticker_management_frame = self.ticker_section.get_frame()
 
-		self.ticker_management_frame  = ttk.LabelFrame(self.root,text="Ticker Management") 
-		self.ticker_management_frame .place(x=360,y=10,height=200,width=700)
-
-		self.notification_pannel = ttk.LabelFrame(self.root,text="Notification") 
-		self.notification_pannel.place(x=1090,y=10,height=900,width=400)
+		# Create collapsible Notification section - full height like original
+		self.notification_section = CollapsibleSection(self.root, "Notification", x=1090, y=10, width=400, height=900)
+		self.notification_pannel = self.notification_section.get_frame()
 
 		self.notification_text = tk.Text(self.notification_pannel, height=10, width=50, state='disabled')
 		self.notification_text.pack(anchor="nw", padx=0, pady=0, fill="both",expand=True)#
@@ -501,12 +588,35 @@ class UI(pannel):
 		self.ticker_table_rows = {}
 
 	def open_ticker_tab(self, symbol):
-
-		#print(self.marketmaking_tabs)
+		"""Switch to tab if exists, otherwise create it"""
+		print(f"\n[CLICK] Ticker clicked: {symbol}")
+		print(f"        marketmaking_tabs keys: {list(self.marketmaking_tabs.keys())}")
+		
 		if hasattr(self, 'marketmaking_tabs') and symbol in self.marketmaking_tabs:
+			# Tab exists - switch to it
+			print(f"        ✓ Tab EXISTS for {symbol} - selecting it")
 			tab = self.marketmaking_tabs[symbol]
 			self.marketmaking_notebook.select(tab)
+		else:
+			# Tab doesn't exist - create it
+			print(f"        ✗ Tab DOES NOT EXIST for {symbol} - creating it")
+			self.load_ticker_tab(symbol=symbol)
 
+
+
+
+	def close_ticker_tab(self, symbol):
+		"""Close tab only - keep ticker in management table"""
+		# Remove notebook tab only (don't remove from ticker_table_rows)
+		print(f"\n[CLOSE] Closing tab for: {symbol}")
+		print(f"        marketmaking_tabs before: {list(self.marketmaking_tabs.keys())}")
+		
+		if hasattr(self, 'marketmaking_tabs') and symbol in self.marketmaking_tabs:
+			self.marketmaking_notebook.forget(self.marketmaking_tabs[symbol])
+			del self.marketmaking_tabs[symbol]
+			print(f"        ✓ Tab closed successfully")
+		
+		print(f"        marketmaking_tabs after: {list(self.marketmaking_tabs.keys())}")
 
 
 	def delete_ticker(self, symbol):
@@ -530,15 +640,34 @@ class UI(pannel):
 
 		print(f"[Deleted] {symbol} fully removed.")
 
-	def load_ticker_tab(self, force=True):
+	def load_ticker_tab(self, force=True, symbol=None):
 
-		ticker = self.ticker_var.get().strip().upper()
+		# Use passed symbol or fall back to ticker_var
+		if symbol is None:
+			ticker = self.ticker_var.get().strip().upper()
+		else:
+			ticker = symbol.strip().upper()
+		
 		if not ticker:
 			return
 
-		mm = self.manager.load_ticker(ticker)
+		print(f"\n[LOAD] load_ticker_tab() called for: {ticker}")
+		
+		# Check if tab already exists - if so, just select it
+		if hasattr(self, 'marketmaking_tabs') and ticker in self.marketmaking_tabs:
+			print(f"        Tab already exists - selecting it")
+			self.marketmaking_notebook.select(self.marketmaking_tabs[ticker])
+			return
+
+		print(f"        Creating new tab...")
+		try:
+			mm = self.manager.load_ticker(ticker)
+		except Exception as e:
+			print(f"        ✗ Exception loading manager for {ticker}: {e}")
+			return
 
 		if not mm:
+			print(f"        ✗ Failed to load manager for {ticker}")
 			return 
 
 		self.create_ticker_management_ui(ticker,mm)
@@ -546,6 +675,15 @@ class UI(pannel):
 		tab = ttk.Frame(self.marketmaking_notebook)
 		self.marketmaking_notebook.add(tab, text=ticker)
 		self.marketmaking_tabs[ticker] = tab
+		print(f"        ✓ Tab created. marketmaking_tabs now: {list(self.marketmaking_tabs.keys())}")
+		
+		# Add a close button at the top of the tab
+		close_frame = ttk.Frame(tab)
+		close_frame.grid(row=0, column=0, columnspan=FIELDS_PER_ROW * 2, sticky="ew", padx=5, pady=5)
+		
+		ttk.Label(close_frame, text=ticker, font=("Arial", 10, "bold")).pack(side="left", padx=5)
+		ttk.Button(close_frame, text="x", command=lambda: self.close_ticker_tab(ticker), width=3).pack(side="right", padx=2)
+		ttk.Button(close_frame, text="× Close Tab", command=lambda: self.close_ticker_tab(ticker)).pack(side="right", padx=20)
 		# --- Step 1: Group schema entries by section ---
 		sections = {}
 		for entry in CONFIG_SCHEMA:
@@ -553,7 +691,7 @@ class UI(pannel):
 			sections.setdefault(sec, []).append(entry)
 
 		section_frames = {}
-		row_counter = 0
+		row_counter = 1  # Start from row 1 since row 0 has the close button
 
 		for sec_name, entries in sections.items():
 			# Section title
@@ -648,31 +786,6 @@ class UI(pannel):
 		# 	row=row_counter + 10, column=1,
 		# 	columnspan=FIELDS_PER_ROW * 2, pady=15, padx=10, sticky="w"
 		# )
-
-class CollapsibleSection(ttk.Frame):
-	def __init__(self, parent, title="", *args, **kwargs):
-		super().__init__(parent, *args, **kwargs)
-
-		self.showing = tk.BooleanVar(value=True)
-
-		# Title row with toggle button
-		self.toggle_button = ttk.Checkbutton(
-			self, text=f"▼ {title}", variable=self.showing,
-			command=self.toggle, style="Toolbutton"
-		)
-		self.toggle_button.grid(row=0, column=0, sticky="w", pady=(10, 0))
-
-		# Container for child widgets
-		self.content = ttk.Frame(self)
-		self.content.grid(row=1, column=0, sticky="w")
-
-	def toggle(self):
-		if self.showing.get():
-			self.toggle_button.configure(text=self.toggle_button.cget("text").replace("▶", "▼"))
-			self.content.grid()
-		else:
-			self.toggle_button.configure(text=self.toggle_button.cget("text").replace("▼", "▶"))
-			self.content.grid_remove()
 
 
 MARKET={}
