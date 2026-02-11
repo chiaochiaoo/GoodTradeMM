@@ -21,6 +21,15 @@ import mysql.connector
 from logging_module import *
 
 from flask import Flask
+import subprocess
+
+# Try to import supabase, if not available, install and import
+try:
+	from supabase import create_client, Client
+except ImportError:
+	print("Supabase not found. Installing...")
+	subprocess.check_call([sys.executable, "-m", "pip", "install", "supabase"])
+	from supabase import create_client, Client
 
 # get_open_orders('QIAOSUN')
 # while True:
@@ -85,6 +94,17 @@ class Manager:
 			message(f'Database connected',NOTIFICATION)
 		except Exception as e:
 			message(f'Database cannot connect',NOTIFICATION)
+
+		# Initialize Supabase client
+		try:
+			self.supabase: Client = create_client(
+				"https://icijsegxoflsilrntfbn.supabase.co", 
+				"sb_secret_SjdrousdyhIk1Hv-c0uYag_lJBNcR6S"
+			)
+			message(f'Cloud server connected',NOTIFICATION)
+		except Exception as e:
+			message(f"Cloud server connection error: {e}", NOTIFICATION)
+			self.supabase = None
 
 		self.start_server()
 		self.start_all_inactive()
@@ -183,6 +203,26 @@ class Manager:
 		    except Exception as e:
 		        message(f"Database volume submission error: {e}", NOTIFICATION)
 
+		    # Push to Supabase
+		    try:
+		        if self.supabase:
+		            data = {
+		                "market_date": marketdate,
+		                "symbol": symbol,
+		                "time_at_bid": timeatbid,
+		                "time_at_ask": timeatask,
+		                "time_at_l1_bid": timeatl1bid,
+		                "time_at_l1_ask": timeatl1ask,
+		                "time_at_bid_percentage": p_timeatbid,
+		                "time_at_ask_percentage": p_timeatask,
+		                "time_at_l1_bid_percentage": p_timeatl1bid,
+		                "time_at_l1_ask_percentage": p_timeatl1ask,
+		                "traded_shares_by_us": volume
+		            }
+		            self.supabase.table("volume_data").upsert(data).execute()
+		    except Exception as e:
+		        message(f"Supabase volume submission error: {e}", NOTIFICATION)
+
 	def insert_order(
 		self,
 		symbol,                # e.g., "ACHR.NY"
@@ -195,6 +235,8 @@ class Manager:
 	):
 
 		if self.TEST_MODE==False:
+			computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+			
 			try:
 				query = """
 					INSERT INTO orderdata (
@@ -214,7 +256,6 @@ class Manager:
 					)
 				"""
 
-				computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 				self.cursor.execute(query, (
 					computer_time,
 					computer_time,
@@ -231,6 +272,25 @@ class Manager:
 				print('databse order submited')
 			except Exception as e:
 				message(f"database order submission error {e}",NOTIFICATION)
+
+			# Push to Supabase
+			try:
+				if self.supabase:
+					data = {
+						"market_date": computer_time.split()[0],
+						"computer_time": computer_time,
+						"message": messageX,
+						"symbol": symbol,
+						"trader": self.user,
+						"depth_level": depth_level,
+						"price": price,
+						"side": side,
+						"papi_id": order_number,
+						"size": shares
+					}
+					self.supabase.table("order_data").insert(data).execute()
+			except Exception as e:
+				message(f"Supabase order submission error: {e}",NOTIFICATION)
 
 			
 	def insert_cancel(self, order_number, symbol, reason):
