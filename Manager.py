@@ -3,6 +3,18 @@ import linecache
 import sys
 import os
 from datetime import datetime, timedelta
+import subprocess
+
+# Try to import dotenv, if not available, install and import
+try:
+	from dotenv import load_dotenv
+except ImportError:
+	print("python-dotenv not found. Installing...")
+	subprocess.check_call([sys.executable, "-m", "pip", "install", "python-dotenv"])
+	from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 import pandas as pd
 import numpy as np
 
@@ -21,7 +33,6 @@ import mysql.connector
 from logging_module import *
 
 from flask import Flask
-import subprocess
 
 # Try to import supabase, if not available, install and import
 try:
@@ -97,10 +108,13 @@ class Manager:
 
 		# Initialize Supabase client
 		try:
-			self.supabase: Client = create_client(
-				"https://icijsegxoflsilrntfbn.supabase.co", 
-				"sb_secret_SjdrousdyhIk1Hv-c0uYag_lJBNcR6S"
-			)
+			supabase_url = os.getenv('SUPABASE_URL')
+			supabase_key = os.getenv('SUPABASE_KEY')
+			
+			if not supabase_url or not supabase_key:
+				raise ValueError("SUPABASE_URL or SUPABASE_KEY not found in environment variables")
+			
+			self.supabase: Client = create_client(supabase_url, supabase_key)
 			message(f'Cloud server connected',NOTIFICATION)
 		except Exception as e:
 			message(f"Cloud server connection error: {e}", NOTIFICATION)
