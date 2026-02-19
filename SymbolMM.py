@@ -17,6 +17,14 @@ import mysql.connector
 from logging_module import *
 
 
+try:
+    from supabase import create_client, Client
+except ImportError:
+    print("Supabase not found. Installing...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "supabase"])
+    from supabase import create_client, Client
+
+
 ALGO ="Algo Manger"
 def find_between(data, first, last):
     try:
@@ -27,53 +35,54 @@ def find_between(data, first, last):
         return data
 
 
-def fetch_data(symbol):
 
-    try:
-        print('trying to fetch',symbol)
-        MYSQL_USER = "webuser"
-        MYSQL_PASSWORD = "Domination77$$"
-        MYSQL_DATABASE = "summitdata"
-        PORT = 3306
+# def fetch_data(symbol):
 
-        # Connect to the MySQL server
-        connection = mysql.connector.connect(
-            user=MYSQL_USER,
-            password=MYSQL_PASSWORD,
-            host="10.29.10.143",
-            database=MYSQL_DATABASE,
-            port=PORT,
-            auth_plugin='mysql_native_password'
-        )
+#     try:
+#         print('trying to fetch',symbol)
+#         MYSQL_USER = "webuser"
+#         MYSQL_PASSWORD = "Domination77$$"
+#         MYSQL_DATABASE = "summitdata"
+#         PORT = 3306
 
-        if connection.is_connected():
+#         # Connect to the MySQL server
+#         connection = mysql.connector.connect(
+#             user=MYSQL_USER,
+#             password=MYSQL_PASSWORD,
+#             host="10.29.10.143",
+#             database=MYSQL_DATABASE,
+#             port=PORT,
+#             auth_plugin='mysql_native_password'
+#         )
 
-            # Create a cursor object
-            cursor = connection.cursor()
+#         if connection.is_connected():
 
-            # List of symbols for the mmdata query
-            #mmdata_symbols = ['ELEM.CN', 'LEXT.CN', 'ESPN.VN', 'BATX.CN', 'CRTL.CN', 'ANT.CN']
+#             # Create a cursor object
+#             cursor = connection.cursor()
+
+#             # List of symbols for the mmdata query
+#             #mmdata_symbols = ['ELEM.CN', 'LEXT.CN', 'ESPN.VN', 'BATX.CN', 'CRTL.CN', 'ANT.CN']
             
-            #query = "SELECT * FROM algoinfo WHERE Symbol = %s;"
-            query = f"SELECT * FROM algoinfo WHERE Symbol = '{symbol}';"
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            column_names = [i[0] for i in cursor.description]
+#             #query = "SELECT * FROM algoinfo WHERE Symbol = %s;"
+#             query = f"SELECT * FROM algoinfo WHERE Symbol = '{symbol}';"
+#             cursor.execute(query)
+#             rows = cursor.fetchall()
+#             column_names = [i[0] for i in cursor.description]
 
-            results = [dict(zip(column_names, row)) for row in rows]
+#             results = [dict(zip(column_names, row)) for row in rows]
 
-            print("Successful on ",symbol)
-            return results[0]
-            # Print JSON with Decimal safely handled
-            #print(json.dumps(results, indent=4, cls=DecimalEncoder))
+#             print("Successful on ",symbol)
+#             return results[0]
+#             # Print JSON with Decimal safely handled
+#             #print(json.dumps(results, indent=4, cls=DecimalEncoder))
 
-        cursor.close()
-        connection.close()
+#         cursor.close()
+#         connection.close()
         
-    except Exception as e:
+#     except Exception as e:
 
-        print(e)
-        return {}
+#         print(e)
+#         return {}        
 
 # d =fetch_data('CRTL.CN')
 # today = datetime.today().date()
@@ -268,8 +277,11 @@ class SymbolMM:
 
         try:
             select = ['RealizedPnLShutdown','FavourableBuyingConditions','MaxInventorySize','MaxAllowedUPnL','BuyZone1','BuyZone2','BuyZone3','SellZone1','SellZone2','SellZone3','AdjustedSpread']
-            d = fetch_data(self.symbol)
+            #d = fetch_data(self.symbol)
 
+            d = self.fetch_data()
+
+            #print(d,d2)
             for j,i in d.items():
                 if j in select:
                     try:
@@ -280,6 +292,20 @@ class SymbolMM:
             self.update_var_data()
         except:
             PrintException("Fetch data from databse error")
+
+    def fetch_data(self):
+
+
+        res = (self.manager.supabase.table('restricted_shares_current')
+        .select("*")
+        .eq("Symbol", self.symbol)     # exact match on "Symbol"
+        .limit(1)
+        .single()                 # expect exactly one row (400 if 0 or >1)
+        .execute()
+        )
+        row = res.data
+
+        return row
 
     def update_var_data(self):
 

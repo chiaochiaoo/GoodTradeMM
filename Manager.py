@@ -39,6 +39,7 @@ try:
 	from supabase import create_client, Client
 except ImportError:
 	print("Supabase not found. Installing...")
+	#pip install subprocess
 	subprocess.check_call([sys.executable, "-m", "pip", "install", "supabase"])
 	from supabase import create_client, Client
 
@@ -92,19 +93,19 @@ class Manager:
 		# x2 = threading.Thread(target=self.connectivity_check, daemon=True)
 		# x2.start()
 
-		try:
-			self.conn = mysql.connector.connect(
-				user="webuser",
-				password="Domination77$$",
-				host="10.29.10.143",
-				database="summitdata",
-				port=3306,
-				auth_plugin='mysql_native_password'
-			)
-			self.cursor = self.conn.cursor()
-			message(f'Database connected',NOTIFICATION)
-		except Exception as e:
-			message(f'Database cannot connect',NOTIFICATION)
+		# try:
+		# 	self.conn = mysql.connector.connect(
+		# 		user="webuser",
+		# 		password="Domination77$$",
+		# 		host="10.29.10.143",
+		# 		database="summitdata",
+		# 		port=3306,
+		# 		auth_plugin='mysql_native_password'
+		# 	)
+		# 	self.cursor = self.conn.cursor()
+		# 	message(f'Database connected',NOTIFICATION)
+		# except Exception as e:
+		# 	message(f'Database cannot connect',NOTIFICATION)
 
 		# Initialize Supabase client
 		try:
@@ -167,55 +168,55 @@ class Manager:
 		    computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		    marketdate    = datetime.now().strftime('%Y-%m-%d')
 
-		    # if you ever want to store raw counters instead of zeros, compute them here
-		    timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
+		    # # if you ever want to store raw counters instead of zeros, compute them here
+		    # timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
 
-		    try:
-		        query = """
-		        INSERT INTO mmdata (
-		            MarketDate,
-		            Symbol,
-		            TimeAtBid,
-		            TimeAtAsk,
-		            TimeAtL1Bid,
-		            TimeAtL1Ask,
-		            TimeAtBidPercentage,
-		            TimeAtAskPercentage,
-		            TimeAtL1BidPercentage,
-		            TimeAtL1AskPercentage,
-		            TradedSharesByUs
-		        ) VALUES (
-		            %s, %s, %s, %s, %s,
-		            %s, %s, %s, %s, %s, %s
-		        )
-		        ON DUPLICATE KEY UPDATE
-		            TimeAtBid             = VALUES(TimeAtBid),
-		            TimeAtAsk             = VALUES(TimeAtAsk),
-		            TimeAtL1Bid           = VALUES(TimeAtL1Bid),
-		            TimeAtL1Ask           = VALUES(TimeAtL1Ask),
-		            TimeAtBidPercentage   = VALUES(TimeAtBidPercentage),
-		            TimeAtAskPercentage   = VALUES(TimeAtAskPercentage),
-		            TimeAtL1BidPercentage = VALUES(TimeAtL1BidPercentage),
-		            TimeAtL1AskPercentage = VALUES(TimeAtL1AskPercentage),
-		            TradedSharesByUs      = VALUES(TradedSharesByUs)
-		        """
-		        self.cursor.execute(query, (
-		            marketdate,
-		            symbol,
-		            timeatbid,
-		            timeatask,
-		            timeatl1bid,
-		            timeatl1ask,
-		            p_timeatbid,
-		            p_timeatask,
-		            p_timeatl1bid,
-		            p_timeatl1ask,
-		            volume
-		        ))
-		        self.conn.commit()
+		    # try:
+		    #     query = """
+		    #     INSERT INTO mmdata (
+		    #         MarketDate,
+		    #         Symbol,
+		    #         TimeAtBid,
+		    #         TimeAtAsk,
+		    #         TimeAtL1Bid,
+		    #         TimeAtL1Ask,
+		    #         TimeAtBidPercentage,
+		    #         TimeAtAskPercentage,
+		    #         TimeAtL1BidPercentage,
+		    #         TimeAtL1AskPercentage,
+		    #         TradedSharesByUs
+		    #     ) VALUES (
+		    #         %s, %s, %s, %s, %s,
+		    #         %s, %s, %s, %s, %s, %s
+		    #     )
+		    #     ON DUPLICATE KEY UPDATE
+		    #         TimeAtBid             = VALUES(TimeAtBid),
+		    #         TimeAtAsk             = VALUES(TimeAtAsk),
+		    #         TimeAtL1Bid           = VALUES(TimeAtL1Bid),
+		    #         TimeAtL1Ask           = VALUES(TimeAtL1Ask),
+		    #         TimeAtBidPercentage   = VALUES(TimeAtBidPercentage),
+		    #         TimeAtAskPercentage   = VALUES(TimeAtAskPercentage),
+		    #         TimeAtL1BidPercentage = VALUES(TimeAtL1BidPercentage),
+		    #         TimeAtL1AskPercentage = VALUES(TimeAtL1AskPercentage),
+		    #         TradedSharesByUs      = VALUES(TradedSharesByUs)
+		    #     """
+		    #     self.cursor.execute(query, (
+		    #         marketdate,
+		    #         symbol,
+		    #         timeatbid,
+		    #         timeatask,
+		    #         timeatl1bid,
+		    #         timeatl1ask,
+		    #         p_timeatbid,
+		    #         p_timeatask,
+		    #         p_timeatl1bid,
+		    #         p_timeatl1ask,
+		    #         volume
+		    #     ))
+		    #     self.conn.commit()
 
-		    except Exception as e:
-		        message(f"Database volume submission error: {e}", NOTIFICATION)
+		    # except Exception as e:
+		    #     message(f"Database volume submission error: {e}", NOTIFICATION)
 
 		    # Push to Supabase
 		    try:
@@ -251,41 +252,41 @@ class Manager:
 		if self.TEST_MODE==False:
 			computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 			
-			try:
-				query = """
-					INSERT INTO orderdata (
-						MarketDate,
-						ComputerTime,
-						Message,
-						Symbol,
-						Trader,
-						DepthLevel,
-						Price,
-						Side,
-						PapiID,
-						Size
-					) VALUES (
-						%s, %s, %s, %s, %s,
-						%s, %s, %s, %s, %s
-					)
-				"""
+			# try:
+			# 	query = """
+			# 		INSERT INTO orderdata (
+			# 			MarketDate,
+			# 			ComputerTime,
+			# 			Message,
+			# 			Symbol,
+			# 			Trader,
+			# 			DepthLevel,
+			# 			Price,
+			# 			Side,
+			# 			PapiID,
+			# 			Size
+			# 		) VALUES (
+			# 			%s, %s, %s, %s, %s,
+			# 			%s, %s, %s, %s, %s
+			# 		)
+			# 	"""
 
-				self.cursor.execute(query, (
-					computer_time,
-					computer_time,
-					messageX,
-					symbol,
-					self.user,
-					depth_level,
-					price,
-					side,
-					order_number,  # stored in PapiID
-					shares
-				))
-				self.conn.commit()
-				print('databse order submited')
-			except Exception as e:
-				message(f"database order submission error {e}",NOTIFICATION)
+			# 	self.cursor.execute(query, (
+			# 		computer_time,
+			# 		computer_time,
+			# 		messageX,
+			# 		symbol,
+			# 		self.user,
+			# 		depth_level,
+			# 		price,
+			# 		side,
+			# 		order_number,  # stored in PapiID
+			# 		shares
+			# 	))
+			# 	self.conn.commit()
+			# 	print('databse order submited')
+			# except Exception as e:
+			# 	message(f"database order submission error {e}",NOTIFICATION)
 
 			# Push to Supabase
 			try:
@@ -311,14 +312,22 @@ class Manager:
 
 
 		if self.TEST_MODE==False:
-			query = """
-				INSERT INTO canceldata (order_number, symbol, reason)
-				VALUES (%s, %s, %s)
-			"""
-			self.cursor.execute(query, (order_number, symbol, reason))
-			self.conn.commit()
-
-
+			# query = """
+			# 	INSERT INTO canceldata (order_number, symbol, reason)
+			# 	VALUES (%s, %s, %s)
+			# """
+			# self.cursor.execute(query, (order_number, symbol, reason))
+			# self.conn.commit()
+			try:
+				data = {
+					"order_number": order_number,
+					"symbol": symbol,
+					"reason": reason,
+				}
+				self.supabase.table("canceldata").insert(data).execute()
+			except Exception as e:
+				message(f"Supabase order submission error: {e}",NOTIFICATION)
+				
 	def _setup_routes(self):
 		@self.app.route('/symbol', methods=['GET'])
 		def get_symbol():
