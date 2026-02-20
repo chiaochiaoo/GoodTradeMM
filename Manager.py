@@ -169,7 +169,7 @@ class Manager:
 		    marketdate    = datetime.now().strftime('%Y-%m-%d')
 
 		    # # if you ever want to store raw counters instead of zeros, compute them here
-		    # timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
+		    timeatbid, timeatl1bid, timeatask, timeatl1ask = 0, 0, 0, 0
 
 		    # try:
 		    #     query = """
