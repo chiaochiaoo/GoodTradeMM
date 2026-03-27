@@ -426,7 +426,7 @@ class UI(pannel):
 		for new_row, (symbol, _) in enumerate(sortable, start=1):
 			row_info = self.ticker_table_rows[symbol]
 			for col, widget in enumerate(row_info["widgets"]):
-				widget.grid(row=new_row, column=col, padx=5, sticky="w")
+				widget.grid(row=new_row, column=col, padx=1, sticky="ew")
 			row_info["row"] = new_row
 
 
@@ -453,47 +453,49 @@ class UI(pannel):
 
 
 
-		w =10
+		status_w = 9
+		num_w = 8
+		pct_w = 6
 
 		# === Create and place widgets ===
-		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2")
-		label.grid(row=row_idx, column=0, padx=5, sticky="w")
+		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2", width=8)
+		label.grid(row=row_idx, column=0, padx=1, sticky="ew")
 		label.bind("<Button-1>", lambda e, sym=symbol: self.open_ticker_tab(sym))
 
-		status_label = ttk.Label(self.ticker_table_frame, textvariable=status,width=w)
-		status_label.grid(row=row_idx, column=1, padx=5, sticky="w")
+		status_label = ttk.Label(self.ticker_table_frame, textvariable=status, width=status_w, anchor="w")
+		status_label.grid(row=row_idx, column=1, padx=1, sticky="ew")
 
-		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory,width=w)
-		inv_label.grid(row=row_idx, column=2, padx=5, sticky="w")
+		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory, width=num_w, anchor="e")
+		inv_label.grid(row=row_idx, column=2, padx=1, sticky="ew")
 
 
-		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional,width=w)
-		not_label.grid(row=row_idx, column=3, padx=5, sticky="w")
+		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional, width=num_w, anchor="e")
+		not_label.grid(row=row_idx, column=3, padx=1, sticky="ew")
 
-		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders,width=w)
-		orders_label.grid(row=row_idx, column=4, padx=5, sticky="w")
+		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders, width=num_w, anchor="e")
+		orders_label.grid(row=row_idx, column=4, padx=1, sticky="ew")
 
-		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade,width=w)
-		ct_label.grid(row=row_idx, column=5, padx=5, sticky="w")
+		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade, width=num_w, anchor="e")
+		ct_label.grid(row=row_idx, column=5, padx=1, sticky="ew")
 
-		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep,width=w)
-		ctp_label.grid(row=row_idx, column=6, padx=5, sticky="w")
+		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep, width=pct_w, anchor="e")
+		ctp_label.grid(row=row_idx, column=6, padx=1, sticky="ew")
 
-		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade,width=w)
-		svi_label.grid(row=row_idx, column=7, padx=5, sticky="w")
+		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade, width=num_w, anchor="e")
+		svi_label.grid(row=row_idx, column=7, padx=1, sticky="ew")
 
-		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep,width=w)
-		svip_label.grid(row=row_idx, column=8, padx=5, sticky="w")
+		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep, width=pct_w, anchor="e")
+		svip_label.grid(row=row_idx, column=8, padx=1, sticky="ew")
 		# Store all info + widgets for future sorting
 		self.ticker_table_rows[symbol] = {
 			"status": status,
 			"inventory": inventory,
-			'notional amount':notional,
+			"notional": notional,
 			"orders": open_orders,
-			'curt':cur_trade,
-			'curtp':cur_tradep,
-			'svit':svi_trade,
-			'svitp':svi_tradep,
+			"curt": cur_trade,
+			"curtp": cur_tradep,
+			"svit": svi_trade,
+			"svitp": svi_tradep,
 			"row": row_idx,
 			"widgets": [label, status_label, inv_label, not_label,orders_label,ct_label,ctp_label,svi_label,svip_label]
 		}
@@ -549,24 +551,31 @@ class UI(pannel):
 		header_frame = ttk.Frame(self.ticker_management_frame)
 		header_frame.pack(fill="x")
 
-		headers = [("Ticker", "ticker"),
-				   ("Status", "status"),
-				   ("Inventory", "inventory"),
-				   ("Notional$", "notional"),
-				   ("Open Orders", "Open Orders"),
-				   ("Current Trade", "orders"),
-				   ("Trade %", "orders"),
-				   ("SVI Trade", "orders"),
-				   ("SVI %", "orders")]
+		headers = [
+			("Ticker", "ticker", 8),
+			("Status", "status", 9),
+			("Inv", "inventory", 6),
+			("Notional$", "notional", 8),
+			("Open Ord", "orders", 8),
+			("Cur Trade", "curt", 8),
+			("Trade %", "curtp", 6),
+			("SVI Trd", "svit", 8),
+			("SVI %", "svitp", 6),
+		]
+
+		# Column pixel widths for alignment between header and data frames
+		col_widths = [70, 75, 55, 75, 75, 75, 55, 75, 55]
 
 		self.sort_order = {}
-		for col, (label, key) in enumerate(headers):
+		for col, (label, key, width_chars) in enumerate(headers):
 			btn = ttk.Button(
 				header_frame,
-				text=label,width=10,
+				text=label,
+				width=width_chars,
 				command=lambda k=key: self.sort_ticker_table(k)
 			)
-			btn.grid(row=0, column=col, padx=1, pady=2, sticky="w")
+			btn.grid(row=0, column=col, padx=1, pady=2, sticky="ew")
+			header_frame.grid_columnconfigure(col, weight=0, minsize=col_widths[col])
 			self.sort_order[key] = True
 
 		# === Scrollable Canvas ===
@@ -578,6 +587,9 @@ class UI(pannel):
 			"<Configure>",
 			lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
 		)
+
+		for col, _ in enumerate(headers):
+			self.ticker_table_frame.grid_columnconfigure(col, weight=0, minsize=col_widths[col])
 
 		canvas.create_window((0, 0), window=self.ticker_table_frame, anchor="nw")
 		canvas.configure(yscrollcommand=scrollbar.set)

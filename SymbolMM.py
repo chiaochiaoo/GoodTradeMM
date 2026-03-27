@@ -416,6 +416,8 @@ class SymbolMM:
 
     def update_volume_profile(self):
 
+        self.reset_trade_metrics_if_new_day()
+
 
         # self.cur_trade = 0
         # self.cur_tradep = 0
@@ -423,20 +425,32 @@ class SymbolMM:
         # self.svi_trade = 0
         # self.svi_tradep =0 
 
+        svi_volume = 0
         try:
-            resp = requests.get("http://127.0.0.1:8000/traded_volume", params={"symbol": self.symbol})
-            self.svi_trade = resp.json()['volume']
-
-            self.svi_trade += self.cur_trade
-
-            
+            resp = requests.get(
+                "http://127.0.0.1:8000/traded_volume",
+                params={"symbol": self.symbol},
+                timeout=2,
+            )
+            resp.raise_for_status()
+            svi_volume = int(resp.json().get('volume', 0))
         except:
             message('svi server cannot reach.',NOTIFICATION)
 
+        self.svi_trade = max(0, svi_volume) + self.cur_trade
 
         if self.total_trade!=0:
             self.svi_tradep = round(self.svi_trade*100/self.total_trade,2)
             self.cur_tradep = round(self.cur_trade*100/self.total_trade,2)
+        else:
+            self.svi_tradep = 0
+            self.cur_tradep = 0
+        
+        print(self.symbol,self.cur_trade,self.cur_tradep,self.svi_trade,self.svi_tradep,self.total_trade)
+        
+        # Protect reporting when feeds are briefly out of sync.
+        self.svi_tradep = min(100, max(0, self.svi_tradep))
+        self.cur_tradep = min(100, max(0, self.cur_tradep))
 
         #print(self.symbol,self.cur_trade,self.cur_tradep,self.cur_trade/self.total_trade,self.total_trade)
 
@@ -1038,16 +1052,20 @@ class SymbolMM:
 
     def add_trade_volume(self,shares):
 
+        self.reset_trade_metrics_if_new_day()
 
-        ### check if today
+        self.cur_trade += abs(int(shares))
+
+    def reset_trade_metrics_if_new_day(self):
 
         now = datetime.now().strftime("%Y-%m-%d")
-
-        if now !=self.today:
-            self.today = now 
+        if now != self.today:
+            self.today = now
             self.cur_trade = 0
-
-        self.cur_trade+=shares
+            self.cur_tradep = 0
+            self.total_trade = 0
+            self.svi_trade = 0
+            self.svi_tradep = 0
 
 
 
