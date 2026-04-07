@@ -1085,6 +1085,11 @@ class SymbolMM:
             ts = find_between(stream_data, "MarketTime=\"", "\"")
             volume = int(find_between(stream_data, "Volume=\"", "\""))
 
+            if volume ==0:
+                postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
+                r= requests.get(postbody)
+
+                message(f'Symbol volume 0. Re-registering. {self.symbol }',NOTIFICATION)
             ################################
             ##### need validity check. #####
             ################################
@@ -1108,7 +1113,10 @@ class SymbolMM:
 
                 
 
+
                 self.total_trade = volume
+
+                
 
                 self.spread = self.ask-self.bid
 
