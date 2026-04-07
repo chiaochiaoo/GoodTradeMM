@@ -886,12 +886,13 @@ class SymbolMM:
                 o_ask_mult =  self.get_variable('o_askmult')
 
 
+
                 if shutdown:
                     send_list = []
 
                     message(f' {self.symbol} shutdown. no opening orders {send_list}',NOTIFICATION)
                 else:
-                    if inv>=max_inv or u<=upnl:
+                    if (inv>=max_inv or u<=upnl) and inv>=tick_size:
                         send_list  = [(self.pc+tick_size)*-1]
 
                         
