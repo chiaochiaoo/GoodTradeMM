@@ -1089,7 +1089,7 @@ class SymbolMM:
                 postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
                 r= requests.get(postbody)
 
-                message(f'Symbol volume 0. Re-registering. {self.symbol }',NOTIFICATION)
+                #message(f'Symbol volume 0. Re-registering. {self.symbol }',NOTIFICATION)
             ################################
             ##### need validity check. #####
             ################################
