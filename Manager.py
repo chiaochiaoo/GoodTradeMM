@@ -446,9 +446,17 @@ class Manager:
 
 				c=0
 
-				for i in self.open_orders.keys():
+				for symbol_orders in self.open_orders.values():
 
-					c+=len(self.open_orders[i])
+					if not isinstance(symbol_orders, dict):
+						continue
+
+					for order_ids in symbol_orders.values():
+
+						if isinstance(order_ids, list):
+							c += len(order_ids)
+						elif order_ids:
+							c += 1
 				#print("DIC check:",len(self.positions),c)
 
 
@@ -683,15 +691,19 @@ def get_open_orders(user):
 		order_id = order.get("id")
 		# state = order.get("state")
 		# description = order.get("description")
-		open_shares = int(order.get("openSize"))
-		side = order.get('side')
+		open_shares = int(order.get("openSize") or 0)
+		side = (order.get('side') or '').strip().upper()
 
+		if open_shares <= 0 or not order_id:
+			continue
 
-		symbol = order.get("symbol") if order.get("symbol") else "UNKNOWN"
+		symbol = (order.get("symbol") or "UNKNOWN").strip()
+		if not symbol:
+			symbol = "UNKNOWN"
 		price = float(order.get("price") if order.get("price") else "0.0")
 
 
-		if side!="B":
+		if not side.startswith("B"):
 			price*=-1
 
 		if abs(price)>=0.5:
@@ -702,7 +714,10 @@ def get_open_orders(user):
 		if symbol not in dic:
 			dic[symbol] = {}
 
-		dic[symbol][price] = order_id
+		if price not in dic[symbol]:
+			dic[symbol][price] = []
+
+		dic[symbol][price].append(order_id)
 
 		#print(f"ID: {order_id}, Symbol: {symbol}, OpenShares: {open_shares} {side}, Price: {price}")
 	#print(dic)		

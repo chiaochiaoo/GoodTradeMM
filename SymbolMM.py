@@ -1,5 +1,7 @@
 import os
 import json
+import sys
+import subprocess
 import tkinter as tk
 import requests 
 from dataclasses import make_dataclass, asdict, field
@@ -210,6 +212,7 @@ class SymbolMM:
         self.price_check_successful = True
 
         self.today =  datetime.now().strftime("%Y-%m-%d")
+        self.bid_ask_day = self.today
 
         self.vars['Status'][0].trace_add("write", self.update_status)
 
@@ -252,13 +255,21 @@ class SymbolMM:
         if ts>=570 and ts<=960:
             self.inspection_count+=1
 
-        if today!=self.today:
+        if today!=self.bid_ask_day:
             message(f'New Day detected {today}',NOTIFICATION)
             self.inspection_count=0
             self.time_at_bid=0
             self.time_at_ask=0
             self.time_best_bid=0
             self.time_best_ask=0
+            self.sell_percentage = 0
+            self.ask_sell_percentage = 0
+            self.buy_percentage = 0
+            self.bid_buy_percentage = 0
+            self.bid_ask_day = today
+
+            self.set_variable('timeOnBidPct', 0)
+            self.set_variable('timeOnAskPct', 0)
 
         if ts%2==0 and ts!=self.volume_update_ts:
 
@@ -739,7 +750,8 @@ class SymbolMM:
                 send_list.append(price)
 
         for i in cancel_list:
-            self.cancel_order(self.order_book[i])
+            for order_id in self.get_order_ids_for_price(i):
+                self.cancel_order(order_id)
 
         #if len(cancel_list)>0:
             
@@ -852,11 +864,19 @@ class SymbolMM:
         if has_ask:
             self.time_at_ask+=1
 
+        if self.inspection_count > 0:
+            self.sell_percentage = round(self.time_at_ask*100/self.inspection_count,2)
+            self.ask_sell_percentage = round(self.time_best_ask*100/self.inspection_count,2)
+            self.buy_percentage = round(self.time_at_bid*100/self.inspection_count,2)
+            self.bid_buy_percentage =round(self.time_best_bid*100/self.inspection_count,2)
+        else:
+            self.sell_percentage = 0
+            self.ask_sell_percentage = 0
+            self.buy_percentage = 0
+            self.bid_buy_percentage = 0
 
-        self.sell_percentage = round(self.time_at_ask*100/self.inspection_count,2)
-        self.ask_sell_percentage = round(self.time_best_ask*100/self.inspection_count,2)
-        self.buy_percentage = round(self.time_at_bid*100/self.inspection_count,2)
-        self.bid_buy_percentage =round(self.time_best_bid*100/self.inspection_count,2)
+        self.set_variable('timeOnBidPct', self.buy_percentage)
+        self.set_variable('timeOnAskPct', self.sell_percentage)
 
         message(f'{self.symbol} current BuyP {self.buy_percentage} BidP {self.bid_buy_percentage} SellP {self.ask_sell_percentage} AskP {self.sell_percentage}',LOG)
 
@@ -886,26 +906,62 @@ class SymbolMM:
                 o_ask_mult =  self.get_variable('o_askmult')
 
 
+                if max_inv <= 0:
+                    if inv>0:
+                        send_list = [(self.pc + tick_size) * -1]   # sell only
+                        message(f'{self.symbol} max_inv={max_inv}. Exit-only mode. Selling out only {send_list}', NOTIFICATION)
+                    else:
+                        send_list = []
+                        message(f'{self.symbol} max_inv={max_inv}. Exit-only mode. No opening orders.', NOTIFICATION)
 
-                if shutdown:
+
+                elif shutdown:
                     send_list = []
+                    message(f'{self.symbol} shutdown. no opening orders {send_list}', NOTIFICATION)
 
-                    message(f' {self.symbol} shutdown. no opening orders {send_list}',NOTIFICATION)
-                else:
-                    if (inv>=max_inv or u<=upnl) and inv>=tick_size:
+
+                elif (inv >= max_inv or u <= upnl):
+
+                    if  inv>0:
+
                         send_list  = [(self.pc+tick_size)*-1]
 
-                        
-                        message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
                     else:
+                        send_list = []
+
+                    message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
 
 
-                        if inv<int(o_ask_mult*board_lot):
-                            send_list =  [self.pc-tick_size]
-                            message(f' {self.symbol} insufficient inventory. opening mode bid only. {send_list}',NOTIFICATION)
-                        else:
-                            send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
-                            message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
+                else:
+                    if inv<int(o_ask_mult*board_lot):
+                        send_list =  [self.pc-tick_size]
+                        message(f' {self.symbol} insufficient inventory. opening mode bid only. {send_list}',NOTIFICATION)
+                    else:
+                        send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+                        message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
+
+
+
+
+                # if shutdown:
+                #     send_list = []
+
+                #     message(f' {self.symbol} shutdown. no opening orders {send_list}',NOTIFICATION)
+                # else:
+                #     if (inv>=max_inv or u<=upnl) and inv>=tick_size:
+                #         send_list  = [(self.pc+tick_size)*-1]
+
+                        
+                #         message(f' {self.symbol} opening mode max inventory reached: {inv>=max_inv} unreal shutdown {u<=upnl}/ real shutdown:{shutdown}. sell only {send_list}',NOTIFICATION)
+                #     else:
+
+
+                #         if inv<int(o_ask_mult*board_lot):
+                #             send_list =  [self.pc-tick_size]
+                #             message(f' {self.symbol} insufficient inventory. opening mode bid only. {send_list}',NOTIFICATION)
+                #         else:
+                #             send_list  = [(self.pc+tick_size)*-1,self.pc-tick_size]
+                #             message(f' {self.symbol} opening mode normal. {send_list}',NOTIFICATION)
 
 
 
@@ -998,7 +1054,21 @@ class SymbolMM:
 
             message(f'{self.symbol} cancel order: {i}',LOG)
 
-            self.cancel_order(self.order_book[i])
+            for order_id in self.get_order_ids_for_price(i):
+                self.cancel_order(order_id)
+
+
+    def get_order_ids_for_price(self,price):
+
+        order_entry = self.order_book.get(price)
+
+        if isinstance(order_entry, list):
+            return [order_id for order_id in order_entry if order_id]
+
+        if order_entry:
+            return [order_entry]
+
+        return []
 
 
     def cancel_order(self,ordername):
@@ -1009,6 +1079,18 @@ class SymbolMM:
 
 
     def post_cmd(self,order,price,share,action):
+
+
+        # Safety guard: never send non-positive or invalid prices.
+        try:
+            valid_price = float(price)
+        except (TypeError, ValueError):
+            message(f'{self.symbol} blocked order with invalid price: {price}', CRITICAL)
+            return
+
+        if valid_price <= 0:
+            message(f'{self.symbol} blocked non-positive order price: {valid_price}', CRITICAL)
+            return
 
 
 
@@ -1047,7 +1129,14 @@ class SymbolMM:
         #refresh.
         self.order_book = new_order
 
-        self.open_order_number = len(self.order_book)
+        total_open_orders = 0
+        for order_entry in self.order_book.values():
+            if isinstance(order_entry, list):
+                total_open_orders += len(order_entry)
+            elif order_entry:
+                total_open_orders += 1
+
+        self.open_order_number = total_open_orders
         self.set_variable('openOrderCount',self.open_order_number)
 
 
@@ -1055,18 +1144,46 @@ class SymbolMM:
 
         self.reset_trade_metrics_if_new_day()
 
-        self.cur_trade += abs(int(shares))
+        try:
+            traded_shares = abs(int(float(shares)))
+        except (TypeError, ValueError):
+            traded_shares = 0
+
+        if traded_shares <= 0:
+            return
+
+        self.cur_trade += traded_shares
+        self.set_variable('cur_traded', self.cur_trade)
+        self.set_variable('filledOrderCount', int(self.get_variable('filledOrderCount')) + 1)
 
     def reset_trade_metrics_if_new_day(self):
 
         now = datetime.now().strftime("%Y-%m-%d")
         if now != self.today:
             self.today = now
+            self.bid_ask_day = now
             self.cur_trade = 0
             self.cur_tradep = 0
             self.total_trade = 0
             self.svi_trade = 0
             self.svi_tradep = 0
+            self.inspection_count = 0
+            self.time_at_bid = 0
+            self.time_at_ask = 0
+            self.time_best_bid = 0
+            self.time_best_ask = 0
+            self.sell_percentage = 0
+            self.ask_sell_percentage = 0
+            self.buy_percentage = 0
+            self.bid_buy_percentage = 0
+
+            self.set_variable('cur_traded', 0)
+            self.set_variable('cur_tradedp', 0)
+            self.set_variable('svi_traded', 0)
+            self.set_variable('svi_tradedp', 0)
+            self.set_variable('filledOrderCount', 0)
+            self.set_variable('timeOnBidPct', 0)
+            self.set_variable('timeOnAskPct', 0)
 
 
 

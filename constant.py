@@ -299,6 +299,10 @@ CONFIG_SCHEMA = [
 
     {"name": "svi_tradedp",     "label": "SVI trade %", "section": STATUS, "type": "float",    "row": 1,'default':0, "readonly": True},
 
+    {"name": "filledOrderCount", "label": "Filled Orders", "section": STATUS, "type": "int", "row": 1, "default": 0, "readonly": True},
+    {"name": "timeOnBidPct", "label": "On Bid %", "section": STATUS, "type": "float", "row": 1, "default": 0, "readonly": True},
+    {"name": "timeOnAskPct", "label": "On Ask %", "section": STATUS, "type": "float", "row": 1, "default": 0, "readonly": True},
+
 
     {"name": "openOrderCount",    "label": "Open Order Count","section": STATUS, "type": "int",  "row": 2,"readonly":True},
     {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 2,"readonly":True},

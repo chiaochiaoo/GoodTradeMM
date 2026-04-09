@@ -132,13 +132,13 @@ def validate_int(new_value):
 def trace_func(d):
 
 	if d['lock'].get()==0:
-		d['set_entry']["state"] = DISABLED
-		d['set_button']["state"] = DISABLED
+		d['set_entry']["state"] = tk.DISABLED
+		d['set_button']["state"] = tk.DISABLED
 		#d['flat_button']["state"] = DISABLED
 		
-		d['set_current']["state"] = DISABLED
-		d['set_max']["state"] = DISABLED
-		d['passive_button']["state"] = DISABLED
+		d['set_current']["state"] = tk.DISABLED
+		d['set_max']["state"] = tk.DISABLED
+		d['passive_button']["state"] = tk.DISABLED
 
 
 	else:
@@ -181,10 +181,10 @@ class UI(pannel):
 	def init_pannel(self):
 
 		self.system_pannel = ttk.LabelFrame(self.root,text="System")
-		self.system_pannel.place(x=10,y=10,height=200,width=350)
+		self.system_pannel.place(x=10,y=10,height=235,width=350)
 
 		# Create collapsible Ticker Management section
-		self.ticker_section = CollapsibleSection(self.root, "Ticker Management", x=360, y=10, width=700, height=200)
+		self.ticker_section = CollapsibleSection(self.root, "Ticker Management", x=360, y=10, width=700, height=235)
 		self.ticker_management_frame = self.ticker_section.get_frame()
 
 		# Create collapsible Notification section - full height like original
@@ -199,7 +199,7 @@ class UI(pannel):
 		# self.filter_pannel.place(x=360,y=200,height=60,width=1300)
 
 		self.mm_pannel = ttk.LabelFrame(self.root,text="MarketMaking") 
-		self.mm_pannel.place(x=10,y=210,height=870,width=1060)
+		self.mm_pannel.place(x=10,y=285,height=870,width=1060)
 
 		self.marketmaking_notebook = ttk.Notebook(self.mm_pannel)
 		self.marketmaking_notebook.place(x=0,rely=0,relheight=1,relwidth=1)
@@ -208,6 +208,7 @@ class UI(pannel):
 		self.init_ticker_management_table()
 		self.init_system_pannel()
 		self.load_saved_tickers()
+		self._refresh_system_metrics()
 
 	def show_notification(self, message: str, max_lines=500):
 		self.notification_text.config(state='normal')
@@ -222,25 +223,25 @@ class UI(pannel):
 		self.notification_text.config(state='disabled')
 
 	def show_notification(self, message: str, max_lines=500, color="black"):
-	    self.notification_text.config(state='normal')
+		self.notification_text.config(state='normal')
 
-	    # Create or configure a tag with the desired color
+		# Create or configure a tag with the desired color
 
-	    if 'mode switch' in message:
-	    	color='red'
-	    if not self.notification_text.tag_names().__contains__(color):
-	        self.notification_text.tag_config(color, foreground=color)
+		if 'mode switch' in message:
+			color='red'
+		if not self.notification_text.tag_names().__contains__(color):
+			self.notification_text.tag_config(color, foreground=color)
 
-	    # Insert the message with the color tag
-	    self.notification_text.insert(tk.END, message + '\n', color)
-	    self.notification_text.see(tk.END)
+		# Insert the message with the color tag
+		self.notification_text.insert(tk.END, message + '\n', color)
+		self.notification_text.see(tk.END)
 
-	    # Trim to keep only the last 500 lines
-	    lines = self.notification_text.get("1.0", tk.END).splitlines()
-	    if len(lines) > max_lines:
-	        self.notification_text.delete("1.0", f"{len(lines) - max_lines + 1}.0")
+		# Trim to keep only the last 500 lines
+		lines = self.notification_text.get("1.0", tk.END).splitlines()
+		if len(lines) > max_lines:
+			self.notification_text.delete("1.0", f"{len(lines) - max_lines + 1}.0")
 
-	    self.notification_text.config(state='disabled')
+		self.notification_text.config(state='disabled')
 
 	def init_system_pannel(self):
 
@@ -272,6 +273,8 @@ class UI(pannel):
 		self.algo_count_string = tk.StringVar(value="0")
 		self.algo_timer_string = tk.StringVar(value="0")
 		self.algo_timer_close_string = tk.StringVar(value="0")
+		self.total_notional_exposure = tk.StringVar(value="0")
+		self.total_shares_traded = tk.StringVar(value="0")
 
 		self.algo_count_string.set("Activated Algos:"+str(self.algo_count_number))
 
@@ -304,6 +307,14 @@ class UI(pannel):
 		self.ol.grid(sticky="w",column=1,row=row,padx=10)
 		self.o_count_ = ttk.Label(self.system_pannel,  textvariable=self.manager.order_count)
 		self.o_count_.grid(sticky="w",column=2,row=row,padx=10)
+
+		row +=1
+		ttk.Label(self.system_pannel, text="Total Notional$:").grid(sticky="w", column=1, row=row, padx=10)
+		ttk.Label(self.system_pannel, textvariable=self.total_notional_exposure).grid(sticky="w", column=2, row=row)
+
+		row +=1
+		ttk.Label(self.system_pannel, text="Total Trd Shrs:").grid(sticky="w", column=1, row=row, padx=10)
+		ttk.Label(self.system_pannel, textvariable=self.total_shares_traded).grid(sticky="w", column=2, row=row)
 
 
 
@@ -352,6 +363,26 @@ class UI(pannel):
 
 		#self.ticker_var.set('XIU.TO')
 		#self.load_ticker_tab()
+
+	def _var_to_float(self, value):
+		if hasattr(value, "get"):
+			value = value.get()
+		try:
+			return float(value)
+		except (TypeError, ValueError):
+			return 0.0
+
+	def _refresh_system_metrics(self):
+		total_notional = 0.0
+		total_shares = 0
+
+		for row_info in self.ticker_table_rows.values():
+			total_notional += self._var_to_float(row_info.get("notional"))
+			total_shares += int(self._var_to_float(row_info.get("curt")))
+
+		self.total_notional_exposure.set(f"{int(total_notional):,}")
+		self.total_shares_traded.set(f"{int(total_shares):,}")
+		self.root.after(1000, self._refresh_system_metrics)
 
 
 	def load_saved_tickers(self):
@@ -403,15 +434,36 @@ class UI(pannel):
 		elif key in info:
 			var = info[key]
 			if hasattr(var, "get"):
-				val = var.get()
-				try:
-					# Try convert to float if it's numeric
-					return float(val)
-				except (ValueError, TypeError):
-					return val  # fallback to raw string
+				return var.get()
 			return var
 		else:
 			return ""  # fallback if key not found
+
+	def _format_status_text(self, status_value):
+		text = "" if status_value is None else str(status_value)
+		if text.endswith(" Mode"):
+			return text[:-5]
+		return text
+
+	def _normalize_sort_value(self, value):
+		# Keep sorting stable across mixed Tk variable types, strings, blanks, and numbers.
+		if value is None:
+			return (1, "")
+
+		if isinstance(value, str):
+			cleaned = value.replace(",", "").replace("%", "").strip()
+			if cleaned == "":
+				return (1, "")
+			try:
+				return (0, float(cleaned))
+			except (TypeError, ValueError):
+				return (1, cleaned.lower())
+
+		try:
+			return (0, float(value))
+		except (TypeError, ValueError):
+			return (1, str(value).lower())
+
 	def sort_ticker_table(self, key):
 		ascending = self.sort_order.get(key, True)
 
@@ -420,10 +472,13 @@ class UI(pannel):
 			val = self.get_sort_value(symbol, key)
 			sortable.append((symbol, val))
 
-		sortable.sort(key=lambda x: x[1], reverse=not ascending)
+		sortable.sort(
+			key=lambda x: (self._normalize_sort_value(x[1]), x[0].lower()),
+			reverse=not ascending
+		)
 		self.sort_order[key] = not ascending
 
-		for new_row, (symbol, _) in enumerate(sortable, start=1):
+		for new_row, (symbol, _) in enumerate(sortable, start=0):
 			row_info = self.ticker_table_rows[symbol]
 			for col, widget in enumerate(row_info["widgets"]):
 				widget.grid(row=new_row, column=col, padx=1, sticky="ew")
@@ -436,10 +491,16 @@ class UI(pannel):
 		if symbol in self.ticker_table_rows:
 			return  # Already exists
 
-		row_idx = len(self.ticker_table_rows) + 1
+		row_idx = len(self.ticker_table_rows)
 
 		# Variables from mm instance
 		status = mm.vars['Status'][0]
+		status_display = tk.StringVar(value=self._format_status_text(status.get()))
+
+		def _sync_status_display(*_):
+			status_display.set(self._format_status_text(status.get()))
+
+		status_trace = status.trace_add("write", _sync_status_display)
 		inventory = mm.vars['cur_inv'][0]
 		open_orders = mm.vars['openOrderCount'][0]
 		notional = mm.vars['notionalAmount'][0]
@@ -449,46 +510,54 @@ class UI(pannel):
 
 		svi_trade = mm.vars['svi_traded'][0]
 		svi_tradep= mm.vars['svi_tradedp'][0]
+		filled_orders = mm.vars['filledOrderCount'][0]
+		on_bid_pct = mm.vars['timeOnBidPct'][0]
+		on_ask_pct = mm.vars['timeOnAskPct'][0]
 
 
 
-
-		status_w = 9
-		num_w = 8
-		pct_w = 6
 
 		# === Create and place widgets ===
-		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2", width=8)
+		label = ttk.Label(self.ticker_table_frame, text=symbol, foreground="blue", cursor="hand2", anchor="w")
 		label.grid(row=row_idx, column=0, padx=1, sticky="ew")
 		label.bind("<Button-1>", lambda e, sym=symbol: self.open_ticker_tab(sym))
 
-		status_label = ttk.Label(self.ticker_table_frame, textvariable=status, width=status_w, anchor="w")
+		status_label = ttk.Label(self.ticker_table_frame, textvariable=status_display, anchor="w")
 		status_label.grid(row=row_idx, column=1, padx=1, sticky="ew")
 
-		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory, width=num_w, anchor="e")
+		inv_label = ttk.Label(self.ticker_table_frame, textvariable=inventory, anchor="e")
 		inv_label.grid(row=row_idx, column=2, padx=1, sticky="ew")
 
 
-		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional, width=num_w, anchor="e")
+		not_label = ttk.Label(self.ticker_table_frame, textvariable=notional, anchor="e")
 		not_label.grid(row=row_idx, column=3, padx=1, sticky="ew")
 
-		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders, width=num_w, anchor="e")
+		orders_label = ttk.Label(self.ticker_table_frame, textvariable=open_orders, anchor="e")
 		orders_label.grid(row=row_idx, column=4, padx=1, sticky="ew")
 
-		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade, width=num_w, anchor="e")
+		ct_label = ttk.Label(self.ticker_table_frame, textvariable=cur_trade, anchor="e")
 		ct_label.grid(row=row_idx, column=5, padx=1, sticky="ew")
 
-		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep, width=pct_w, anchor="e")
+		ctp_label = ttk.Label(self.ticker_table_frame, textvariable=cur_tradep, anchor="e")
 		ctp_label.grid(row=row_idx, column=6, padx=1, sticky="ew")
 
-		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade, width=num_w, anchor="e")
+		svi_label = ttk.Label(self.ticker_table_frame, textvariable=svi_trade, anchor="e")
 		svi_label.grid(row=row_idx, column=7, padx=1, sticky="ew")
 
-		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep, width=pct_w, anchor="e")
+		svip_label = ttk.Label(self.ticker_table_frame, textvariable=svi_tradep, anchor="e")
 		svip_label.grid(row=row_idx, column=8, padx=1, sticky="ew")
+
+		fills_label = ttk.Label(self.ticker_table_frame, textvariable=filled_orders, anchor="e")
+		fills_label.grid(row=row_idx, column=9, padx=1, sticky="ew")
+
+		on_bid_label = ttk.Label(self.ticker_table_frame, textvariable=on_bid_pct, anchor="e")
+		on_bid_label.grid(row=row_idx, column=10, padx=1, sticky="ew")
+
+		on_ask_label = ttk.Label(self.ticker_table_frame, textvariable=on_ask_pct, anchor="e")
+		on_ask_label.grid(row=row_idx, column=11, padx=1, sticky="ew")
 		# Store all info + widgets for future sorting
 		self.ticker_table_rows[symbol] = {
-			"status": status,
+			"status": status_display,
 			"inventory": inventory,
 			"notional": notional,
 			"orders": open_orders,
@@ -496,8 +565,12 @@ class UI(pannel):
 			"curtp": cur_tradep,
 			"svit": svi_trade,
 			"svitp": svi_tradep,
+			"fills": filled_orders,
+			"bidpct": on_bid_pct,
+			"askpct": on_ask_pct,
+			"status_trace": (status, status_trace),
 			"row": row_idx,
-			"widgets": [label, status_label, inv_label, not_label,orders_label,ct_label,ctp_label,svi_label,svip_label]
+			"widgets": [label, status_label, inv_label, not_label,orders_label,ct_label,ctp_label,svi_label,svip_label,fills_label,on_bid_label,on_ask_label]
 		}
 
 	# def init_ticker_management_table(self):
@@ -552,36 +625,42 @@ class UI(pannel):
 		header_frame.pack(fill="x")
 
 		headers = [
-			("Ticker", "ticker", 8),
-			("Status", "status", 9),
-			("Inv", "inventory", 6),
-			("Notional$", "notional", 8),
-			("Open Ord", "orders", 8),
-			("Cur Trade", "curt", 8),
-			("Trade %", "curtp", 6),
-			("SVI Trd", "svit", 8),
+			("Ticker", "ticker", 7),
+			("Status", "status", 8),
+			("Inv", "inventory", 5),
+			("Notional", "notional", 8),
+			("Open Ord", "orders", 7),
+			("Cur Trd", "curt", 7),
+			("Trd %", "curtp", 6),
+			("SVI Trd", "svit", 7),
 			("SVI %", "svitp", 6),
+			("Fills", "fills", 5),
+			("On Bid %", "bidpct", 6),
+			("On Ask %", "askpct", 6),
 		]
 
 		# Column pixel widths for alignment between header and data frames
-		col_widths = [70, 75, 55, 75, 75, 75, 55, 75, 55]
+		col_widths = [52, 62, 44, 60, 58, 58, 48, 58, 48, 46, 50, 50]
 
 		self.sort_order = {}
 		for col, (label, key, width_chars) in enumerate(headers):
-			btn = ttk.Button(
+			header = ttk.Button(
 				header_frame,
 				text=label,
 				width=width_chars,
 				command=lambda k=key: self.sort_ticker_table(k)
 			)
-			btn.grid(row=0, column=col, padx=1, pady=2, sticky="ew")
+			header.grid(row=0, column=col, padx=1, pady=2, sticky="ew")
 			header_frame.grid_columnconfigure(col, weight=0, minsize=col_widths[col])
 			self.sort_order[key] = True
 
 		# === Scrollable Canvas ===
-		canvas = tk.Canvas(self.ticker_management_frame, height=200)
+		canvas = tk.Canvas(self.ticker_management_frame, height=220, highlightthickness=0, bd=0)
 		scrollbar = ttk.Scrollbar(self.ticker_management_frame, orient="vertical", command=canvas.yview)
 		self.ticker_table_frame = ttk.Frame(canvas)
+
+		# Keep header width synced with the live scrollbar width for perfect right-edge alignment.
+		scrollbar.bind("<Configure>", lambda e: header_frame.pack_configure(padx=(0, e.width)))
 
 		self.ticker_table_frame.bind(
 			"<Configure>",
@@ -596,6 +675,9 @@ class UI(pannel):
 
 		canvas.pack(side="left", fill="both", expand=True)
 		scrollbar.pack(side="right", fill="y")
+
+		# Apply initial padding once geometry is realized.
+		header_frame.pack_configure(padx=(0, max(scrollbar.winfo_reqwidth(), 1)))
 
 		self.ticker_table_rows = {}
 
@@ -634,7 +716,15 @@ class UI(pannel):
 	def delete_ticker(self, symbol):
 		# 1. Remove widgets from Ticker Management table
 		if symbol in self.ticker_table_rows:
-			for widget in self.ticker_table_rows[symbol]["widgets"]:
+			row_info = self.ticker_table_rows[symbol]
+			if "status_trace" in row_info:
+				status_var, trace_id = row_info["status_trace"]
+				try:
+					status_var.trace_remove("write", trace_id)
+				except tk.TclError:
+					pass
+
+			for widget in row_info["widgets"]:
 				widget.destroy()
 			del self.ticker_table_rows[symbol]
 
