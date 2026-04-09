@@ -382,7 +382,7 @@ class UI(pannel):
 
 		self.total_notional_exposure.set(f"{int(total_notional):,}")
 		self.total_shares_traded.set(f"{int(total_shares):,}")
-		self.root.after(1000, self._refresh_system_metrics)
+		self.root.after(300, self._refresh_system_metrics)
 
 
 	def load_saved_tickers(self):

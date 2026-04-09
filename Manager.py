@@ -78,6 +78,8 @@ class Manager:
 
 
 		self.lock = threading.Lock()
+		self.base_refresh_interval_sec = 2.0
+		self.immediate_refresh = threading.Event()
 
 		### ONLY RUN; when Both System & User check works ###
 
@@ -427,6 +429,9 @@ class Manager:
 
 		return self.system_status.get()==CONNECTED
 
+	def request_immediate_refresh(self):
+		self.immediate_refresh.set()
+
 	def position_update_loop(self):
 
 		while True:
@@ -441,8 +446,8 @@ class Manager:
 		while True:
 			try:
 				self.set_connected()
-				self.positions = get_current_positions(self.user)
-				self.open_orders = get_open_orders(self.user)
+				self.positions = get_current_positions(self.user) or {}
+				self.open_orders = get_open_orders(self.user) or {}
 
 				c=0
 
@@ -486,8 +491,8 @@ class Manager:
 			except:
 				PrintException("Inspection error:")
 
-
-			time.sleep(5)
+			if self.immediate_refresh.wait(timeout=self.base_refresh_interval_sec):
+				self.immediate_refresh.clear()
 
 
 
@@ -572,6 +577,7 @@ class Manager:
 		if "OrderState" in stream_data:
 			#log_print(stream_data)
 			state = find_between(stream_data, "OrderState=", ",")
+			self.request_immediate_refresh()
 			if state =="Filled" or state =="Partially Filled":
 				symbol = find_between(stream_data, "Symbol=", ",")
 				side = find_between(stream_data, "Side=", ",")
