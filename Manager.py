@@ -78,8 +78,7 @@ class Manager:
 
 
 		self.lock = threading.Lock()
-		self.base_refresh_interval_sec = 2.0
-		self.immediate_refresh = threading.Event()
+		self.base_refresh_interval_sec = 1.0
 
 		### ONLY RUN; when Both System & User check works ###
 
@@ -491,8 +490,7 @@ class Manager:
 			except:
 				PrintException("Inspection error:")
 
-			if self.immediate_refresh.wait(timeout=self.base_refresh_interval_sec):
-				self.immediate_refresh.clear()
+			time.sleep(self.base_refresh_interval_sec)
 
 
 
@@ -577,7 +575,6 @@ class Manager:
 		if "OrderState" in stream_data:
 			#log_print(stream_data)
 			state = find_between(stream_data, "OrderState=", ",")
-			self.request_immediate_refresh()
 			if state =="Filled" or state =="Partially Filled":
 				symbol = find_between(stream_data, "Symbol=", ",")
 				side = find_between(stream_data, "Side=", ",")
