@@ -79,6 +79,7 @@ class Manager:
 
 		self.lock = threading.Lock()
 		self.base_refresh_interval_sec = 1.0
+		self.post_snapshot_settle_sec = 0.25
 
 		### ONLY RUN; when Both System & User check works ###
 
@@ -476,10 +477,20 @@ class Manager:
 
 					keys =  list(self.symbols.keys())
 
+					# Phase 1: refresh quotes/inventory snapshots for all symbols first.
 					for symbol in keys:
 
 						if symbol in self.symbols:
 							self.symbols[symbol].update_data()
+
+					# Let feed snapshots settle a bit before making order decisions.
+					if self.post_snapshot_settle_sec > 0:
+						time.sleep(self.post_snapshot_settle_sec)
+
+					# Phase 2: sync open orders and run inspections.
+					for symbol in keys:
+
+						if symbol in self.symbols:
 
 							if symbol in self.open_orders:
 								self.symbols[symbol].update_orderbook(self.open_orders[symbol])
