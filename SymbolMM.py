@@ -239,6 +239,9 @@ class SymbolMM:
             if avg_diff>=0.15:
                 message(f'{self.symbol} l1 update UNSUCCES, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check} please check',NOTIFICATION)
                 self.price_check_successful=False
+
+                postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
+                r= requests.get(postbody)
             else:
                 message(f'{self.symbol} l1 update success, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check}',LOG)
                 self.price_check_successful=True
