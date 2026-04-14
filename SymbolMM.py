@@ -746,11 +746,35 @@ class SymbolMM:
 
         abs_keys_set = {abs(key) for key in self.order_book.keys()}
 
+        buy_prices = [p for p in self.order_book.keys() if p > 0]
+        sell_prices = [abs(p) for p in self.order_book.keys() if p < 0]
+
+        best_buy = max(buy_prices) if buy_prices else None
+        best_sell = min(sell_prices) if sell_prices else None
+
 
         send_list = []
+
+        send_abs = set()
         for price in vals.keys():
-            if abs(price) not in abs_keys_set and abs(price) not in send_list:
-                send_list.append(price)
+            abs_price = abs(price)
+
+            if abs_price in abs_keys_set or abs_price in send_abs:
+                continue
+
+            if price > 0:
+                if best_sell is not None and abs_price >= best_sell:
+                    message(f'{self.symbol} order {price} conflicts with best_sell {best_sell}. skip sending.', LOG)
+                    continue
+            elif price < 0:
+                if best_buy is not None and abs_price <= best_buy:
+                    message(f'{self.symbol} order {price} conflicts with best_buy {best_buy}. skip sending.', LOG)
+                    continue
+            else:
+                continue
+
+            send_list.append(price)
+            send_abs.add(abs_price)
 
         for i in cancel_list:
             for order_id in self.get_order_ids_for_price(i):
