@@ -777,15 +777,15 @@ class UI(pannel):
 		tab = ttk.Frame(self.marketmaking_notebook)
 		self.marketmaking_notebook.add(tab, text=ticker)
 		self.marketmaking_tabs[ticker] = tab
+		tab.columnconfigure(0, weight=1)
 		print(f"        ✓ Tab created. marketmaking_tabs now: {list(self.marketmaking_tabs.keys())}")
-		
+
 		# Add a close button at the top of the tab
 		close_frame = ttk.Frame(tab)
-		close_frame.grid(row=0, column=0, columnspan=FIELDS_PER_ROW * 2, sticky="ew", padx=5, pady=5)
+		close_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 		
 		ttk.Label(close_frame, text=ticker, font=("Arial", 10, "bold")).pack(side="left", padx=5)
-		ttk.Button(close_frame, text="x", command=lambda: self.close_ticker_tab(ticker), width=3).pack(side="right", padx=2)
-		ttk.Button(close_frame, text="× Close Tab", command=lambda: self.close_ticker_tab(ticker)).pack(side="right", padx=20)
+		ttk.Button(close_frame, text="× Close Tab", command=lambda: self.close_ticker_tab(ticker)).pack(side="right", padx=5)
 		# --- Step 1: Group schema entries by section ---
 		sections = {}
 		for entry in CONFIG_SCHEMA:

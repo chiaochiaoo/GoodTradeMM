@@ -1217,6 +1217,14 @@ class SymbolMM:
     def get_l1(self):
 
         try:
+
+
+            reg = f'http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1'
+            try:
+                requests.get(reg)
+            except Exception as _:
+                pass
+                
             postbody = "http://127.0.0.1:8080/GetLv1?symbol=" + self.symbol 
 
             r= requests.get(postbody)
