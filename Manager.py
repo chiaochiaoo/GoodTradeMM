@@ -251,65 +251,58 @@ class Manager:
 		messageX="OrderStatus"  # optional, for completeness
 	):
 
-		if self.TEST_MODE==False:
-			computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-			
-			# try:
-			# 	query = """
-			# 		INSERT INTO orderdata (
-			# 			MarketDate,
-			# 			ComputerTime,
-			# 			Message,
-			# 			Symbol,
-			# 			Trader,
-			# 			DepthLevel,
-			# 			Price,
-			# 			Side,
-			# 			PapiID,
-			# 			Size
-			# 		) VALUES (
-			# 			%s, %s, %s, %s, %s,
-			# 			%s, %s, %s, %s, %s
-			# 		)
-			# 	"""
+		computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-			# 	self.cursor.execute(query, (
-			# 		computer_time,
-			# 		computer_time,
-			# 		messageX,
-			# 		symbol,
-			# 		self.user,
-			# 		depth_level,
-			# 		price,
-			# 		side,
-			# 		order_number,  # stored in PapiID
-			# 		shares
-			# 	))
-			# 	self.conn.commit()
-			# 	print('databse order submited')
-			# except Exception as e:
-			# 	message(f"database order submission error {e}",NOTIFICATION)
+		# Push to Supabase
+		try:
+			if self.supabase:
+				data = {
+					"market_date": computer_time.split()[0],
+					"computer_time": computer_time,
+					"message": messageX,
+					"symbol": symbol,
+					"trader": self.user,
+					"depth_level": depth_level,
+					"price": price,
+					"side": side,
+					"papi_id": order_number,
+					"size": shares
+				}
+				self.supabase.table("order_data").insert(data).execute()
+		except Exception as e:
+			message(f"Supabase order submission error: {e}",NOTIFICATION)
 
-			# Push to Supabase
-			try:
-				if self.supabase:
-					data = {
-						"market_date": computer_time.split()[0],
-						"computer_time": computer_time,
-						"message": messageX,
-						"symbol": symbol,
-						"trader": self.user,
-						"depth_level": depth_level,
-						"price": price,
-						"side": side,
-						"papi_id": order_number,
-						"size": shares
-					}
-					self.supabase.table("order_data").insert(data).execute()
-			except Exception as e:
-				message(f"Supabase order submission error: {e}",NOTIFICATION)
 
-			
+	def insert_fill(self, symbol, side, price, shares, market_datetime, state):
+
+		computer_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+		try:
+			price_val = float(price)
+		except (TypeError, ValueError):
+			price_val = None
+		try:
+			shares_val = int(shares)
+		except (TypeError, ValueError):
+			shares_val = None
+
+		try:
+			if self.supabase:
+				data = {
+					"market_date": computer_time.split()[0],
+					"computer_time": computer_time,
+					"market_datetime": market_datetime,
+					"symbol": symbol,
+					"side": side,
+					"price": price_val,
+					"shares": shares_val,
+					"state": state,
+				}
+				self.supabase.table("order_fills").insert(data).execute()
+		except Exception as e:
+			message(f"Supabase fill submission error: {e}", NOTIFICATION)
+
+
 	def insert_cancel(self, order_number, symbol, reason):
 
 
@@ -591,26 +584,22 @@ class Manager:
 				side = find_between(stream_data, "Side=", ",")
 				price = find_between(stream_data, "Price=", ",")
 				share = int(find_between(stream_data, "Shares=", ","))
-				ts=find_between(stream_data, "MarketDateTime=", ",")[9:-4]
-				#add time
-				# if side =="T" or side =="S": side ="Short"
-				# if side =="B": side = "Long"
-
-				# data ={}
-				# data["symbol"]= symbol
-				# data["side"]= side
-				# data["price"]= float(price)
-				# data["shares"]= int(share)
-				# data["timestamp"]= timestamp_seconds(ts)
-				# #pipe.send(["order confirm",data])
-
+				market_datetime = find_between(stream_data, "MarketDateTime=", ",")[9:-4]
 
 				now = datetime.now()
 				ts = now.hour*60 + now.minute
 
 				if symbol in self.symbols and ts>=565:
 
-					self.symbols[symbol].add_trade_volume(share)
+					self.symbols[symbol].add_trade_volume(
+						share,
+						price=price,
+						market_datetime=market_datetime,
+						side=side,
+						state=state,
+					)
+
+					self.insert_fill(symbol, side, price, share, market_datetime, state)
 
 			if state =="Rejected":
 				symbol = find_between(stream_data, "Symbol=", ",")

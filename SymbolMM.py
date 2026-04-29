@@ -28,6 +28,13 @@ except ImportError:
 
 
 ALGO ="Algo Manger"
+
+# Runtime-only fields: per-day metrics and live market data that should never
+# be persisted across restarts. Listed in CONFIG_SCHEMA only so they get a
+# tk var for the UI; on save we write defaults, on load we ignore the JSON value.
+RUNTIME_FIELDS = {entry["name"] for entry in CONFIG_SCHEMA if entry.get("runtime")}
+
+
 def find_between(data, first, last):
     try:
         start = data.index(first) + len(first)
@@ -206,6 +213,9 @@ class SymbolMM:
 
         
         self.reserve_orders = []
+
+        self.buy_fills = {}
+        self.sell_fills = {}
 
         self.price_check = deque(maxlen=5)
 
@@ -1178,7 +1188,7 @@ class SymbolMM:
         self.set_variable('openOrderCount',self.open_order_number)
 
 
-    def add_trade_volume(self,shares):
+    def add_trade_volume(self, shares, price=None, market_datetime=None, side=None, state=None):
 
         self.reset_trade_metrics_if_new_day()
 
@@ -1193,6 +1203,21 @@ class SymbolMM:
         self.cur_trade += traded_shares
         self.set_variable('cur_traded', self.cur_trade)
         self.set_variable('filledOrderCount', int(self.get_variable('filledOrderCount')) + 1)
+
+        if price is not None and side is not None:
+            try:
+                price_key = float(price)
+            except (TypeError, ValueError):
+                price_key = None
+
+            if price_key is not None:
+                now = datetime.now()
+                minute_ts = now.hour * 60 + now.minute
+
+                if side == 'B':
+                    self.buy_fills[price_key] = minute_ts
+                elif side in ('S', 'T'):
+                    self.sell_fills[price_key] = minute_ts
 
     def reset_trade_metrics_if_new_day(self):
 
@@ -1214,6 +1239,9 @@ class SymbolMM:
             self.ask_sell_percentage = 0
             self.buy_percentage = 0
             self.bid_buy_percentage = 0
+
+            self.buy_fills = {}
+            self.sell_fills = {}
 
             self.set_variable('cur_traded', 0)
             self.set_variable('cur_tradedp', 0)
@@ -1460,6 +1488,9 @@ class SymbolMM:
     def to_config(self):
         values = {}
         for name, (var, typ) in self.vars.items():
+            if name in RUNTIME_FIELDS:
+                values[name] = self.default_for(typ)
+                continue
             try:
                 value = var.get()
             except tk.TclError:
@@ -1508,6 +1539,11 @@ class SymbolMM:
             name = entry["name"]
             typ = entry["type"]
             default_val = entry.get("default", self.default_for(typ))
+
+            # Runtime fields (per-day metrics, live quotes) never restore from JSON.
+            if entry.get("runtime"):
+                self.data[name] = default_val
+                continue
 
             # Priority: override > loaded config > default
             if name in override_values:
