@@ -222,10 +222,11 @@ class SymbolMM:
 
     def check_price_validity(self,bid,ask):
 
+        was_failing = not self.price_check_successful
 
+        # On entering a failing state we cleared the deque, so samples here
+        # are all post-incident — letting avg_diff recover within a few cycles.
         self.price_check.append(bid)
-
-       # print(len(self.price_check))
 
         c=0
         d=0
@@ -235,16 +236,26 @@ class SymbolMM:
 
         avg_diff = round(d/c,2)
 
-        if bid!=self.bid:
-            if avg_diff>=0.15:
+        if avg_diff>=0.15:
+            if not was_failing:
                 message(f'{self.symbol} l1 update UNSUCCES, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check} please check',NOTIFICATION)
                 self.price_check_successful=False
+                # Drop poisoned samples so recovery isn't gated on the bad quote
+                # aging out of a length-5 deque.
+                self.price_check.clear()
+                self.price_check.append(bid)
 
-                postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
-                r= requests.get(postbody)
+                postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1"
+                try:
+                    requests.get(postbody)
+                except Exception:
+                    pass
+        else:
+            if was_failing:
+                message(f'{self.symbol} l1 update RECOVERED, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check}',NOTIFICATION)
             else:
                 message(f'{self.symbol} l1 update success, {avg_diff} current bid {bid}  and ask {ask} , pool {self.price_check}',LOG)
-                self.price_check_successful=True
+            self.price_check_successful=True
     def check_today(self):
 
         today = datetime.now().strftime("%Y-%m-%d")
