@@ -78,7 +78,7 @@ class Manager:
 
 
 		self.lock = threading.Lock()
-		self.base_refresh_interval_sec = 1.0
+		self.base_refresh_interval_sec = 2.0
 		self.post_snapshot_settle_sec = 0.25
 
 		### ONLY RUN; when Both System & User check works ###
