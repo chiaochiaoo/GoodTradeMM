@@ -419,13 +419,13 @@ class Manager:
 		try:
 			r = requests.post(req, timeout=5)
 			if r.status_code == 200:
-				log_print("register_ostat: OSTAT registered ok, region=1 port=%s" % port)
+				message("register_ostat: OSTAT registered ok, region=1 port=%s" % port, NOTIFICATION)
 				return True
 			else:
-				log_print("register_ostat: FAILED status=%s body=%s" % (r.status_code, r.text.strip()))
+				message("register_ostat: FAILED status=%s body=%s" % (r.status_code, r.text.strip()), NOTIFICATION)
 				return False
 		except Exception as e:
-			log_print("register_ostat: request error: %s" % e)
+			message("register_ostat: request error: %s" % e, NOTIFICATION)
 			return False
 
 	def ostat_register_loop(self, interval_sec=600):
