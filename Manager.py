@@ -90,6 +90,9 @@ class Manager:
 		x = threading.Thread(target=self.Ppro_in, args=(4399,),daemon=True)
 		x.start()
 
+		ostat = threading.Thread(target=self.ostat_register_loop, args=(600,), daemon=True)
+		ostat.start()
+
 		self.app = Flask('GoodTrade')
 		self._setup_routes()
 		# x2 = threading.Thread(target=self.connectivity_check, daemon=True)
@@ -401,14 +404,38 @@ class Manager:
 			self.ui.set_user(self.user)
 			message(f"Trader id: {self.user}",NOTIFICATION)
 
-			
-			req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(4399)+"&status=on"
-			r = requests.post(req)
-
+			self.register_ostat()
 
 			message("PPRO Connected",NOTIFICATION)
 		self.system_status.set(CONNECTED)
 		self.ui.system_status["background"] = "lightgreen"
+
+	def register_ostat(self, port=4399):
+		# Register the OSTAT push stream so status/fill events arrive over UDP.
+		# PProApi can return 400 "region not available" if region 1 isn't ready
+		# yet (e.g. right after connect), so we check the response and log it.
+		# The periodic re-register loop (ostat_register_loop) retries later.
+		req = "http://127.0.0.1:8080/SetOutput?region=1&feedtype=OSTAT&output="+ str(port)+"&status=on"
+		try:
+			r = requests.post(req, timeout=5)
+			if r.status_code == 200:
+				log_print("register_ostat: OSTAT registered ok, region=1 port=%s" % port)
+				return True
+			else:
+				log_print("register_ostat: FAILED status=%s body=%s" % (r.status_code, r.text.strip()))
+				return False
+		except Exception as e:
+			log_print("register_ostat: request error: %s" % e)
+			return False
+
+	def ostat_register_loop(self, interval_sec=600):
+		# Re-register the OSTAT push stream every `interval_sec` (default 10 min).
+		# Guards against the known issue where OSTAT messages silently stop, and
+		# against an initial registration that 400'd because region 1 wasn't ready.
+		while True:
+			time.sleep(interval_sec)
+			if self.get_connectivity():
+				self.register_ostat()
 
 	def set_disconnected(self):
 
