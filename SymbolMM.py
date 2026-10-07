@@ -14,7 +14,7 @@ from constant import *
 from datetime import datetime
 
 from collections import deque
-import mysql.connector
+#import mysql.connector
 
 from logging_module import *
 

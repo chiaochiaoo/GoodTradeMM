@@ -29,7 +29,7 @@ import xml.etree.ElementTree as ET
 
 from psutil import process_iter
 import psutil
-import mysql.connector
+#import mysql.connector
 from logging_module import *
 
 from flask import Flask
