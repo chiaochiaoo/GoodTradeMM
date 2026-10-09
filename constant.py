@@ -282,6 +282,9 @@ OPENING_MODE = "Opening Mode"
 AGGRESIVE_MODE = 'Aggresive Mode'
 
 VENUES = "Venues"
+
+SPREAD_AGG_PCT = 5   # default Spread Agg %; used when a ticker's value is blank or out of range
+
 # === Step 1: Central Config Schema ===
 CONFIG_SCHEMA = [
     {"name": "Ticker",      "label": "Ticker",            "section": STATUS, "type": "string", "row": 0},
@@ -308,6 +311,11 @@ CONFIG_SCHEMA = [
     {"name": "notionalAmount",    "label": "Notional Amount","section": STATUS, "type": "float",  "row": 2,"readonly":True},
     {"name": "RealizedPnLShutdown",  "label": "RPnLShutdown",            "section": STATUS, "type": "float",  "row": 2, "readonly": True},
     {"name": "FavourableBuyingConditions",  "label": "FavBuyingConds",   "section": STATUS, "type": "float",  "row": 2, "readonly": True},
+
+    {"name": "spreadAggPct", "label": "Spread Agg %", "section": STATUS, "type": "float", "row": 3, "default": SPREAD_AGG_PCT},
+    {"name": "refPrice",     "label": "Ref Price",    "section": STATUS, "type": "float", "row": 3, "default": 0, "readonly": True, "runtime": True},
+    {"name": "bidLimit",     "label": "Bid Limit",    "section": STATUS, "type": "float", "row": 3, "default": 0, "readonly": True, "runtime": True},
+    {"name": "askLimit",     "label": "Ask Limit",    "section": STATUS, "type": "float", "row": 3, "default": 0, "readonly": True, "runtime": True},
 
 
 

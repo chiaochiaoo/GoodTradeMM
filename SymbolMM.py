@@ -14,6 +14,7 @@ from constant import *
 from datetime import datetime
 
 from collections import deque
+from decimal import Decimal, ROUND_HALF_UP
 #import mysql.connector
 
 from logging_module import *
@@ -42,6 +43,28 @@ def find_between(data, first, last):
         return data[start:end]
     except ValueError:
         return data
+
+
+def round_to_tick(price, rounding=ROUND_HALF_UP):
+    # Valid tick: $0.01 at or above $0.50, $0.005 below.
+    tick = Decimal('0.01') if price >= Decimal('0.5') else Decimal('0.005')
+    return float((price / tick).quantize(Decimal('1'), rounding=rounding) * tick)
+
+
+def spread_agg_limits(last, close, volume, agg_pct):
+    # Equation 1: limits for tightened orders. Reference is today's last trade,
+    # or the previous close if there is none.
+    # Returns (bid_limit, ask_limit, ref, source), all None without a reference.
+    if volume > 0 and last > 0:
+        ref, source = last, 'last'
+    elif close > 0:
+        ref, source = close, 'close'
+    else:
+        return None, None, None, None
+
+    ref_d = Decimal(str(ref))
+    pct = Decimal(str(agg_pct)) / 100
+    return round_to_tick(ref_d * (1 + pct)), round_to_tick(ref_d * (1 - pct)), ref, source
 
 
 
@@ -172,6 +195,9 @@ class SymbolMM:
 
             self.rbids[i]=0
             self.rasks[i]=0
+
+        self.agg_buy_price = 0
+        self.agg_sell_price = 0
 
         self.venues_options ={}
 
@@ -708,10 +734,10 @@ class SymbolMM:
 
                 if self.aggresive_action=='Buy':
 
-                    price = self.rasks[0]
+                    price = self.agg_buy_price
                     ACTION = BUY
                 elif self.aggresive_action  =='Sell':
-                    price = self.rbids[0]
+                    price = self.agg_sell_price
                     ACTION = SELL
 
                 if self.aggresive_order_book[ts]!=0:
@@ -1046,7 +1072,7 @@ class SymbolMM:
 
         if shutdown:
 
-            vals = [self.nbids[1],self.nbids[2],self.nasks[0]*-1,self.nasks[1]*-1]
+            vals = [self.nbids[1],self.nbids[2],self.nasks[0]*-1,self.nasks[1]*-1,self.nasks[2]*-1]
 
         else:
 
@@ -1276,6 +1302,13 @@ class SymbolMM:
             ts = find_between(stream_data, "MarketTime=\"", "\"")
             volume = int(find_between(stream_data, "Volume=\"", "\""))
 
+            # Own try: a missing field falls back to the close
+            # instead of aborting the whole L1 update.
+            try:
+                last = float(find_between(stream_data, "LastPrice=\"", "\""))
+            except ValueError:
+                last = 0
+
             if volume ==0:
                 postbody = f"http://127.0.0.1:8080/Register?symbol={self.symbol}&feedtype=L1" 
                 r= requests.get(postbody)
@@ -1333,6 +1366,12 @@ class SymbolMM:
                 else:
                     self.rasks[0]=round(bid+self.adj_spread,3)
 
+                # Aggressive mode prices off these reversed and is not capped.
+                self.agg_buy_price = self.rasks[0]
+                self.agg_sell_price = self.rbids[0]
+
+                self.apply_spread_agg(last, pc, volume)
+
 
                 self.pc = pc
                 self.l1_ts =ts
@@ -1360,6 +1399,46 @@ class SymbolMM:
             r= requests.get(postbody)
 
             pass
+
+    def get_spread_agg_pct(self):
+        # Per-ticker Spread Agg %. Blank (mid-edit), 0 (a blank field saves as 0),
+        # negative, >= 100, nan or inf all fall back to the default.
+        try:
+            pct = float(self.get_variable('spreadAggPct'))
+        except (tk.TclError, ValueError):
+            return SPREAD_AGG_PCT
+        return pct if 0 < pct < 100 else SPREAD_AGG_PCT
+
+    def apply_spread_agg(self, last, close, volume):
+        # Equation 1: limits from the reference price, shown in STATUS every refresh.
+        bid_limit, ask_limit, ref, source = spread_agg_limits(last, close, volume, self.get_spread_agg_pct())
+        if bid_limit is not None:
+            # A limit never crosses the market: bid limit <= ask, ask limit >= bid.
+            if self.ask > 0:
+                bid_limit = min(bid_limit, self.ask)
+            ask_limit = max(ask_limit, self.bid)
+        self.set_variable('refPrice', ref or 0)
+        self.set_variable('bidLimit', bid_limit or 0)
+        self.set_variable('askLimit', ask_limit or 0)
+
+        # Equation 2: only when tightening, i.e. spread wider than Adj Spread.
+        if self.spread <= self.get_variable('AdjustedSpread') + 1e-9:
+            return
+
+        if bid_limit is None:
+            # No reference price: don't tighten, join the L1 bid/ask.
+            self.rbids[0] = self.bid
+            self.rasks[0] = self.ask
+            message(f'{self.symbol} spread agg: no reference price, joining L1', LOG)
+            return
+
+        raw_bid, raw_ask = self.rbids[0], self.rasks[0]
+        self.rbids[0] = min(raw_bid, bid_limit)
+        self.rasks[0] = max(raw_ask, ask_limit)
+
+        if self.rbids[0] != raw_bid or self.rasks[0] != raw_ask:
+            message(f'{self.symbol} spread agg ({source} {ref}): '
+                    f'bid {raw_bid}->{self.rbids[0]} ask {raw_ask}->{self.rasks[0]}', LOG)
 
     def check_boardlot(self):
 
